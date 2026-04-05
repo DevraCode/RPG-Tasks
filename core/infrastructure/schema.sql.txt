@@ -1,0 +1,33 @@
+-- 1. Creamos la base de datos si no existe
+CREATE DATABASE IF NOT EXISTS rpg_system CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE rpg_system;
+
+-- 2. Tabla Maestra de Usuarios (Identidad Única)
+-- Aquí vive el "quién eres" en el juego, sin importar la App.
+CREATE TABLE IF NOT EXISTS usuarios (
+    id_interno VARCHAR(36) PRIMARY KEY, -- Usaremos UUIDs (ej: 550e8400-e29b...)
+    nombre_jugador VARCHAR(100) NOT NULL,
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    activo BOOLEAN DEFAULT TRUE
+) ENGINE=InnoDB;
+
+-- 3. Tabla de Vinculaciones (Las "Llaves" de acceso)
+-- Aquí conectamos tu ID de Telegram o Discord con tu id_interno.
+CREATE TABLE IF NOT EXISTS vinculaciones (
+    id_vinculacion INT AUTO_INCREMENT PRIMARY KEY,
+    id_interno VARCHAR(36) NOT NULL,
+    plataforma ENUM('telegram', 'discord', 'android', 'web') NOT NULL,
+    id_externo VARCHAR(100) NOT NULL,
+    UNIQUE KEY plataforma_usuario (plataforma, id_externo), -- Evita duplicados
+    FOREIGN KEY (id_interno) REFERENCES usuarios(id_interno) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- 4. Tabla de Personajes (Atributos del juego)
+CREATE TABLE IF NOT EXISTS personajes (
+    id_interno VARCHAR(36) PRIMARY KEY,
+    clase VARCHAR(30) NOT NULL,
+    nivel INT DEFAULT 1,
+    exp INT DEFAULT 0,
+    oro INT DEFAULT 0,
+    FOREIGN KEY (id_interno) REFERENCES usuarios(id_interno) ON DELETE CASCADE
+) ENGINE=InnoDB;
