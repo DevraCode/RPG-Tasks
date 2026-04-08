@@ -2,14 +2,15 @@ from dataclasses import dataclass
 
 @dataclass
 class Usuario:
-    id_interno: str
-    nombre_jugador: str
+    id_usuario: str
+    nombre_usuario: str
+    password_usuario: str
     activo: bool = True
 
 @dataclass
 class Personaje:
-    id_interno: str
-    clase: str
+    id_usuario: str
+    clase: str = "Aprendiz"
     nivel: int = 1
     exp: int = 0
     oro: int = 0
