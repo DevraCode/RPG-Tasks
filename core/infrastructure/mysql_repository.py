@@ -29,20 +29,90 @@ class MySQLUsuarioRepository(UsuarioRepository):
         if res:
             return Usuario(id_usuario=res['id_usuario'], nombre_usuario=res['nombre_usuario'], password_usuario=res['password_usuario'])
         return None
+    
+    def buscar_usuario_por_nombre(self, nombre_usuario: str):
+        conn = self._get_connection() # Usamos tu método auxiliar
+        cursor = conn.cursor(dictionary=True)
+    
+        query = "SELECT * FROM usuarios WHERE nombre_usuario = %s"
+        cursor.execute(query, (nombre_usuario,))
+        row = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
 
+        if row:
+            return Usuario(
+                id_usuario=row['id_usuario'], 
+                nombre_usuario=row['nombre_usuario'], 
+                password_usuario=row['password_usuario']
+            )
+        return None
+    
+
+    def buscar_usuario_por_plataforma(self, plataforma:str):
+        conn = self._get_connection() 
+        cursor = conn.cursor(dictionary=True)
+    
+        query ="""
+            SELECT u.id_usuario, u.nombre_usuario, p.nombre_plataforma
+            FROM usuarios u
+            INNER JOIN plataformas p ON u.id_usuario = p.id_usuario
+            WHERE p.nombre_plataforma = %s
+        """
+        cursor.execute(query, (plataforma,))
+        row = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+
+        if row:
+            return Usuario(
+                id_usuario=row['id_usuario'], 
+                nombre_usuario=row['nombre_usuario']
+            )
+        return None
+
+    def buscar_usuario_en_bd(self, nombre_usuario):
+        conn = self._get_connection() 
+        cursor = conn.cursor(dictionary=True)
+
+        query ="""
+            SELECT u.id_usuario, u.nombre_usuario, u.password_usuario
+            FROM usuarios u
+            WHERE u.nombre_usuario = %s
+        """
+
+        cursor.execute(query, (nombre_usuario,))
+        row = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+
+        if row:
+            return Usuario(
+                id_usuario=row['id_usuario'], 
+                nombre_usuario=row['nombre_usuario'],
+                password_usuario=row['password_usuario']
+            )
+        return None
+
+
+    #Registra al usuario con su id, nombre, contraseña, plataforma y personaje
     def registrar_usuario_completo(self, usuario, plataforma, id_ext, personaje):
         conn = self._get_connection()
         cursor = conn.cursor()
+
         try:
-            # 1. Insertar en Usuarios
+            # Insertar en la tabla Usuarios
             cursor.execute("INSERT INTO usuarios (id_usuario, nombre_usuario, password_usuario) VALUES (%s, %s, %s)", 
                            (usuario.id_usuario, usuario.nombre_usuario, usuario.password_usuario))
             
-            # 2. Insertar en Vinculaciones (Telegram/Discord)
+            # Insertar en la tabla Plataformas
             cursor.execute("INSERT INTO plataformas (id_usuario, nombre_plataforma, id_externo_usuario) VALUES (%s, %s, %s)", 
                            (usuario.id_usuario, plataforma, str(id_ext)))
             
-            # 3. Insertar en Personajes
+            # Insertar en la tabla Personajes
             cursor.execute("INSERT INTO personajes (id_usuario) VALUES (%s)", 
                            [personaje.id_usuario])
             

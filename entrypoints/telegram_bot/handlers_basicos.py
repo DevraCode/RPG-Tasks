@@ -5,14 +5,16 @@
 import os
 from dotenv import load_dotenv
 from telegram import Update
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, ConversationHandler
 
 #Internas
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
-from core.application.use_cases import MensajeInicioUseCase, RegistroNuevoJugadorUseCase, ObtenerSaludoUseCase
+from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, RegistroNuevoJugadorUseCase, ObtenerSaludoUseCase
 from dotenv import load_dotenv
 
 from .dbconfig import db_config
+
+import hashlib
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
@@ -23,6 +25,7 @@ load_dotenv()
 #INYECCIÓN DE DEPENDENCIAS
 repo = MySQLUsuarioRepository(db_config)
 mensaje_bienvenida = MensajeInicioUseCase()
+crear_cuenta = CrearCuentaUseCase()
 registro_use_case = RegistroNuevoJugadorUseCase(repo)
 saludo_use_case = ObtenerSaludoUseCase(repo)
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -32,28 +35,10 @@ saludo_use_case = ObtenerSaludoUseCase(repo)
 #HANDLERS
 async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
     mensaje_inicio = mensaje_bienvenida.mensaje()
-    segundo_mensaje = mensaje_bienvenida.segundo_mensaje()
 
     await update.message.reply_text(mensaje_inicio)
-    await update.message.reply_text(segundo_mensaje)
-
-
-
-async def registro(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id_telegram = str(update.effective_user.id)
-    nombre_telegram = update.effective_user.first_name
+    await update.message.reply_text(f"Utiliza el comando /registro para crear una cuenta o /iniciarsesion para iniciar sesión")
     
-    # 🚀 LLAMADA AL NÚCLEO (Arquitectura Hexagonal en acción)
-    # No importa que sea Telegram, el Caso de Uso solo quiere un ID y un nombre.
-    mensaje_resultado = registro_use_case.ejecutar(
-        id_externo=user_id_telegram, 
-        plataforma='telegram', 
-        nombre_usuario=nombre_telegram,
-        password_usuario="asas"
-    )
-    
-    await update.message.reply_text(mensaje_resultado)
-
 
 async def saludo(update:Update, context: ContextTypes.DEFAULT_TYPE):
     user_id_telegram = str(update.effective_user.id)
@@ -64,3 +49,50 @@ async def saludo(update:Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
+#CONVERSATION HANDLERS
+NOMBRE, PASSWORD = range(2)
+
+async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+
+    pide_usuario = crear_cuenta.nombre_usuario()
+
+    await context.bot.send_message(chat_id=chat_id, text=pide_usuario)
+    return NOMBRE
+
+async def nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['nombre_usuario'] = update.message.text.strip().lower()
+
+    pide_contraseña = crear_cuenta.contraseña()
+
+    await update.message.reply_text(f"Perfecto, **{update.message.text}**." + f"{pide_contraseña}")
+    return PASSWORD
+
+async def contraseña (update:Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['password_usuario'] = update.message.text
+
+    nombre = context.user_data.get('nombre_usuario')
+    password = context.user_data.get('password_usuario')
+    id_externo = str(update.effective_user.id)
+
+    #Se mezcla el id de telegram con el nombre elegido. De esta forma se pueden crear varias cuentas en la misma plataforma
+    id_externo_bytes = f"{id_externo}{nombre}".encode()
+    nuevo_id_externo = hashlib.sha256(id_externo_bytes).hexdigest()[:8]
+
+    resultado = registro_use_case.ejecutar(
+            id_externo=nuevo_id_externo,
+            plataforma='telegram',
+            nombre_usuario=nombre,
+            password_usuario=password
+        )
+    await update.message.reply_text(f"✅ {resultado}")
+
+    return ConversationHandler.END
+
+
+async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("🚫 Registro cancelado. Puedes volver a empezar con /registro.")
+    return ConversationHandler.END

@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 #Locales
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
-from core.application.use_cases import MensajeInicioUseCase, RegistroNuevoJugadorUseCase, ObtenerSaludoUseCase
+from core.application.use_cases import MensajeInicioUseCase, RegistroNuevoJugadorUseCase, ObtenerSaludoUseCase, ObtenerCatalogoUseCase
 #----------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ mensaje_bienvenida = MensajeInicioUseCase()
 
 registro_use_case = RegistroNuevoJugadorUseCase(repo)
 saludo_use_case = ObtenerSaludoUseCase(repo)
-
+obtener_catalogo_use_case = ObtenerCatalogoUseCase()
 
 @bot.event
 async def on_ready():
@@ -58,7 +58,7 @@ async def on_ready():
         # 2. Si encontramos el canal y tenemos permiso para escribir
         if channel and channel.permissions_for(guild.me).send_messages:
             mensaje_inicio = mensaje_bienvenida.mensaje()
-            segundo_mensaje = mensaje_bienvenida.segundo_mensaje()
+            segundo_mensaje = "Utiliza el comando !registro para empezar o !iniciarsesion si ya tienes una cuenta"
             
             # Opcional: Añadir un aviso de que el sistema está en línea
             await channel.send(f"⚠️ **Sistema RPG Tasks Iniciado**\n\n{mensaje_inicio}")
@@ -83,6 +83,20 @@ async def hello(ctx):
     mensaje_saludo = saludo_use_case.ejecutar(id_externo=user_id_discord, plataforma='discord')
     await ctx.send(mensaje_saludo)
 
-
+@bot.command()
+async def elegir_clase(ctx):
+    # Traemos el catálogo desde el Caso de Uso
+    catalogo = obtener_catalogo_use_case.ejecutar()
+    
+    for clave, datos in catalogo.items():
+        ruta_archivo = datos["imagen_gif"]
+        
+        # Creamos el objeto File de Discord
+        archivo_discord = discord.File(ruta_archivo, filename=datos["imagen_gif"])
+        embed = discord.Embed(title=f"Clase: {datos['clase']}")
+        embed.set_image(url=f"attachment://{datos['imagen_gif']}")
+        
+        
+        await ctx.send(file=archivo_discord, embed=embed)
 
 bot.run(DISCORD_TOKEN)

@@ -4,11 +4,14 @@
 #Externas
 import os
 from dotenv import load_dotenv
-from telegram.ext import ApplicationBuilder, CommandHandler
+from telegram.ext import ApplicationBuilder, CommandHandler, ConversationHandler, MessageHandler, filters
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #Importaciones propias del bot
-from .handlers_basicos import start, saludo
+from .handlers_basicos import NOMBRE, PASSWORD
+from .handlers_basicos import start, saludo, pide_nombre_usuario, nombre_usuario, contraseña, cancelar
+
+from .handlers_personajes import mostrar_personaje
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
@@ -28,9 +31,26 @@ if __name__ == "__main__":
     #HANDLERS
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("hola", saludo))
+    
+    app.add_handler(CommandHandler("personaje", mostrar_personaje))
+
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
 
+    #CONVERSATION HANDLERS
+    reg_conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("registro", pide_nombre_usuario)],
+        states={
+            NOMBRE: [MessageHandler(filters.TEXT & ~filters.COMMAND, nombre_usuario)],
+            PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, contraseña)] 
+        },
+        fallbacks=[CommandHandler("cancelar", cancelar)],
+    )
+
+
+
+
+    app.add_handler(reg_conv_handler)
 
     
     print("🤖 Bot de RPG iniciado y conectado a MySQL...")

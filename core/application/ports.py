@@ -10,6 +10,19 @@ class UsuarioRepository(ABC):
         pass
 
     @abstractmethod
+    def buscar_usuario_por_nombre(self,id_usuario:str): #Busca al usuario por el nombre
+        pass
+
+    @abstractmethod
+    def buscar_usuario_por_plataforma(self, plataforma:str): #Busca al usuario por plataforma
+        pass
+
+    @abstractmethod
+    def buscar_usuario_en_bd (self, nombre_usuario: str): #Busca al usuario por nombre en la db
+        pass
+    
+    @abstractmethod
     def registrar_usuario_completo(self, usuario: Usuario, plataforma: str, id_ext: str, personaje: Personaje):
         """Guarda todo: Usuario, su Vinculación y su Personaje inicial."""
         pass
+
