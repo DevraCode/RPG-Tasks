@@ -75,23 +75,13 @@ class RegistroNuevoJugadorUseCase:
 
 
 
-class ObtenerSaludoUseCase:
-    def __init__(self, repo):
-        self.repo = repo
 
-    def ejecutar(self, id_externo: str, plataforma: str) -> str:
-        # 1. Buscamos al usuario en la DB a través del repositorio
-        usuario_existente = self.repo.buscar_por_id_externo(id_externo, plataforma)
-
-        if not usuario_existente:
-            return "¡Hola viajero desconocido! Crea una cuenta para empezar a usar la aplicación"
-
-        # 2. Si existe, podríamos incluso buscar su personaje para un saludo épico
-        # (Por ahora usemos solo el nombre que recuperamos de la DB)
-        return f"¡Saludos, {usuario_existente.nombre_usuario}! Es un honor verte de nuevo."
-    
 
 class ObtenerCatalogoUseCase:
-    def ejecutar(self):
-        
+    #Devuelve el diccionario entero con las clases de los personajes
+    def personajes_dic(self):
         return CLASES_DISPONIBLES
+    
+    def personajes_list(self) -> list:
+        claves = list(CLASES_DISPONIBLES.keys())
+        return claves
