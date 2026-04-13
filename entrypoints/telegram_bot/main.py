@@ -9,7 +9,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ConversationHandler
 #-----------------------------------------------------------------------------------------------------------------------------
 #Importaciones propias del bot
 from .handlers_basicos import NOMBRE, PASSWORD
-from .handlers_basicos import start, saludo, pide_nombre_usuario, nombre_usuario, contraseña, cancelar
+from .handlers_basicos import start, pide_nombre_usuario, nombre_usuario, contraseña, cancelar
 
 from .handlers_personajes import mostrar_personaje, manejador_botones
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     #HANDLERS
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("hola", saludo))
+   
     
     app.add_handler(CommandHandler("personaje", mostrar_personaje))
     app.add_handler(CallbackQueryHandler(manejador_botones, pattern="^(NEXT_|PREV_|SELECT_)"))

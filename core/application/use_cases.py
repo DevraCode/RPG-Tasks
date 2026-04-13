@@ -71,7 +71,7 @@ class RegistroNuevoJugadorUseCase:
         # Guardamos todo en MySQL
         self.repo.registrar_usuario_completo(nuevo_usuario, plataforma, id_externo, nuevo_personaje)
         
-        return f"¡Cuenta creada! Tu ID universal es {nuevo_id}. ¡A la aventura!"
+        return f"¡Cuenta creada!"
 
 
 

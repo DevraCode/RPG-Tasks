@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 #Locales
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
-from core.application.use_cases import MensajeInicioUseCase, RegistroNuevoJugadorUseCase, ObtenerSaludoUseCase, ObtenerCatalogoUseCase
+from core.application.use_cases import MensajeInicioUseCase, RegistroNuevoJugadorUseCase, ObtenerCatalogoUseCase
 #----------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ repo = MySQLUsuarioRepository(db_config)
 mensaje_bienvenida = MensajeInicioUseCase()
 
 registro_use_case = RegistroNuevoJugadorUseCase(repo)
-saludo_use_case = ObtenerSaludoUseCase(repo)
+
 obtener_catalogo_use_case = ObtenerCatalogoUseCase()
 
 @bot.event
