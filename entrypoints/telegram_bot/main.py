@@ -12,6 +12,7 @@ from .handlers_basicos import NOMBRE, PASSWORD
 from .handlers_basicos import start, pide_nombre_usuario, nombre_usuario, contraseña, cancelar
 
 from .handlers_personajes import mostrar_personaje, manejador_botones
+from .menu import menu
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 

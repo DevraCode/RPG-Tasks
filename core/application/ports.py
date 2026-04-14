@@ -1,4 +1,4 @@
-# core/application/ports.py
+
 from abc import ABC, abstractmethod
 from core.domain.models import Usuario, Personaje
 from typing import Optional
