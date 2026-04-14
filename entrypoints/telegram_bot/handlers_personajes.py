@@ -13,6 +13,11 @@ catalogo = use_case.personajes_dic()
 lista_personajes = use_case.personajes_list()
 
 
+#Asignar las constantes manualmente para evitar conflictos
+SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE = range(2)
+
+
+#PRIMERO SE ENSEÑA EL CATÁLOGO DE PERSONAJES
 async def mostrar_personaje(update:Update, context):
     chat_id = update.effective_chat.id
 
@@ -39,6 +44,9 @@ async def mostrar_personaje(update:Update, context):
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
+
+    return SELECCIONANDO_CLASE #Mantenemos el estado mientras se selecciona al personaje
+
 async def manejador_botones (update:Update, context: CallbackContext):
     query = update.callback_query
     if query.data == "ignore":
@@ -60,9 +68,17 @@ async def manejador_botones (update:Update, context: CallbackContext):
         nuevo_indice = indice_actual
 
         personaje_elegido = lista_personajes[nuevo_indice]
-        #LLAMAR AQUI A FUNCION PARA GUARDAR EN LA DB
+        datos_personaje = catalogo[personaje_elegido]
+        
         print(f"Usuario eligió a: {personaje_elegido}")
-        return
+        context.user_data['imagen_personaje'] = datos_personaje["imagen"]
+        context.user_data['clase_personaje'] = datos_personaje["clase"]
+        context.user_data['genero_personaje'] = datos_personaje["genero"]
+        
+        await query.message.reply_text(f"Has seleccionado la clase {datos_personaje["clase"]}. Ahora, escribe el nombre de tu personaje:")
+        
+        
+        return PREGUNTAR_NOMBRE #Pasa al siguiente estado
 
     #Borra el Sticker actual y muestra el siguiente, dando la sensación de dinamismo 
     await query.message.delete()
@@ -89,3 +105,21 @@ async def manejador_botones (update:Update, context: CallbackContext):
         sticker=datos_personaje["imagen"],
         reply_markup=InlineKeyboardMarkup(nuevo_keyboard)
         )
+    
+    return SELECCIONANDO_CLASE #Mientras se selecciona la clase no se cambia de estado
+    
+async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['nombre_personaje'] = update.message.text
+
+    nombre = context.user_data.get('nombre_personaje')
+    imagen = context.user_data.get('imagen_personaje')
+    clase = context.user_data.get('clase_personaje')
+    genero = context.user_data.get('genero_personaje')
+
+    print(f"Usuario escribió: {nombre}")
+
+    #REGISTRAR EN BD
+
+    await update.message.reply_text(f"Todo listo")
+
+    return ConversationHandler.END
