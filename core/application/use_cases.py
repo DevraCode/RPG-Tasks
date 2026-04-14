@@ -73,8 +73,14 @@ class RegistroNuevoJugadorUseCase:
         
         return f"¡Cuenta creada!"
 
+class SesionIniciada:
+    def __init__(self, repo):
+        self.repo = repo
 
-
+    def usuario_activo(self, nombre_usuario:str):
+        sesion_iniciada = self.repo.sesion_iniciada(nombre_usuario)
+        if sesion_iniciada:
+            return f"Ya has iniciado sesión como {sesion_iniciada.nombre_usuario.capitalize()}."
 
 
 class ObtenerCatalogoUseCase:

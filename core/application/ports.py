@@ -5,8 +5,7 @@ from typing import Optional
 
 class UsuarioRepository(ABC):
     @abstractmethod
-    def buscar_por_id_externo(self, id_ext: str, plataforma: str) -> Optional[Usuario]:
-        
+    def buscar_por_id_externo(self, id_ext: str, plataforma: str) -> Optional[Usuario]: 
         pass
 
     @abstractmethod
@@ -23,6 +22,10 @@ class UsuarioRepository(ABC):
     
     @abstractmethod
     def registrar_usuario_completo(self, usuario: Usuario, plataforma: str, id_ext: str, personaje: Personaje):
-        
         pass
+
+    def sesion_iniciada(self, nombre_usuario: str):
+        pass
+
+
 

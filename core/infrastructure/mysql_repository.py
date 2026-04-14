@@ -123,3 +123,28 @@ class MySQLUsuarioRepository(UsuarioRepository):
         finally:
             cursor.close()
             conn.close()
+
+
+    def sesion_iniciada(self, nombre_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        query ="""
+            SELECT u.id_usuario, u.nombre_usuario, u.activo
+            FROM usuarios u
+            WHERE u.nombre_usuario = %s
+        """
+        cursor.execute(query, (nombre_usuario,))
+        row = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+
+        if row:
+            return Usuario(
+                id_usuario=row['id_usuario'], 
+                nombre_usuario=row['nombre_usuario'],
+                activo=row['activo']
+            )
+        return None
+
