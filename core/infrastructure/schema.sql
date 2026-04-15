@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     password_usuario VARCHAR(20) NOT NULL,
     email_usuario VARCHAR(100),
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    activo BOOLEAN DEFAULT TRUE
+    activo BOOLEAN DEFAULT FALSE
 ) ENGINE=InnoDB;
 
 -- TABLA PLATAFORMAS (Desde donde se conecta el usuario)

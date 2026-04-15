@@ -24,7 +24,7 @@ class UsuarioRepository(ABC):
     def registrar_usuario_completo(self, usuario: Usuario, plataforma: str, id_ext: str, personaje: Personaje):
         pass
 
-    def sesion_iniciada(self, nombre_usuario: str):
+    def sesion_iniciada(self, id_externo_usuario: str):
         pass
 
 

@@ -54,7 +54,7 @@ class RegistroNuevoJugadorUseCase:
 
     def ejecutar(self, id_externo: str, plataforma: str, nombre_usuario: str, password_usuario: str):
         # Comprobar que el usuario existe en la base de datos (se comprueba por nombre)
-        #existente = self.repo.buscar_por_id_externo(id_externo, plataforma)
+        
         usuario = self.repo.buscar_usuario_en_bd(nombre_usuario)
         if usuario:
             return f"El nombre {usuario.nombre_usuario.capitalize()} ya existe"
@@ -73,15 +73,20 @@ class RegistroNuevoJugadorUseCase:
         
         return f"¡Cuenta creada!"
 
-class SesionIniciada:
+class SesionIniciadaUseCase:
     def __init__(self, repo):
         self.repo = repo
 
-    def usuario_activo(self, nombre_usuario:str):
-        sesion_iniciada = self.repo.sesion_iniciada(nombre_usuario)
-        if sesion_iniciada:
-            return f"Ya has iniciado sesión como {sesion_iniciada.nombre_usuario.capitalize()}."
+    def usuario_activo(self, id_externo_usuario):
 
+        sesion = self.repo.sesion_iniciada(id_externo_usuario)
+        # Debug rápido: pon un print aquí para ver qué llega de la DB
+        print(f"DEBUG: Usuario encontrado: {sesion}")
+        if sesion and sesion.activo:
+            return f"Ya has iniciado sesión como {sesion.nombre_usuario.capitalize()}."
+    
+        
+        return None
 
 class ObtenerCatalogoUseCase:
     #Devuelve el diccionario entero con las clases de los personajes

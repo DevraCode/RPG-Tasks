@@ -4,6 +4,7 @@ from dataclasses import dataclass
 class Usuario:
     id_usuario: str
     nombre_usuario: str
+    id_externo_usuario: str = "0"
     password_usuario: str = None
     plataforma: str = None
     activo: bool = True
