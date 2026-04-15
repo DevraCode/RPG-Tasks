@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS plataformas (
     id_usuario VARCHAR(50) NOT NULL,
     nombre_plataforma VARCHAR(100) NOT NULL,
     id_externo_usuario VARCHAR(100) NOT NULL, -- Id del usuario de Telegram, Discord, etc
-    UNIQUE KEY plataforma_usuario (nombre_plataforma, id_externo_usuario),
+    UNIQUE KEY (nombre_plataforma, id_externo_usuario),
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
     
 ) ENGINE=InnoDB;

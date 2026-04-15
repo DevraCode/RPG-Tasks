@@ -124,6 +124,29 @@ class MySQLUsuarioRepository(UsuarioRepository):
             cursor.close()
             conn.close()
 
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+
+    def iniciar_sesion(self, id_externo_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True, buffered=True)
+
+        
+        query = """ UPDATE usuarios u
+                    JOIN plataformas p ON u.id_usuario = p.id_usuario
+                    SET u.activo = 1
+                    WHERE p.id_externo_usuario =  %s """
+
+        try:
+            cursor.execute(query, (id_externo_usuario,))
+            conn.commit() 
+        finally:
+            cursor.close()
+            conn.close()
+        
+        
+
+    #-----------------------------------------------------------------------------------------------------------------------------
 
     def sesion_iniciada(self, id_externo_usuario):
         conn = self._get_connection()
@@ -132,12 +155,11 @@ class MySQLUsuarioRepository(UsuarioRepository):
         query ="""
             SELECT u.id_usuario, u.nombre_usuario, u.activo, p.id_externo_usuario
             FROM usuarios u, plataformas p
-            WHERE p.id_externo_usuario = %s AND u.activo = 1
-        """
-        print(f"Buscando ID: {id_externo_usuario}") # Mira si este ID existe en tu tabla 'plataformas'
+            WHERE p.id_externo_usuario = %s AND u.activo = 1 """
+        
         cursor.execute(query, (id_externo_usuario,))
         row = cursor.fetchone()
-        print(f"Resultado DB: {row}") # Si esto es None, el problema es el ID o la Query
+        
         
         cursor.close()
         conn.close()
@@ -150,4 +172,38 @@ class MySQLUsuarioRepository(UsuarioRepository):
                 activo=row['activo'] 
             )
         return None
+    
+    #-----------------------------------------------------------------------------------------------------------------------------
+    def cerrar_sesion(self, id_externo_usuario):
+        pass
+
+    #-----------------------------------------------------------------------------------------------------------------------------
+
+
+    def sesion_cerrada(self, id_externo_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True, buffered=True)
+
+        query ="""
+            SELECT u.id_usuario, u.nombre_usuario, u.activo, p.id_externo_usuario
+            FROM usuarios u, plataformas p
+            WHERE p.id_externo_usuario = %s AND u.activo = 0
+        """
+        cursor.execute(query, (id_externo_usuario,))
+        row = cursor.fetchone()
+        
+        
+        cursor.close()
+        conn.close()
+
+        if row:
+            return Usuario(
+                id_usuario=row['id_usuario'],
+                id_externo_usuario=row["id_externo_usuario"],
+                nombre_usuario=row['nombre_usuario'],
+                activo=row['activo'] 
+            )
+        return None
+
+
 

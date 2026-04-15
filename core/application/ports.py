@@ -24,8 +24,20 @@ class UsuarioRepository(ABC):
     def registrar_usuario_completo(self, usuario: Usuario, plataforma: str, id_ext: str, personaje: Personaje):
         pass
 
+    @abstractmethod
+    def iniciar_sesion(self, id_externo_usuario: str):
+        pass
+    
+    @abstractmethod
     def sesion_iniciada(self, id_externo_usuario: str):
         pass
 
+    @abstractmethod
+    def cerrar_sesion(self, id_externo_usuario: str):
+        pass
+
+    @abstractmethod
+    def sesion_cerrada(self, id_externo_usuario: str):
+        pass
 
 

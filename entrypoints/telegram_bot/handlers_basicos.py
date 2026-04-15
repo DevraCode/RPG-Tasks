@@ -51,7 +51,7 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
 #CONVERSATION HANDLERS
 NOMBRE, PASSWORD = range(2)
 
-@sesion_activa
+
 async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
@@ -82,16 +82,11 @@ async def contraseña (update:Update, context: ContextTypes.DEFAULT_TYPE):
     password_bytes = f"{password}".encode()
     password_encriptado = hashlib.sha256(password_bytes).hexdigest()[:8]
 
-    id_externo = str(update.effective_user.id)
-    palabra_para_encriptar = "TELEGRAM"
-
-    #Se mezcla el id de telegram con la palabra para encriptar. 
-    #De esta forma se pueden crear varias cuentas en la misma plataforma cerrando sesión con activo = 0 en la tabla usuarios
-    id_externo_bytes = f"{id_externo}{palabra_para_encriptar}".encode()
-    nuevo_id_externo = hashlib.sha256(id_externo_bytes).hexdigest()[:8]
+    
+    id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
 
     resultado = registro_use_case.ejecutar(
-            id_externo=nuevo_id_externo,
+            id_externo=id_generado,
             plataforma='telegram',
             nombre_usuario=nombre,
             password_usuario=password_encriptado
