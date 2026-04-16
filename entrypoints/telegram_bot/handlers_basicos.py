@@ -9,12 +9,12 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 #Internas
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
-from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, RegistroNuevoJugadorUseCase
+from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, RegistroNuevoJugadorUseCase, BuscarPorIdExternoUseCase
 from dotenv import load_dotenv
 
 from .dbconfig import db_config
 
-from .decoradores import sesion_activa
+from .decoradores import sesion_activa, id_externo_existente
 
 import hashlib
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -29,6 +29,7 @@ repo = MySQLUsuarioRepository(db_config)
 mensaje_bienvenida = MensajeInicioUseCase()
 crear_cuenta = CrearCuentaUseCase()
 registro_use_case = RegistroNuevoJugadorUseCase(repo)
+buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -52,6 +53,7 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
 NOMBRE, PASSWORD = range(2)
 
 @sesion_activa
+@id_externo_existente
 async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
@@ -84,6 +86,8 @@ async def contraseña (update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+
+
 
     resultado = registro_use_case.ejecutar(
             id_externo=id_generado,

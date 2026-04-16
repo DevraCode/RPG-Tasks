@@ -77,16 +77,24 @@ class SesionIniciadaUseCase:
     def __init__(self, repo):
         self.repo = repo
 
-    def usuario_activo(self, id_externo_usuario):
+    def usuario_activo(self, id_externo_usuario, nombre_plataforma):
 
-        sesion = self.repo.obtener_estado_sesion(id_externo_usuario)
-        
-        print(f"DEBUG: Usuario encontrado: {sesion}")
-        if sesion and sesion.activo:
-            return f"Ya has iniciado sesión como {sesion.nombre_usuario.capitalize()}."
-    
+        self.repo.obtener_estado_sesion(id_externo_usuario, nombre_plataforma)
         
         return None
+
+
+
+class BuscarPorIdExternoUseCase: #Útil para Telegram/Discord
+    def __init__(self, repo):
+        self.repo = repo
+
+    def buscar_id_externo_usuario(self, id_externo, nombre_plataforma):
+        self.repo.buscar_por_id_externo(id_externo, nombre_plataforma)
+    
+
+
+
 
 class ObtenerCatalogoUseCase:
     #Devuelve el diccionario entero con las clases de los personajes

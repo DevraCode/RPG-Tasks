@@ -10,28 +10,31 @@ class MySQLUsuarioRepository(UsuarioRepository):
     def _get_connection(self):
         return mysql.connector.connect(**self.config)
 
-    def buscar_por_id_externo(self, id_ext: str, plataforma: str):
+    def buscar_por_id_externo(self, id_externo_usuario: str, nombre_plataforma: str):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
         
         query = """
-            SELECT u.id_usuario, u.nombre_usuario, u.password_usuario
+            SELECT u.id_usuario, u.nombre_usuario, u.password_usuario, p.id_externo_usuario
             FROM usuarios u
             JOIN plataformas p ON u.id_usuario = p.id_usuario
             WHERE p.id_externo_usuario = %s AND p.nombre_plataforma = %s
         """
-        cursor.execute(query, (str(id_ext), plataforma))
+        cursor.execute(query, (id_externo_usuario,nombre_plataforma,))
         res = cursor.fetchone()
         
         cursor.close()
         conn.close()
         
         if res:
-            return Usuario(id_usuario=res['id_usuario'], nombre_usuario=res['nombre_usuario'], password_usuario=res['password_usuario'])
+            return Usuario(id_usuario=res['id_usuario'], 
+                           nombre_usuario=res['nombre_usuario'], 
+                           password_usuario=res['password_usuario'],
+                           id_externo_usuario=res['id_externo_usuario'])
         return None
     
     def buscar_usuario_por_nombre(self, nombre_usuario: str):
-        conn = self._get_connection() # Usamos tu método auxiliar
+        conn = self._get_connection() 
         cursor = conn.cursor(dictionary=True)
     
         query = "SELECT * FROM usuarios WHERE nombre_usuario = %s"
@@ -148,7 +151,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
 
     #-----------------------------------------------------------------------------------------------------------------------------
 
-    def obtener_estado_sesion(self, id_externo_usuario):
+    def obtener_estado_sesion(self, id_externo_usuario, nombre_plataforma):
 
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
@@ -158,12 +161,12 @@ class MySQLUsuarioRepository(UsuarioRepository):
         FROM usuarios u
         JOIN plataformas p ON u.id_usuario = p.id_usuario
         WHERE p.id_externo_usuario = %s 
-          AND p.nombre_plataforma = 'telegram'
+          AND p.nombre_plataforma = %s
         LIMIT 1
         """
         
         try:
-            cursor.execute(query, (id_externo_usuario,))
+            cursor.execute(query, (id_externo_usuario,nombre_plataforma,))
             resultado = cursor.fetchone()
             
             return resultado is not None and resultado['activo'] == 1
