@@ -23,37 +23,21 @@ sesion_iniciada = SesionIniciadaUseCase(repo)
 def sesion_activa(func):
     @wraps(func)
     async def sesion_activa_true(update, context, *args, **kwargs):
-
-        # ESTO DEBE ESTAR AQUÍ DENTRO
-        user = update.effective_user
-        if not user:
-            return
+        id_telegram = str(update.effective_user.id)
+        id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
+    
         
-        
-
-        id_telegram = str(user.id) 
-        # Haz este print exacto para ver si Telegram te está dando IDs iguales
-        print(f"DEBUG REAL: Usuario: {user.first_name} | ID Real: {id_telegram}")
-
-        id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
-        print(f"HASH GENERADO: {id_generado}")
-
-        #Se busca el id de la tabla plataformas que no necesita el nombre de usuario
-        #Tiene que ser EXACTAMENTE el mismo id que se crea al registrarse
-        #palabra_para_encriptar = "TELEGRAM"
-        #id_telegram = str(update.effective_user.id)
-        #id_telegram_bytes = f"{id_telegram}{palabra_para_encriptar}".encode()
-        #id_generado = hashlib.sha256(id_telegram_bytes).hexdigest()[:8]
-
-
-        #print(f"DEBUG DECORADOR: User: {update.effective_user.first_name} | ID Telegram: {id_telegram} | Hash: {id_generado}")
-        
-        mensaje_error = sesion_iniciada.usuario_activo(id_generado)
-        
-        if mensaje_error:
-            await update.message.reply_text(mensaje_error)
+        if repo.obtener_estado_sesion(id_externo):
+            await update.message.reply_text(
+                "Ya tienes una sesión iniciada"
+                "En Telegram solo puedes tener una cuenta por Usuario debido a las limitaciones"
+            )
             return 
 
+        
+        await update.message.reply_text("Genial, vamos a empezar el registro")
+
+        
         return await func(update, context, *args, **kwargs)
     return sesion_activa_true
 

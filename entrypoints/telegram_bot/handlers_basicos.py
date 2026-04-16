@@ -51,7 +51,7 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
 #CONVERSATION HANDLERS
 NOMBRE, PASSWORD = range(2)
 
-
+@sesion_activa
 async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 

@@ -79,8 +79,8 @@ class SesionIniciadaUseCase:
 
     def usuario_activo(self, id_externo_usuario):
 
-        sesion = self.repo.sesion_iniciada(id_externo_usuario)
-        # Debug rápido: pon un print aquí para ver qué llega de la DB
+        sesion = self.repo.obtener_estado_sesion(id_externo_usuario)
+        
         print(f"DEBUG: Usuario encontrado: {sesion}")
         if sesion and sesion.activo:
             return f"Ya has iniciado sesión como {sesion.nombre_usuario.capitalize()}."

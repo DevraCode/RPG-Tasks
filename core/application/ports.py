@@ -29,7 +29,7 @@ class UsuarioRepository(ABC):
         pass
     
     @abstractmethod
-    def sesion_iniciada(self, id_externo_usuario: str):
+    def obtener_estado_sesion(self, id_externo_usuario: str):
         pass
 
     @abstractmethod

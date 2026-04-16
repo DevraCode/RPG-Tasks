@@ -148,30 +148,28 @@ class MySQLUsuarioRepository(UsuarioRepository):
 
     #-----------------------------------------------------------------------------------------------------------------------------
 
-    def sesion_iniciada(self, id_externo_usuario):
+    def obtener_estado_sesion(self, id_externo_usuario):
+
         conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True, buffered=True)
+        cursor = conn.cursor(dictionary=True)
 
-        query ="""
-            SELECT u.id_usuario, u.nombre_usuario, u.activo, p.id_externo_usuario
-            FROM usuarios u, plataformas p
-            WHERE p.id_externo_usuario = %s AND u.activo = 1 """
+        query = """
+        SELECT u.activo 
+        FROM usuarios u
+        JOIN plataformas p ON u.id_usuario = p.id_usuario
+        WHERE p.id_externo_usuario = %s 
+          AND p.nombre_plataforma = 'telegram'
+        LIMIT 1
+        """
         
-        cursor.execute(query, (id_externo_usuario,))
-        row = cursor.fetchone()
-        
-        
-        cursor.close()
-        conn.close()
-
-        if row:
-            return Usuario(
-                id_usuario=row['id_usuario'],
-                id_externo_usuario=row["id_externo_usuario"],
-                nombre_usuario=row['nombre_usuario'],
-                activo=row['activo'] 
-            )
-        return None
+        try:
+            cursor.execute(query, (id_externo_usuario,))
+            resultado = cursor.fetchone()
+            
+            return resultado is not None and resultado['activo'] == 1
+        finally:
+            cursor.close()
+            conn.close()
     
     #-----------------------------------------------------------------------------------------------------------------------------
     def cerrar_sesion(self, id_externo_usuario):
