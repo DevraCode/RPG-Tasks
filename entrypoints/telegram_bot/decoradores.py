@@ -2,12 +2,10 @@
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #Externas
-from dotenv import load_dotenv
-from telegram import Update
-from telegram.ext import ContextTypes, ConversationHandler
 from functools import wraps
-
 import hashlib
+
+#-----------------------------------------------------------------------------------------------------------------------------
 
 #Internas
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
@@ -16,10 +14,20 @@ from core.application.use_cases import SesionIniciadaUseCase, BuscarPorIdExterno
 
 from .dbconfig import db_config
 
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
 #INYECCIÓN DE DEPENDENCIAS
 repo = MySQLUsuarioRepository(db_config)
 sesion_iniciada = SesionIniciadaUseCase(repo)
 buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
+
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
 
 
 #Si el usuario está activo, tabla usuarios.activo = 1
@@ -40,8 +48,8 @@ def sesion_activa(func):
         return await func(update, context, *args, **kwargs)
     return sesion_activa_true
 
-
-
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
 
 #Si el usuario se ha dado de baja, es decir, en la tabla usuarios.activo = 0
 #Útil para usuarios baneados
@@ -57,10 +65,6 @@ def id_externo_existente(func):
                 "Este ID de Telegram ya está registrado pero no tiene la sesión activa"
             )
             return 
-
-        
-        
-
         
         return await func(update, context, *args, **kwargs)
     return id_externo_true

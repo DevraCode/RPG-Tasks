@@ -2,7 +2,6 @@
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #Externas
-import os
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
@@ -19,10 +18,10 @@ from .decoradores import sesion_activa, id_externo_existente
 import hashlib
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
 
 load_dotenv()
-
-
 
 #INYECCIÓN DE DEPENDENCIAS
 repo = MySQLUsuarioRepository(db_config)
@@ -31,6 +30,8 @@ crear_cuenta = CrearCuentaUseCase()
 registro_use_case = RegistroNuevoJugadorUseCase(repo)
 buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
 
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
@@ -45,11 +46,16 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
 
-#-----------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------
 
 #CONVERSATION HANDLERS
+
+#REGISTRO
+#-----------------------------------------------------------------------------------------------------------------------------
 NOMBRE, PASSWORD = range(2)
 
 @sesion_activa
@@ -59,9 +65,9 @@ async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYP
 
     pide_usuario = crear_cuenta.nombre_usuario()
 
-    await context.bot.send_message(chat_id=chat_id, text=pide_usuario)
+    await context.bot.send_message(chat_id=chat_id, text=pide_usuario + f". Puedes cancelar en cualquier momento con /cancelar")
     return NOMBRE
-
+#----------------------------------------------------------------------------------------
 
 async def nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['nombre_usuario'] = update.message.text.strip().lower()
@@ -73,8 +79,10 @@ async def nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         pide_contraseña = crear_cuenta.contraseña()
 
-        await update.message.reply_text(f"Perfecto, **{update.message.text}**." + f"{pide_contraseña}")
+        await update.message.reply_text(f"Perfecto, {update.message.text}." + f"{pide_contraseña}")
         return PASSWORD
+    
+#----------------------------------------------------------------------------------------
 
 async def contraseña (update:Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['password_usuario'] = update.message.text
@@ -84,10 +92,7 @@ async def contraseña (update:Update, context: ContextTypes.DEFAULT_TYPE):
     password_bytes = f"{password}".encode()
     password_encriptado = hashlib.sha256(password_bytes).hexdigest()[:8]
 
-    
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
-
-
 
     resultado = registro_use_case.ejecutar(
             id_externo=id_generado,
@@ -95,11 +100,14 @@ async def contraseña (update:Update, context: ContextTypes.DEFAULT_TYPE):
             nombre_usuario=nombre,
             password_usuario=password_encriptado
         )
-    await update.message.reply_text(f"✅ {resultado}")
+    await update.message.reply_text(f"{resultado}")
 
     return ConversationHandler.END
 
+#----------------------------------------------------------------------------------------
 
 async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("🚫 Registro cancelado. Puedes volver a empezar con /registro.")
+    await update.message.reply_text("Registro cancelado. Puedes volver a empezar con /registro.")
     return ConversationHandler.END
+
+#----------------------------------------------------------------------------------------
