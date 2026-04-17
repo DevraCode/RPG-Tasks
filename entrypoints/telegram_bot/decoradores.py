@@ -29,15 +29,33 @@ buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
+#Si el usuario no está registrado
+def usuario_no_registrado(func):
+    @wraps(func)
+    async def usuario_no_existe(update, context, *args, **kwargs):
+        id_telegram = str(update.effective_user.id)
+        id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
+         
+        if not repo.obtener_estado_sesion(id_externo,nombre_plataforma='telegram'):
+            await update.message.reply_text(
+                "Debes registrarte primero"
+            )
+            return 
 
-#Si el usuario está activo, tabla usuarios.activo = 1
-def sesion_activa(func):
+        return await func(update, context, *args, **kwargs)
+    return usuario_no_existe
+
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
+
+#Si el usuario está registrado y activo, tabla usuarios.activo = 1
+def usuario_registrado(func):
     @wraps(func)
     async def sesion_activa_true(update, context, *args, **kwargs):
         id_telegram = str(update.effective_user.id)
         id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
-    
-        
+         
         if repo.obtener_estado_sesion(id_externo,nombre_plataforma='telegram'):
             await update.message.reply_text(
                 "Ya te has registrado \n"
@@ -53,12 +71,11 @@ def sesion_activa(func):
 
 #Si el usuario se ha dado de baja, es decir, en la tabla usuarios.activo = 0
 #Útil para usuarios baneados
-def id_externo_existente(func):
+def usuario_inactivo(func):
     @wraps(func)
     async def id_externo_true(update, context, *args, **kwargs):
         id_telegram = str(update.effective_user.id)
         id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
-    
         
         if repo.buscar_por_id_externo(id_externo,nombre_plataforma='telegram'):
             await update.message.reply_text(
@@ -68,3 +85,4 @@ def id_externo_existente(func):
         
         return await func(update, context, *args, **kwargs)
     return id_externo_true
+

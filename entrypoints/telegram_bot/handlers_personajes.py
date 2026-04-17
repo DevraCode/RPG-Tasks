@@ -3,21 +3,20 @@ from telegram.ext import ContextTypes, ConversationHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMedia
 from telegram.ext import CallbackContext
 
-
-
-
 from core.application.use_cases import ObtenerCatalogoUseCase
+
+from .decoradores import usuario_no_registrado
 
 use_case = ObtenerCatalogoUseCase() 
 catalogo = use_case.personajes_dic()
 lista_personajes = use_case.personajes_list()
 
 
-#Asignar las constantes manualmente para evitar conflictos
 SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE = range(2)
 
 
 #PRIMERO SE ENSEÑA EL CATÁLOGO DE PERSONAJES
+@usuario_no_registrado #Comprobar que el usuario se ha registrado primero o que esté o no baneado
 async def mostrar_personaje(update:Update, context):
     chat_id = update.effective_chat.id
 

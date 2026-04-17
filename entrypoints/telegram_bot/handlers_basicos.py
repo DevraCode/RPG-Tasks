@@ -5,17 +5,16 @@
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
+import hashlib
+
+#-----------------------------------------------------------------------------------------------------------------------------
 
 #Internas
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
 from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, RegistroNuevoJugadorUseCase, BuscarPorIdExternoUseCase
-from dotenv import load_dotenv
-
 from .dbconfig import db_config
+from .decoradores import usuario_registrado, usuario_inactivo
 
-from .decoradores import sesion_activa, id_externo_existente
-
-import hashlib
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -35,7 +34,6 @@ buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-
 #HANDLERS
 async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
     mensaje_inicio = mensaje_bienvenida.mensaje()
@@ -44,13 +42,10 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"Utiliza el comando /registro para crear una cuenta o /iniciarsesion para iniciar sesión")
     
 
-
-
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
-
 
 #CONVERSATION HANDLERS
 
@@ -58,8 +53,8 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
 #-----------------------------------------------------------------------------------------------------------------------------
 NOMBRE, PASSWORD = range(2)
 
-@sesion_activa
-@id_externo_existente
+@usuario_registrado # Comprueba si el usuario existe o no en la bd
+@usuario_inactivo # Comprueba que el usuario esté o no inactivo por alguna razón
 async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
@@ -67,6 +62,7 @@ async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYP
 
     await context.bot.send_message(chat_id=chat_id, text=pide_usuario + f". Puedes cancelar en cualquier momento con /cancelar")
     return NOMBRE
+
 #----------------------------------------------------------------------------------------
 
 async def nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
