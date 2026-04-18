@@ -39,7 +39,6 @@ async def mostrar_personaje(update:Update, context):
          
     #Primer teclado para mostrar solamente al primer personaje
     keyboard = [
-        [InlineKeyboardButton(datos_personaje["id"], callback_data="ignore")],
         [InlineKeyboardButton(datos_personaje["clase"], callback_data="ignore")],
         [
             InlineKeyboardButton("Anterior", callback_data=f"PREV_{index}"),
@@ -51,7 +50,7 @@ async def mostrar_personaje(update:Update, context):
     #Se envía el mensaje a telegram con la imagen del primer personaje y sus botones
     await context.bot.send_sticker(
         chat_id=chat_id,
-        sticker=datos_personaje["imagen"],
+        sticker=datos_personaje["imagen_personaje"],
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
@@ -82,7 +81,7 @@ async def manejador_botones (update:Update, context: CallbackContext):
         datos_personaje = catalogo[personaje_elegido]
         
         print(f"Usuario eligió a: {personaje_elegido}")
-        context.user_data['imagen_personaje'] = datos_personaje["imagen"]
+        context.user_data['imagen_personaje'] = datos_personaje["imagen_personaje"]
         context.user_data['clase_personaje'] = datos_personaje["clase"]
         context.user_data['genero_personaje'] = datos_personaje["genero"]
         
@@ -101,7 +100,6 @@ async def manejador_botones (update:Update, context: CallbackContext):
         
     #Creamos el nuevo teclado con el nuevo índice que mostrará al siguiente o al anterior personaje
     nuevo_keyboard = [
-        [InlineKeyboardButton(datos_personaje["id"], callback_data="ignore")],
         [InlineKeyboardButton(datos_personaje["clase"], callback_data="ignore")],
         [
             InlineKeyboardButton("Anterior", callback_data=f"PREV_{nuevo_indice}"),
@@ -113,7 +111,7 @@ async def manejador_botones (update:Update, context: CallbackContext):
     #Se envía el nuevo personaje
     await context.bot.send_sticker(
         chat_id=query.message.chat_id,
-        sticker=datos_personaje["imagen"],
+        sticker=datos_personaje["imagen_personaje"],
         reply_markup=InlineKeyboardMarkup(nuevo_keyboard)
         )
     

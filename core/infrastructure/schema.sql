@@ -32,10 +32,11 @@ CREATE TABLE IF NOT EXISTS personajes (
     clase VARCHAR(30),
     nivel INT DEFAULT 1,
     exp INT DEFAULT 0,
-    evolucion INT DEFAULT 1,
-    imagen_personaje VARCHAR(5000),
-    imagen_personaje_ataque VARCHAR(5000),
-    imagen_personaje_defensa VARCHAR(5000),
+    evolucion INT DEFAULT 0,
+    icon_personaje TEXT,
+    imagen_personaje TEXT,
+    imagen_personaje_ataque TEXT,
+    imagen_personaje_defensa TEXT,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

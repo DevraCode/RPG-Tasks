@@ -4,13 +4,16 @@ from core.application.ports import UsuarioRepository
 from core.domain.models import Usuario, Personaje
 
 class MySQLUsuarioRepository(UsuarioRepository):
+
     def __init__(self, config):
         self.config = config
 
     def _get_connection(self):
         return mysql.connector.connect(**self.config)
     
-
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    
     def buscar_por_id_usuario(self, id_usuario: str):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
@@ -120,9 +123,11 @@ class MySQLUsuarioRepository(UsuarioRepository):
                 password_usuario=row['password_usuario']
             )
         return None
-
-
     
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
 
 
     def registrar_personaje_elegido(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje):
@@ -139,12 +144,6 @@ class MySQLUsuarioRepository(UsuarioRepository):
         finally:
             cursor.close()
             conn.close()
-
-
-    
-        
-        
-    
 
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
