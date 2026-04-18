@@ -24,9 +24,7 @@ class UsuarioRepository(ABC):
     def buscar_usuario_en_bd (self, nombre_usuario: str): #Busca al usuario por nombre en la db
         pass
     
-    @abstractmethod
-    def registrar_usuario_completo(self, usuario: Usuario, plataforma: str, id_ext: str, personaje: Personaje):
-        pass
+    
 
     #Esto para Telegram / Discord    
     @abstractmethod
@@ -53,5 +51,16 @@ class UsuarioRepository(ABC):
     def sesion_cerrada(self, id_externo_usuario: str):
         pass
 
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #TELEGRAM / DISCORD
+    @abstractmethod
+    def registrar_usuario_telegram_discord(self, usuario: Usuario, plataforma: str, id_ext: str):
+        pass
+
+    def vincular_id_personaje_con_usuario(self, id_usuario:str):
+        pass
     
 

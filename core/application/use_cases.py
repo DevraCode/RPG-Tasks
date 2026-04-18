@@ -46,29 +46,7 @@ class UsuarioExiste:
 
 
 
-#Registra a un usuario nuevo
-class RegistroNuevoJugadorUseCase:
-    def __init__(self, repo):
-        self.repo = repo
 
-
-    def ejecutar(self, id_externo: str, plataforma: str, nombre_usuario: str, password_usuario: str):
-        # Comprobar que el usuario existe en la base de datos (se comprueba por nombre)
-        usuario = self.repo.buscar_usuario_en_bd(nombre_usuario)
-        if usuario:
-            return f"El nombre {usuario.nombre_usuario.capitalize()} ya existe"
-
-        #El id del usuario sera una mezcla del id de la plataforma desde donde se conecte y su nombre de usuario
-        id_externo_bytes = f"{id_externo}{nombre_usuario}".encode()
-        nuevo_id = hashlib.sha256(id_externo_bytes).hexdigest()[:8]
-
-        nuevo_usuario = Usuario(id_usuario=nuevo_id, nombre_usuario=nombre_usuario, password_usuario=password_usuario)
-        nuevo_personaje = Personaje(id_usuario=nuevo_id)
-
-        # Guardamos todo en MySQL
-        self.repo.registrar_usuario_completo(nuevo_usuario, plataforma, id_externo, nuevo_personaje)
-        
-        return f"¡Cuenta creada!"
     
 
 
@@ -116,14 +94,7 @@ class BuscarPorIdExternoUseCase: #Útil para Telegram/Discord
     
 
 
-class VincularIdExternoUseCase: #Vincula el id de Telegram / Discord con el id interno del usuario
-    def __init__(self, repo):
-        self.repo = repo
 
-    def vincular_id_externo_usuario(self, id_externo):
-        resultado = self.repo.vincular_id_externo_con_interno(id_externo)
-
-        return resultado
 
 
 
@@ -135,3 +106,52 @@ class ObtenerCatalogoUseCase:
     def personajes_list(self) -> list:
         claves = list(CLASES_DISPONIBLES.keys())
         return claves
+    
+
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+# TELEGRAM / DISCORD
+
+class NuevoUsuarioTelegramDiscordUseCase:
+    def __init__(self, repo):
+        self.repo = repo
+
+
+    def ejecutar(self, id_externo: str, plataforma: str, nombre_usuario: str, password_usuario: str):
+        # Comprobar que el usuario existe en la base de datos (se comprueba por nombre)
+        usuario = self.repo.buscar_usuario_en_bd(nombre_usuario)
+        if usuario:
+            return f"El nombre {usuario.nombre_usuario.capitalize()} ya existe"
+
+        #El id del usuario sera una mezcla del id de la plataforma desde donde se conecte y su nombre de usuario
+        id_externo_bytes = f"{id_externo}{nombre_usuario}".encode()
+        nuevo_id = hashlib.sha256(id_externo_bytes).hexdigest()[:8]
+
+        nuevo_usuario = Usuario(id_usuario=nuevo_id, nombre_usuario=nombre_usuario, password_usuario=password_usuario)
+        
+
+        # Guardamos todo en MySQL
+        self.repo.registrar_usuario_telegram_discord(nuevo_usuario, plataforma, id_externo)
+        
+        return f"¡Cuenta creada!"
+    
+
+class VincularIdExternoUseCase: #Vincula el id de Telegram / Discord con el id interno del usuario
+    def __init__(self, repo):
+        self.repo = repo
+
+    def vincular_id_externo_usuario(self, id_externo):
+        resultado = self.repo.vincular_id_externo_con_interno(id_externo)
+
+        return resultado
+
+class VincularIdPersonajeConUsuarioUseCase:
+    def __init__(self, repo):
+        self.repo = repo
+
+    def vincular_id_personaje_con_usuario(self, id_externo):
+        resultado = self.repo.vincular_id_personaje_con_usuario(id_externo)
+
+        return resultado

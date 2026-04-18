@@ -122,68 +122,26 @@ class MySQLUsuarioRepository(UsuarioRepository):
         return None
 
 
-    #Registra al usuario con su id, nombre, contraseña, plataforma y personaje
-    def registrar_usuario_completo(self, usuario, plataforma, id_ext, personaje):
-        conn = self._get_connection()
-        cursor = conn.cursor()
-
-        try:
-            # Insertar en la tabla Usuarios
-            cursor.execute("INSERT INTO usuarios (id_usuario, nombre_usuario, password_usuario) VALUES (%s, %s, %s)", 
-                           (usuario.id_usuario, usuario.nombre_usuario, usuario.password_usuario))
-            
-            # Insertar en la tabla Plataformas
-            cursor.execute("INSERT INTO plataformas (id_usuario, nombre_plataforma, id_externo_usuario) VALUES (%s, %s, %s)", 
-                           (usuario.id_usuario, plataforma, str(id_ext)))
-            
-            # Insertar en la tabla Personajes
-            cursor.execute("INSERT INTO personajes (id_usuario) VALUES (%s)", 
-                           [personaje.id_usuario])
-            
-            conn.commit() 
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            cursor.close()
-            conn.close()
+    
 
 
     def registrar_personaje_elegido(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        query = """ UPDATE personajes p
-                    SET p.nombre_personaje = %s, p.genero = %s, p.clase = %s, imagen_personaje = %s
-                    WHERE p.id_usuario = %s
+        query = """ INSERT INTO personajes (id_usuario, nombre_personaje, genero, clase, imagen_personaje)
+                    VALUES (%s, %s, %s, %s, %s)
                 """
         
         try:
-            cursor.execute(query, (nombre_personaje,genero,clase,imagen_personaje,id_usuario,))
+            cursor.execute(query, (id_usuario,nombre_personaje,genero,clase,imagen_personaje,))
             conn.commit() 
         finally:
             cursor.close()
             conn.close()
 
 
-    #Para Telegram / Discord - Busca a que usuario pertenece su id externo
-    def vincular_id_externo_con_interno(self, id_externo_usuario):
-        conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True, buffered=True) # El buffer es clave
-        try:
-            query = "SELECT id_usuario FROM plataformas WHERE id_externo_usuario = %s"
-            cursor.execute(query, (id_externo_usuario,))
-            row = cursor.fetchone()
-            
-            if row:
-                print(f"ÉXITO: Encontrado id_usuario {row['id_usuario']} para el hash {id_externo_usuario}")
-                return row['id_usuario']
-            
-            print(f"FALLO: No existe ninguna fila con el hash {id_externo_usuario} en la tabla plataformas")
-            return None
-        finally:
-            cursor.close()
-            conn.close()
+    
         
         
     
@@ -266,7 +224,88 @@ class MySQLUsuarioRepository(UsuarioRepository):
                 activo=row['activo'] 
             )
         return None
+    
+
+
 
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    # TELEGRAM / DISCORD
+    #Registra al usuario con su id, nombre, contraseña, plataforma y personaje
+    def registrar_usuario_telegram_discord(self, usuario, plataforma, id_ext):
+        conn = self._get_connection()
+        cursor = conn.cursor()
 
+        try:
+            # Insertar en la tabla Usuarios
+            cursor.execute("INSERT INTO usuarios (id_usuario, nombre_usuario, password_usuario) VALUES (%s, %s, %s)", 
+                           (usuario.id_usuario, usuario.nombre_usuario, usuario.password_usuario))
+            
+            # Insertar en la tabla Plataformas
+            cursor.execute("INSERT INTO plataformas (id_usuario, nombre_plataforma, id_externo_usuario) VALUES (%s, %s, %s)", 
+                           (usuario.id_usuario, plataforma, str(id_ext)))
+            
+           
+            
+            conn.commit() 
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            cursor.close()
+            conn.close()
+
+    #Para Telegram / Discord - Busca a que usuario pertenece su id externo
+    def vincular_id_externo_con_interno(self, id_externo_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True, buffered=True) 
+        try:
+            query = "SELECT id_usuario FROM plataformas WHERE id_externo_usuario = %s"
+            cursor.execute(query, (id_externo_usuario,))
+            row = cursor.fetchone()
+            
+            if row:
+                
+                return row['id_usuario']
+            
+            print(f"FALLO: No existe ninguna fila con el hash {id_externo_usuario} en la tabla plataformas")
+            return None
+        finally:
+            cursor.close()
+            conn.close()
+
+    #Para evitar que el usuario pueda volver a usar el comando /personaje si ya tiene un personaje elegido
+    def vincular_id_personaje_con_usuario(self, id_externo_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True, buffered=True)
+
+        try:
+            query1 = "SELECT id_usuario from plataformas WHERE id_externo_usuario = %s"
+            cursor.execute(query1, (id_externo_usuario,))
+            row1 = cursor.fetchone()
+
+            if not row1:
+                print(f"FALLO: No existe vínculo para el hash {id_externo_usuario}")
+                return None
+
+            id_interno = row1['id_usuario']
+            print(f"ÉXITO: Usuario encontrado: {id_interno}")
+
+            
+            query2 = "SELECT id_personaje FROM personajes WHERE id_usuario = %s"
+            cursor.execute(query2, (id_interno,))
+            row2 = cursor.fetchone()
+
+            if row2:
+                print(f"ÉXITO: Personaje {row2['id_personaje']} encontrado para usuario {id_interno}")
+                
+                return {"id_usuario": id_interno, "id_personaje": row2['id_personaje']}
+            
+            return {"id_usuario": id_interno, "id_personaje": None}
+            
+            
+        finally:
+            cursor.close()
+            conn.close()

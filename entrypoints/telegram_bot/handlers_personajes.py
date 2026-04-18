@@ -7,7 +7,7 @@ import hashlib
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
 from core.application.use_cases import ObtenerCatalogoUseCase, VincularIdExternoUseCase, RegistrarPersonajeUseCase
 
-from .decoradores import usuario_no_registrado
+from .decoradores import usuario_no_registrado, personaje_elegido
 
 from .dbconfig import db_config
 
@@ -28,6 +28,7 @@ SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE = range(2)
 
 #PRIMERO SE ENSEÑA EL CATÁLOGO DE PERSONAJES
 @usuario_no_registrado #Comprobar que el usuario se ha registrado primero o que esté o no baneado
+@personaje_elegido #Comprobar que el usuario haya elegido o no personaje
 async def mostrar_personaje(update:Update, context):
     chat_id = update.effective_chat.id
 

@@ -9,7 +9,7 @@ import hashlib
 
 #Internas
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
-from core.application.use_cases import SesionIniciadaUseCase, BuscarPorIdExternoUseCase
+from core.application.use_cases import SesionIniciadaUseCase, BuscarPorIdExternoUseCase, VincularIdPersonajeConUsuarioUseCase
 
 
 from .dbconfig import db_config
@@ -23,6 +23,7 @@ from .dbconfig import db_config
 repo = MySQLUsuarioRepository(db_config)
 sesion_iniciada = SesionIniciadaUseCase(repo)
 buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
+vincular_id_personaje_con_usuario_use_case = VincularIdPersonajeConUsuarioUseCase(repo)
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -86,3 +87,24 @@ def usuario_inactivo(func):
         return await func(update, context, *args, **kwargs)
     return id_externo_true
 
+
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
+#Busca que personaje pertence al usuario
+def personaje_elegido(func):
+    @wraps(func)
+    async def id_personaje(update, context, *args, **kwargs):
+        id_telegram = str(update.effective_user.id)
+        id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
+
+        personaje_elegido_id = vincular_id_personaje_con_usuario_use_case.vincular_id_personaje_con_usuario(id_externo)
+        
+        if personaje_elegido_id and personaje_elegido_id.get("id_personaje") is not None:
+            await update.message.reply_text(
+                "Ya has elegido personaje"
+            )
+            return 
+        
+        return await func(update, context, *args, **kwargs)
+    return id_personaje

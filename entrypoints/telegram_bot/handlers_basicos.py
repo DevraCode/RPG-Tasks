@@ -11,7 +11,7 @@ import hashlib
 
 #Internas
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
-from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, RegistroNuevoJugadorUseCase, BuscarPorIdExternoUseCase
+from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, NuevoUsuarioTelegramDiscordUseCase, BuscarPorIdExternoUseCase
 from .dbconfig import db_config
 from .decoradores import usuario_registrado, usuario_inactivo
 
@@ -26,7 +26,7 @@ load_dotenv()
 repo = MySQLUsuarioRepository(db_config)
 mensaje_bienvenida = MensajeInicioUseCase()
 crear_cuenta = CrearCuentaUseCase()
-registro_use_case = RegistroNuevoJugadorUseCase(repo)
+registro_use_case = NuevoUsuarioTelegramDiscordUseCase(repo)
 buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
 
 
