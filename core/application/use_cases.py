@@ -121,7 +121,9 @@ class VincularIdExternoUseCase: #Vincula el id de Telegram / Discord con el id i
         self.repo = repo
 
     def vincular_id_externo_usuario(self, id_externo):
-        self.repo.vincular_id_externo_con_interno(id_externo)
+        resultado = self.repo.vincular_id_externo_con_interno(id_externo)
+
+        return resultado
 
 
 

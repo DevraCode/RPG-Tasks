@@ -159,7 +159,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
                 """
         
         try:
-            cursor.execute(query, (id_usuario,nombre_personaje,genero,clase,imagen_personaje,))
+            cursor.execute(query, (nombre_personaje,genero,clase,imagen_personaje,id_usuario,))
             conn.commit() 
         finally:
             cursor.close()

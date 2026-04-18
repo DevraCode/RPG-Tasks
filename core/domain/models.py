@@ -19,3 +19,6 @@ class Personaje:
     nivel: int = 1
     exp: int = 0
     evolucion: int = 0
+    imagen_personaje: str = "Ruta_Imagen"
+    imagen_personaje_ataque: str = "Ruta_Imagen"
+    imagen_personaje_defensa: str = "Ruta_Imagen"
