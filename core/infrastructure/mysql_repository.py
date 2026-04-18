@@ -9,6 +9,27 @@ class MySQLUsuarioRepository(UsuarioRepository):
 
     def _get_connection(self):
         return mysql.connector.connect(**self.config)
+    
+
+    def buscar_por_id_usuario(self, id_usuario: str):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """ SELECT *
+                    FROM usuarios u
+                    WHERE u.id_usuario = %s"""
+        
+        cursor.execute(query, (id_usuario,))
+        res = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if res:
+            return Usuario(id_usuario=res['id_usuario'], 
+                           nombre_usuario=res['nombre_usuario'])
+        return None
+        
 
     def buscar_por_id_externo(self, id_externo_usuario: str, nombre_plataforma: str):
         conn = self._get_connection()
@@ -127,6 +148,46 @@ class MySQLUsuarioRepository(UsuarioRepository):
             cursor.close()
             conn.close()
 
+
+    def registrar_personaje_elegido(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """ UPDATE personajes p
+                    SET p.nombre_personaje = %s, p.genero = %s, p.clase = %s, imagen_personaje = %s
+                    WHERE p.id_usuario = %s
+                """
+        
+        try:
+            cursor.execute(query, (id_usuario,nombre_personaje,genero,clase,imagen_personaje,))
+            conn.commit() 
+        finally:
+            cursor.close()
+            conn.close()
+
+
+    #Para Telegram / Discord - Busca a que usuario pertenece su id externo
+    def vincular_id_externo_con_interno(self, id_externo_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True, buffered=True) # El buffer es clave
+        try:
+            query = "SELECT id_usuario FROM plataformas WHERE id_externo_usuario = %s"
+            cursor.execute(query, (id_externo_usuario,))
+            row = cursor.fetchone()
+            
+            if row:
+                print(f"ÉXITO: Encontrado id_usuario {row['id_usuario']} para el hash {id_externo_usuario}")
+                return row['id_usuario']
+            
+            print(f"FALLO: No existe ninguna fila con el hash {id_externo_usuario} en la tabla plataformas")
+            return None
+        finally:
+            cursor.close()
+            conn.close()
+        
+        
+    
+
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
 
@@ -206,5 +267,6 @@ class MySQLUsuarioRepository(UsuarioRepository):
             )
         return None
 
-
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
 

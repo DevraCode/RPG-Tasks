@@ -5,6 +5,10 @@ from typing import Optional
 
 class UsuarioRepository(ABC):
     @abstractmethod
+    def buscar_por_id_usuario(self, id_usuario: str) -> Optional[Usuario]: 
+        pass
+
+    @abstractmethod
     def buscar_por_id_externo(self, id_ext: str, plataforma: str) -> Optional[Usuario]: 
         pass
 
@@ -24,6 +28,15 @@ class UsuarioRepository(ABC):
     def registrar_usuario_completo(self, usuario: Usuario, plataforma: str, id_ext: str, personaje: Personaje):
         pass
 
+    #Esto para Telegram / Discord    
+    @abstractmethod
+    def vincular_id_externo_con_interno(self, id_externo_usuario: str):
+        pass
+
+    @abstractmethod
+    def registrar_personaje_elegido(self, id_usuario: str, nombre_personaje: str, genero: str, clase: str, imagen_personaje: str):
+        pass
+
     @abstractmethod
     def iniciar_sesion(self, id_externo_usuario: str):
         pass
@@ -40,4 +53,5 @@ class UsuarioRepository(ABC):
     def sesion_cerrada(self, id_externo_usuario: str):
         pass
 
+    
 

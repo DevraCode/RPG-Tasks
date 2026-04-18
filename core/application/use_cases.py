@@ -54,7 +54,6 @@ class RegistroNuevoJugadorUseCase:
 
     def ejecutar(self, id_externo: str, plataforma: str, nombre_usuario: str, password_usuario: str):
         # Comprobar que el usuario existe en la base de datos (se comprueba por nombre)
-        
         usuario = self.repo.buscar_usuario_en_bd(nombre_usuario)
         if usuario:
             return f"El nombre {usuario.nombre_usuario.capitalize()} ya existe"
@@ -63,8 +62,6 @@ class RegistroNuevoJugadorUseCase:
         id_externo_bytes = f"{id_externo}{nombre_usuario}".encode()
         nuevo_id = hashlib.sha256(id_externo_bytes).hexdigest()[:8]
 
-
-
         nuevo_usuario = Usuario(id_usuario=nuevo_id, nombre_usuario=nombre_usuario, password_usuario=password_usuario)
         nuevo_personaje = Personaje(id_usuario=nuevo_id)
 
@@ -72,6 +69,31 @@ class RegistroNuevoJugadorUseCase:
         self.repo.registrar_usuario_completo(nuevo_usuario, plataforma, id_externo, nuevo_personaje)
         
         return f"¡Cuenta creada!"
+    
+
+
+class RegistrarPersonajeUseCase:
+    def __init__(self, repo):
+        self.repo = repo
+
+    def ejecutar(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje):
+        usuario = self.repo.buscar_por_id_usuario(id_usuario)
+        if usuario is None:
+            
+            print(f"LOG: No se pudo registrar personaje. El usuario {id_usuario} no existe.")
+            return "Error: El usuario no existe en la base de datos."
+        
+        self.repo.registrar_personaje_elegido(
+            id_usuario, 
+            nombre_personaje, 
+            genero, 
+            clase, 
+            imagen_personaje
+        )
+        return "¡Personaje elegido!"
+
+
+    
 
 class SesionIniciadaUseCase:
     def __init__(self, repo):
@@ -93,6 +115,13 @@ class BuscarPorIdExternoUseCase: #Útil para Telegram/Discord
         self.repo.buscar_por_id_externo(id_externo, nombre_plataforma)
     
 
+
+class VincularIdExternoUseCase: #Vincula el id de Telegram / Discord con el id interno del usuario
+    def __init__(self, repo):
+        self.repo = repo
+
+    def vincular_id_externo_usuario(self, id_externo):
+        self.repo.vincular_id_externo_con_interno(id_externo)
 
 
 

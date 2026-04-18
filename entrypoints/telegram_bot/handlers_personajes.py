@@ -2,12 +2,23 @@ from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMedia
 from telegram.ext import CallbackContext
+import hashlib
 
-from core.application.use_cases import ObtenerCatalogoUseCase
+from core.infrastructure.mysql_repository import MySQLUsuarioRepository
+from core.application.use_cases import ObtenerCatalogoUseCase, VincularIdExternoUseCase, RegistrarPersonajeUseCase
 
 from .decoradores import usuario_no_registrado
 
-use_case = ObtenerCatalogoUseCase() 
+from .dbconfig import db_config
+
+repo = MySQLUsuarioRepository(db_config)
+use_case = ObtenerCatalogoUseCase()
+vincular_id_externo_use_case = VincularIdExternoUseCase(repo)
+registrar_personaje_use_case = RegistrarPersonajeUseCase(repo)
+
+
+
+
 catalogo = use_case.personajes_dic()
 lista_personajes = use_case.personajes_list()
 
@@ -117,8 +128,25 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 
     print(f"Usuario escribió: {nombre}")
 
-    #REGISTRAR EN BD
+    """ Como el id de Telegram no cambia y está asociado al usuario, 
+    en este caso da igual buscarlo en la base de datos y hacer una comparación con effective_user.id que poner la variable
+    id_generado
+    """
+    id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+    print(f"DEBUG 1 - Hash Telegram: {id_generado}")
 
-    await update.message.reply_text(f"Todo listo")
+    id_usuario = vincular_id_externo_use_case.vincular_id_externo_usuario(id_generado) #Se busca el id de usuario interno a través del id_enterno
+
+    print(f"DEBUG 2 - ID Usuario recuperado: {id_usuario}")
+    resultado = registrar_personaje_use_case.ejecutar(
+            id_usuario=id_usuario,
+            nombre_personaje=nombre,
+            genero=genero,
+            clase=clase,
+            imagen_personaje = imagen
+        )
+
+    await update.message.reply_text(f"{resultado}")
 
     return ConversationHandler.END
+
