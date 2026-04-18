@@ -227,6 +227,27 @@ class MySQLUsuarioRepository(UsuarioRepository):
     
 
 
+    def contar_personajes_de_usuario(self, id_usuario):
+        
+        conn = self._get_connection() 
+        cursor = conn.cursor(buffered=True)
+        
+        try:
+            query = "SELECT COUNT(*) FROM personajes WHERE id_usuario = %s"
+            cursor.execute(query, (id_usuario,))
+            result = cursor.fetchone()
+            
+            
+            return result[0] if result else 0
+            
+        except Exception as e:
+            print(f"Error contando personajes: {e}")
+            return 0
+        finally:
+            
+            cursor.close()
+            conn.close()
+
 
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------

@@ -97,14 +97,18 @@ def personaje_elegido(func):
     async def id_personaje(update, context, *args, **kwargs):
         id_telegram = str(update.effective_user.id)
         id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
+        id_interno_obj = repo.buscar_por_id_externo(id_externo,nombre_plataforma='telegram')
+        id_interno = id_interno_obj.id_usuario
 
         personaje_elegido_id = vincular_id_personaje_con_usuario_use_case.vincular_id_personaje_con_usuario(id_externo)
+        total_personajes = repo.contar_personajes_de_usuario(id_interno)
         
-        if personaje_elegido_id and personaje_elegido_id.get("id_personaje") is not None:
+        if personaje_elegido_id and personaje_elegido_id.get("id_personaje") is not None and total_personajes >= 5:
             await update.message.reply_text(
-                "Ya has elegido personaje"
+                "Has llegado al límite de 5 personajes por usuario"
             )
             return 
         
         return await func(update, context, *args, **kwargs)
     return id_personaje
+
