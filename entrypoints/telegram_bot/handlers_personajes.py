@@ -149,3 +149,30 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 
     return ConversationHandler.END
 
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
+#Muestra los personajes que tiene el usuario
+
+#Ahora solo esta comprobando que envia bien el icono
+async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+
+    personaje = lista_personajes[0]
+    datos_personaje = catalogo[personaje]
+
+
+    nuevo_keyboard = [
+        [InlineKeyboardButton(datos_personaje["clase"], callback_data="ignore")]
+        
+    ]
+
+    await context.bot.send_sticker(
+        chat_id=chat_id,
+        sticker=datos_personaje["icon_personaje"],
+        reply_markup=InlineKeyboardMarkup(nuevo_keyboard)
+        )
+
+

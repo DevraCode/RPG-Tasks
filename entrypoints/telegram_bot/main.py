@@ -16,7 +16,7 @@ from .handlers_basicos import NOMBRE, PASSWORD
 from .handlers_basicos import start, pide_nombre_usuario, nombre_usuario, contraseña, cancelar
 
 from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE
-from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje
+from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios
 from .menu import menu
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -36,6 +36,7 @@ if __name__ == "__main__":
 
     #HANDLERS
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("listapersonajes", lista_personajes_usuarios))
    
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
