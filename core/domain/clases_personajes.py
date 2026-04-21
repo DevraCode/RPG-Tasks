@@ -101,7 +101,41 @@ CLASES_DISPONIBLES = {
         "imagen_personaje_defensa_gif": "./assets/personajes/monje/gif/female_monk_01.gif" 
     },
 
+    "arquero": {
+        "id_personaje": "", 
+        "nombre_personaje": "",
+        "genero": "Masculino",
+        "clase": "Arquero",
+        "nivel": 1,
+        "experiencia": 0,
+        "evolucion": 0,
+        "icon_personaje": "./assets/personajes/arquero/icon/male_archer_01.webm",
+        "imagen_personaje": "./assets/personajes/arquero/webm/male_archer_01.webm",
+        "imagen_personaje_gif": "./assets/personajes/arquero/gif/male_archer_01.gif",
+        "imagen_personaje_ataque": "./assets/personajes/arquero/webm/male_archer_01.webm",
+        "imagen_personaje_ataque_gif": "./assets/personajes/arquero/gif/male_archer_01.gif",
+        "imagen_personaje_defensa": "./assets/personajes/arquero/webm/male_archer_01.webm",
+        "imagen_personaje_defensa_gif": "./assets/personajes/arquero/gif/male_archer_01.gif" 
+    },
+
+    "arquera": {
+        "id_personaje": "", 
+        "nombre_personaje": "",
+        "genero": "Femenino",
+        "clase": "Arquera",
+        "nivel": 1,
+        "experiencia": 0,
+        "evolucion": 0,
+        "icon_personaje": "./assets/personajes/arquero/icon/female_archer_01.webm",
+        "imagen_personaje": "./assets/personajes/arquero/webm/female_archer_01.webm",
+        "imagen_personaje_gif": "./assets/personajes/arquero/gif/female_archer_01.gif",
+        "imagen_personaje_ataque": "./assets/personajes/arquero/webm/female_archer_01.webm",
+        "imagen_personaje_ataque_gif": "./assets/personajes/arquero/gif/female_archer_01.gif",
+        "imagen_personaje_defensa": "./assets/personajes/arquero/webm/female_archer_01.webm",
+        "imagen_personaje_defensa_gif": "./assets/personajes/arquero/gif/female_archer_01.gif" 
+    },
     
+
 
 
 
