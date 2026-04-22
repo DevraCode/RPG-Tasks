@@ -224,9 +224,9 @@ class MySQLUsuarioRepository(UsuarioRepository):
             )
         return None
     
-
-
-    def contar_personajes_de_usuario(self, id_usuario):
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #Para establecer un máximo de 5 personajes por usuario
+    def limite_personajes_de_usuario(self, id_usuario):
         
         conn = self._get_connection() 
         cursor = conn.cursor(buffered=True)
@@ -234,14 +234,14 @@ class MySQLUsuarioRepository(UsuarioRepository):
         try:
             query = "SELECT COUNT(*) FROM personajes WHERE id_usuario = %s"
             cursor.execute(query, (id_usuario,))
-            result = cursor.fetchone()
-            
-            
-            return result[0] if result else 0
+            total_personajes = cursor.fetchone()[0]
+
+           
+            return total_personajes < 5
             
         except Exception as e:
             print(f"Error contando personajes: {e}")
-            return 0
+            return False
         finally:
             
             cursor.close()

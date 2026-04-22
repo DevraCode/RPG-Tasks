@@ -108,6 +108,15 @@ class ObtenerCatalogoUseCase:
         return claves
     
 
+    
+class LimitePersonajesUsuarioUseCase:
+    def __init__(self, repo):
+        self.repo = repo
+
+    def limite_personajes_usuario(self, id_usuario):
+        limite = self.repo.limite_personajes_de_usuario(id_usuario)
+
+        return limite
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -155,3 +164,4 @@ class VincularIdPersonajeConUsuarioUseCase:
         resultado = self.repo.vincular_id_personaje_con_usuario(id_externo)
 
         return resultado
+    

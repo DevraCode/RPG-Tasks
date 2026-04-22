@@ -25,7 +25,7 @@ class UsuarioRepository(ABC):
         pass
     
     @abstractmethod
-    def contar_personajes_de_usuario(self, id_usuario: str): #Busca al usuario por nombre en la db
+    def limite_personajes_de_usuario(self, id_usuario: str): #Busca al usuario por nombre en la db
         pass
 
     @abstractmethod

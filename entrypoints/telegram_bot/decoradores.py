@@ -9,7 +9,7 @@ import hashlib
 
 #Internas
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
-from core.application.use_cases import SesionIniciadaUseCase, BuscarPorIdExternoUseCase, VincularIdPersonajeConUsuarioUseCase
+from core.application.use_cases import SesionIniciadaUseCase, BuscarPorIdExternoUseCase, VincularIdPersonajeConUsuarioUseCase, LimitePersonajesUsuarioUseCase
 
 
 from .dbconfig import db_config
@@ -24,6 +24,7 @@ repo = MySQLUsuarioRepository(db_config)
 sesion_iniciada = SesionIniciadaUseCase(repo)
 buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
 vincular_id_personaje_con_usuario_use_case = VincularIdPersonajeConUsuarioUseCase(repo)
+limite_personajes_usuario_use_case = LimitePersonajesUsuarioUseCase(repo)
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -101,9 +102,10 @@ def personaje_elegido(func):
         id_interno = id_interno_obj.id_usuario
 
         personaje_elegido_id = vincular_id_personaje_con_usuario_use_case.vincular_id_personaje_con_usuario(id_externo)
-        total_personajes = repo.contar_personajes_de_usuario(id_interno)
+        total_personajes = limite_personajes_usuario_use_case.limite_personajes_usuario(id_interno)
         
-        if personaje_elegido_id and personaje_elegido_id.get("id_personaje") is not None and total_personajes >= 5:
+        
+        if personaje_elegido_id and personaje_elegido_id.get("id_personaje") is not None and total_personajes == False:
             await update.message.reply_text(
                 "Has llegado al límite de 5 personajes por usuario"
             )
