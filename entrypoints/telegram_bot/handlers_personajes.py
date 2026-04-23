@@ -81,7 +81,7 @@ async def manejador_botones (update:Update, context: CallbackContext):
         datos_personaje = catalogo[personaje_elegido]
         
         print(f"Usuario eligió a: {personaje_elegido}")
-        context.user_data['imagen_personaje'] = datos_personaje["imagen_personaje"]
+        context.user_data['imagen_personaje'] = datos_personaje["imagen_personaje_gif"] #Para la base de datos
         context.user_data['clase_personaje'] = datos_personaje["clase"]
         context.user_data['genero_personaje'] = datos_personaje["genero"]
         
