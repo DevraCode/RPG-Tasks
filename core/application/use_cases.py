@@ -116,6 +116,9 @@ class LimitePersonajesUsuarioUseCase:
     def limite_personajes_usuario(self, id_usuario):
         limite = self.repo.limite_personajes_de_usuario(id_usuario)
 
+        #if not limite:
+        
+
         return limite
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
