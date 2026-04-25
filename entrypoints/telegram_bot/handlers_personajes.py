@@ -81,9 +81,11 @@ async def manejador_botones (update:Update, context: CallbackContext):
         datos_personaje = catalogo[personaje_elegido]
         
         print(f"Usuario eligió a: {personaje_elegido}")
-        context.user_data['imagen_personaje'] = datos_personaje["imagen_personaje_gif"] #Para la base de datos
+        context.user_data['imagen_personaje'] = datos_personaje["imagen_personaje_gif"]
         context.user_data['clase_personaje'] = datos_personaje["clase"]
         context.user_data['genero_personaje'] = datos_personaje["genero"]
+        context.user_data['icono_personaje'] = datos_personaje["icono_personaje_gif"]
+        context.user_data['animacion_personaje'] = datos_personaje["animacion_personaje_gif"]
         
         await query.message.reply_text(f"Has seleccionado la clase {datos_personaje["clase"]}. Ahora, escribe el nombre de tu personaje:")
         
@@ -124,6 +126,8 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     imagen = context.user_data.get('imagen_personaje')
     clase = context.user_data.get('clase_personaje')
     genero = context.user_data.get('genero_personaje')
+    icono = context.user_data.get('icono_personaje')
+    animacion = context.user_data.get('animacion_personaje')
 
     print(f"Usuario escribió: {nombre}")
 
@@ -142,7 +146,10 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
             nombre_personaje=nombre,
             genero=genero,
             clase=clase,
-            imagen_personaje = imagen
+            imagen_personaje = imagen,
+            icono_personaje= icono,
+            animacion_personaje = animacion
+
         )
 
     await update.message.reply_text(f"{resultado}")

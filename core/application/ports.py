@@ -29,7 +29,7 @@ class UsuarioRepository(ABC):
         pass
 
     @abstractmethod
-    def registrar_personaje_elegido(self, id_usuario: str, nombre_personaje: str, genero: str, clase: str, imagen_personaje: str):
+    def registrar_personaje_elegido(self, id_usuario: str, nombre_personaje: str, genero: str, clase: str, imagen_personaje: str, icono_personaje: str, animacion_personaje:str):
         pass
 
     @abstractmethod

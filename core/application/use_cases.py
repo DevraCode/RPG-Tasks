@@ -54,7 +54,7 @@ class RegistrarPersonajeUseCase:
     def __init__(self, repo):
         self.repo = repo
 
-    def ejecutar(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje):
+    def ejecutar(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje):
         usuario = self.repo.buscar_por_id_usuario(id_usuario)
         if usuario is None:
             
@@ -66,7 +66,9 @@ class RegistrarPersonajeUseCase:
             nombre_personaje, 
             genero, 
             clase, 
-            imagen_personaje
+            imagen_personaje,
+            icono_personaje,
+            animacion_personaje
         )
         return "¡Personaje elegido!"
 
@@ -115,11 +117,10 @@ class LimitePersonajesUsuarioUseCase:
 
     def limite_personajes_usuario(self, id_usuario):
         limite = self.repo.limite_personajes_de_usuario(id_usuario)
-
-        #if not limite:
+        
+        return limite
         
 
-        return limite
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
