@@ -143,6 +143,8 @@ async def manejador_botones (update:Update, context: CallbackContext):
     
     return SELECCIONANDO_CLASE  #Mientras se selecciona la clase no se cambia de estado
     
+
+#Función que registra al personaje en la base de datos
 async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['nombre_personaje'] = update.message.text
 
@@ -153,18 +155,17 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     icono = context.user_data.get('icono_personaje')
     animacion = context.user_data.get('animacion_personaje')
 
-    print(f"Usuario escribió: {nombre}")
 
     """ Como el id de Telegram no cambia y está asociado al usuario, 
     en este caso da igual buscarlo en la base de datos y hacer una comparación con effective_user.id que poner la variable
     id_generado
     """
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
-    print(f"DEBUG 1 - Hash Telegram: {id_generado}")
+    
 
     id_usuario = vincular_id_externo_use_case.vincular_id_externo_usuario(id_generado) #Se busca el id de usuario interno a través del id_enterno
 
-    print(f"DEBUG 2 - ID Usuario recuperado: {id_usuario}")
+    
     resultado = registrar_personaje_use_case.ejecutar(
             id_usuario=id_usuario,
             nombre_personaje=nombre,
@@ -260,16 +261,16 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
         
         return ASIGNAR_TAREA #Pasa al siguiente estado
 
-    #Borra el Sticker actual y muestra el siguiente, dando la sensación de dinamismo 
+    
     await query.message.delete()
 
 
-    #Hay que rehacer el teclado para cada personaje
+    
     nuevo_personaje = personajes[nuevo_indice]
     img, icon, anim = ruta_webm(nuevo_personaje["clase"].lower())
     
         
-    #Creamos el nuevo teclado con el nuevo índice que mostrará al siguiente o al anterior personaje
+    
     nuevo_keyboard = [
         [InlineKeyboardButton(nuevo_personaje["nombre_personaje"], callback_data="ignore")],
         [
@@ -279,7 +280,7 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
         [InlineKeyboardButton("Seleccionar", callback_data=f"SELECT_{nuevo_indice}")]
     ]
 
-    #Se envía el nuevo personaje
+    
     await context.bot.send_sticker(
         chat_id=query.message.chat_id,
         sticker=icon,
@@ -290,4 +291,6 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
 
 
 async def asignar_tarea(update:Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(f"wiiiiiii")
+
+    #Aquí se mostraria una lista de tareas que el usuario ha registrado previamente, se elige la tarea y se altera la tabla tareas con el id del personaje para luego hacer la lógica de subida de exp, etc
+    await update.message.reply_text(f"wiiiiiii") #Mensaje de prueba

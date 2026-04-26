@@ -43,8 +43,10 @@ CREATE TABLE IF NOT EXISTS personajes (
 CREATE TABLE IF NOT EXISTS tareas (
     id_tarea INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario VARCHAR(50),
+    id_personaje INT,
     nombre_tarea VARCHAR(500),
     fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
     tarea_completada BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (id_personaje) REFERENCES personajes(id_personaje),
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB;
