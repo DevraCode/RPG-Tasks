@@ -164,6 +164,18 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 
 #Muestra los personajes que tiene el usuario
 
+#Funcion auxiliar
+def ruta_webm(clase_personaje):
+
+    datos_personaje = catalogo[clase_personaje]
+
+    imagen = datos_personaje["imagen_personaje"]
+    icono_personaje = datos_personaje["icono_personaje"]
+    animacion = datos_personaje["animacion_personaje"]
+
+    return imagen, icono_personaje, animacion
+
+
 #Ahora solo esta comprobando que envia bien el icono
 async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
@@ -173,9 +185,11 @@ async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT
 
     personajes = lista_personajes_usuarios_use_case.lista_personajes_usuario(id_usuario)
 
-    
-
     for elemento in personajes:
+
+
+
+        img, icon, anim = ruta_webm(elemento["clase"].lower())
 
         keyboard = [
         [InlineKeyboardButton(elemento["nombre_personaje"], callback_data="ignore")]
@@ -183,8 +197,7 @@ async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT
 
         await context.bot.send_sticker(
         chat_id=chat_id,
-        sticker=elemento["icono_personaje"],
+        sticker=icon,
         reply_markup=InlineKeyboardMarkup(keyboard)
         )
-
 
