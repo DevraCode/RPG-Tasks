@@ -1,1 +1,7 @@
 .env
+
+assets/gifs/*
+assets/webm/*
+
+!assets/gifs/.gitkeep
+!assets/webm/.gitkeep
