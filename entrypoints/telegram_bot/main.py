@@ -15,8 +15,8 @@ from telegram.ext import CallbackContext
 from .handlers_basicos import NOMBRE, PASSWORD
 from .handlers_basicos import start, pide_nombre_usuario, nombre_usuario, contraseña, cancelar
 
-from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE
-from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios
+from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO, ASIGNAR_TAREA
+from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes, asignar_tarea
 from .menu import menu
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     #HANDLERS
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("listapersonajes", lista_personajes_usuarios))
+    #app.add_handler(CommandHandler("listapersonajes", lista_personajes_usuarios))
    
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
@@ -66,13 +66,27 @@ if __name__ == "__main__":
     per_chat=True,
     map_to_parent={}, 
     allow_reentry=True 
-)
+    )
+
+    entrenar_personaje_conv_handler = ConversationHandler(
+    entry_points=[CommandHandler('entrenar', lista_personajes_usuarios)],
+    states={
+        SELECCIONANDO: [CallbackQueryHandler(manejador_lista_personajes)],
+        ASIGNAR_TAREA: [MessageHandler(filters.TEXT & ~filters.COMMAND, asignar_tarea)]
+    },
+    fallbacks=[CommandHandler('cancel', cancelar)],
+    per_message=False,
+    per_chat=True,
+    map_to_parent={}, 
+    allow_reentry=True 
+    )
 
 
 
 
     app.add_handler(reg_conv_handler)
     app.add_handler(personaje_conv_handler)
+    app.add_handler(entrenar_personaje_conv_handler)
 
     
     print("🤖 Bot de RPG iniciado y conectado a MySQL...")

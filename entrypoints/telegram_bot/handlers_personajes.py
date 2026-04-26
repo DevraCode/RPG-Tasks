@@ -18,16 +18,39 @@ registrar_personaje_use_case = RegistrarPersonajeUseCase(repo)
 lista_personajes_usuarios_use_case = ListaPersonajesUsuarioUseCase(repo)
 
 
-
-
 catalogo = use_case.personajes_dic()
 lista_personajes = use_case.personajes_list()
 
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
+
+#Funcion auxiliar que cambia las rutas gif a webm para Telegram exclusivamente
+def ruta_webm(clase_personaje):
+
+    datos_personaje = catalogo[clase_personaje]
+
+    imagen = datos_personaje["imagen_personaje"]
+    icono_personaje = datos_personaje["icono_personaje"]
+    animacion = datos_personaje["animacion_personaje"]
+
+    return imagen, icono_personaje, animacion
+
+
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
+
+#ELEGIR PERSONAJE
 
 SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE = range(2)
 
 
-#PRIMERO SE ENSEÑA EL CATÁLOGO DE PERSONAJES
+#Primero se enseña la galería de personajes
 @usuario_no_registrado #Comprobar que el usuario se ha registrado primero o que esté o no baneado
 @personaje_elegido #Comprobar que el usuario haya elegido o no personaje
 async def mostrar_personaje(update:Update, context):
@@ -118,7 +141,7 @@ async def manejador_botones (update:Update, context: CallbackContext):
         reply_markup=InlineKeyboardMarkup(nuevo_keyboard)
         )
     
-    return SELECCIONANDO_CLASE #Mientras se selecciona la clase no se cambia de estado
+    return SELECCIONANDO_CLASE  #Mientras se selecciona la clase no se cambia de estado
     
 async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['nombre_personaje'] = update.message.text
@@ -162,42 +185,109 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-#Muestra los personajes que tiene el usuario
+#ENTRENAR PERSONAJES
 
-#Funcion auxiliar
-def ruta_webm(clase_personaje):
+#El usuario elige a un personaje que va a ser entrenado conforme cumple tareas
 
-    datos_personaje = catalogo[clase_personaje]
+SELECCIONANDO, ASIGNAR_TAREA = range(2)
 
-    imagen = datos_personaje["imagen_personaje"]
-    icono_personaje = datos_personaje["icono_personaje"]
-    animacion = datos_personaje["animacion_personaje"]
-
-    return imagen, icono_personaje, animacion
-
-
-#Ahora solo esta comprobando que envia bien el icono
+#Se muestran los personajes que tiene el usuario en una galeria, igual que para elegir personaje
 async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
     id_usuario = vincular_id_externo_use_case.vincular_id_externo_usuario(id_generado)
 
-    personajes = lista_personajes_usuarios_use_case.lista_personajes_usuario(id_usuario)
+    personajes = lista_personajes_usuarios_use_case.lista_personajes_usuario(id_usuario) #Devuelve los personajes que tiene el usuario
 
-    for elemento in personajes:
+    index = 0 
+
+    personaje_usuario = personajes[index]
+
+    img, icon, anim = ruta_webm(personaje_usuario["clase"].lower())
 
 
-
-        img, icon, anim = ruta_webm(elemento["clase"].lower())
-
-        keyboard = [
-        [InlineKeyboardButton(elemento["nombre_personaje"], callback_data="ignore")]
+    keyboard = [
+        [InlineKeyboardButton(personaje_usuario["nombre_personaje"], callback_data="ignore")],
+        [
+            InlineKeyboardButton("Anterior", callback_data=f"PREV_{index}"),
+            InlineKeyboardButton("Siguiente", callback_data=f"NEXT_{index}")
+        ],
+        [InlineKeyboardButton("Entrenar", callback_data=f"SELECT_{index}")]
     ]
 
-        await context.bot.send_sticker(
+    await context.bot.send_sticker(
         chat_id=chat_id,
         sticker=icon,
         reply_markup=InlineKeyboardMarkup(keyboard)
         )
+    
+    return SELECCIONANDO
 
+
+
+async def manejador_lista_personajes(update:Update, context: CallbackContext):
+    query = update.callback_query
+    if query.data == "ignore":
+        await query.answer()
+        return
+
+    await query.answer()
+
+    data = query.data.split("_") 
+    accion = data[0] 
+    indice_actual = int(data[1])
+
+    id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+    id_usuario = vincular_id_externo_use_case.vincular_id_externo_usuario(id_generado)
+
+    personajes = lista_personajes_usuarios_use_case.lista_personajes_usuario(id_usuario) #Devuelve los personajes que tiene el usuario
+
+    
+    if accion == "NEXT":
+        nuevo_indice = (indice_actual + 1) % len(personajes) 
+    elif accion == "PREV":
+        nuevo_indice = (indice_actual - 1) % len(personajes)
+    else:
+        nuevo_indice = indice_actual
+
+        personaje_a_entrenar = personajes[nuevo_indice]
+        
+        print(f"Usuario eligió a: {personaje_a_entrenar["nombre_personaje"]}")
+
+        await query.message.reply_text(f"Has seleccionado a {personaje_a_entrenar["nombre_personaje"]}. Elige la tarea con la que quieres entrenarle")
+        
+        
+        return ASIGNAR_TAREA #Pasa al siguiente estado
+
+    #Borra el Sticker actual y muestra el siguiente, dando la sensación de dinamismo 
+    await query.message.delete()
+
+
+    #Hay que rehacer el teclado para cada personaje
+    nuevo_personaje = personajes[nuevo_indice]
+    img, icon, anim = ruta_webm(nuevo_personaje["clase"].lower())
+    
+        
+    #Creamos el nuevo teclado con el nuevo índice que mostrará al siguiente o al anterior personaje
+    nuevo_keyboard = [
+        [InlineKeyboardButton(nuevo_personaje["nombre_personaje"], callback_data="ignore")],
+        [
+            InlineKeyboardButton("Anterior", callback_data=f"PREV_{nuevo_indice}"),
+            InlineKeyboardButton("Siguiente", callback_data=f"NEXT_{nuevo_indice}")
+        ],
+        [InlineKeyboardButton("Seleccionar", callback_data=f"SELECT_{nuevo_indice}")]
+    ]
+
+    #Se envía el nuevo personaje
+    await context.bot.send_sticker(
+        chat_id=query.message.chat_id,
+        sticker=icon,
+        reply_markup=InlineKeyboardMarkup(nuevo_keyboard)
+        )
+    
+    return SELECCIONANDO_CLASE  #Mientras se selecciona la clase no se cambia de estado
+
+
+async def asignar_tarea(update:Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(f"wiiiiiii")
