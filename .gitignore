@@ -1,7 +1,17 @@
 .env
 
-assets/gifs/*
-assets/webm/*
+*.gif
+*.webm
 
-!assets/gifs/.gitkeep
-!assets/webm/.gitkeep
+!assets/personajes/guerrero/gif/.gitkeep
+!assets/personajes/guerrero/icon/.gitkeep
+!assets/personajes/guerrero/webm/.gitkeep
+!assets/personajes/mago/gif/.gitkeep
+!assets/personajes/mago/icon/.gitkeep
+!assets/personajes/mago/webm/.gitkeep
+!assets/personajes/monje/gif/.gitkeep
+!assets/personajes/monje/icon/.gitkeep
+!assets/personajes/monje/webm/.gitkeep
+!assets/personajes/arquero/gif/.gitkeep
+!assets/personajes/arquero/icon/.gitkeep
+!assets/personajes/arquero/webm/.gitkeep
