@@ -5,7 +5,7 @@ from telegram.ext import CallbackContext
 import hashlib
 
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
-from core.application.use_cases import ObtenerCatalogoUseCase, VincularIdExternoUseCase, RegistrarPersonajeUseCase
+from core.application.use_cases import ObtenerCatalogoUseCase, VincularIdExternoUseCase, RegistrarPersonajeUseCase, ListaPersonajesUsuarioUseCase
 
 from .decoradores import usuario_no_registrado, personaje_elegido
 
@@ -15,6 +15,7 @@ repo = MySQLUsuarioRepository(db_config)
 use_case = ObtenerCatalogoUseCase()
 vincular_id_externo_use_case = VincularIdExternoUseCase(repo)
 registrar_personaje_use_case = RegistrarPersonajeUseCase(repo)
+lista_personajes_usuarios_use_case = ListaPersonajesUsuarioUseCase(repo)
 
 
 
@@ -167,19 +168,23 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
-    personaje = lista_personajes[0]
-    datos_personaje = catalogo[personaje]
+    id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+    id_usuario = vincular_id_externo_use_case.vincular_id_externo_usuario(id_generado)
 
+    personajes = lista_personajes_usuarios_use_case.lista_personajes_usuario(id_usuario)
 
-    nuevo_keyboard = [
-        [InlineKeyboardButton(datos_personaje["clase"], callback_data="ignore")]
-        
+    
+
+    for elemento in personajes:
+
+        keyboard = [
+        [InlineKeyboardButton(elemento["nombre_personaje"], callback_data="ignore")]
     ]
 
-    await context.bot.send_sticker(
+        await context.bot.send_sticker(
         chat_id=chat_id,
-        sticker=datos_personaje["icon_personaje"],
-        reply_markup=InlineKeyboardMarkup(nuevo_keyboard)
+        sticker=elemento["icono_personaje"],
+        reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
 

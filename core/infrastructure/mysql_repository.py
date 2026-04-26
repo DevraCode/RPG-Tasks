@@ -248,6 +248,21 @@ class MySQLUsuarioRepository(UsuarioRepository):
             conn.close()
 
 
+    
+    def lista_personajes_usuario(self, id_usuario):
+        conn = self._get_connection() 
+        cursor = conn.cursor(dictionary=True, buffered=True)
+
+        query = "SELECT * FROM personajes p WHERE id_usuario = %s"
+        cursor.execute(query, (id_usuario,))
+        personajes = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return personajes
+        
+
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------

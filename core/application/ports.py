@@ -23,14 +23,23 @@ class UsuarioRepository(ABC):
     @abstractmethod
     def buscar_usuario_en_bd (self, nombre_usuario: str): #Busca al usuario por nombre en la db
         pass
-    
-    @abstractmethod
-    def limite_personajes_de_usuario(self, id_usuario: str): #Busca al usuario por nombre en la db
-        pass
 
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
     @abstractmethod
     def registrar_personaje_elegido(self, id_usuario: str, nombre_personaje: str, genero: str, clase: str, imagen_personaje: str, icono_personaje: str, animacion_personaje:str):
         pass
+
+    @abstractmethod
+    def limite_personajes_de_usuario(self, id_usuario: str): 
+        pass
+
+    @abstractmethod
+    def lista_personajes_usuario(id_usuario:str):
+        pass
+
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
 
     @abstractmethod
     def iniciar_sesion(self, id_externo_usuario: str):
