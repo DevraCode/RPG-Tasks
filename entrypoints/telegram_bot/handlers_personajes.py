@@ -286,7 +286,7 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
         reply_markup=InlineKeyboardMarkup(nuevo_keyboard)
         )
     
-    return SELECCIONANDO_CLASE  #Mientras se selecciona la clase no se cambia de estado
+    return SELECCIONANDO  
 
 
 async def asignar_tarea(update:Update, context: ContextTypes.DEFAULT_TYPE):
