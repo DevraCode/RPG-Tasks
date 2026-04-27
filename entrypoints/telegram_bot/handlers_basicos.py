@@ -54,7 +54,7 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
 
 #REGISTRO
 #-----------------------------------------------------------------------------------------------------------------------------
-NOMBRE, PASSWORD = range(2)
+NOMBRE, PASSWORD, EMAIL = range(3)
 
 @usuario_registrado # Comprueba si el usuario existe o no en la bd
 @usuario_inactivo # Comprueba que el usuario esté o no inactivo por alguna razón
@@ -80,23 +80,34 @@ async def nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text(f"Perfecto, {update.message.text}." + f"{pide_contraseña}")
         return PASSWORD
+
+#----------------------------------------------------------------------------------------
+async def contraseña (update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['password_usuario'] = update.message.text
+
+    
+    pide_email = crear_cuenta.email()
+
+    await update.message.reply_text(f"De acuerdo, {update.message.text}." + f"{pide_email}")
+    return EMAIL
     
 #----------------------------------------------------------------------------------------
 
-async def contraseña (update:Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['password_usuario'] = update.message.text
+async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['email_usuario'] = update.message.text
 
     nombre = context.user_data.get('nombre_usuario')
     password = context.user_data.get('password_usuario')
     password_bytes = f"{password}".encode()
     password_encriptado = hashlib.sha256(password_bytes).hexdigest()[:8]
+    email = context.user_data.get('email_usuario')
 
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
 
     registrar_usuario_use_case.registrar_usuario(
             nombre_usuario=nombre,
             password_usuario=password_encriptado,
-            email_usuario=" ",
+            email_usuario=email,
             rango= Rango.novato,
             tipo_usuario=TiposUsuario.USUARIO,
             id_plataforma = CorrespondenciaPlataformas.TELEGRAM,

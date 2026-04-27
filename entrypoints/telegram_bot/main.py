@@ -12,8 +12,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMedia
 from telegram.ext import CallbackContext
 #-----------------------------------------------------------------------------------------------------------------------------
 #Importaciones propias del bot
-from .handlers_basicos import NOMBRE, PASSWORD
-from .handlers_basicos import start, pide_nombre_usuario, nombre_usuario, contraseña, cancelar
+from .handlers_basicos import NOMBRE, PASSWORD, EMAIL
+from .handlers_basicos import start, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar
 
 from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO, ASIGNAR_TAREA
 from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes, asignar_tarea
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     #HANDLERS
     app.add_handler(CommandHandler("start", start))
-    #app.add_handler(CommandHandler("listapersonajes", lista_personajes_usuarios))
+    
    
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
@@ -46,7 +46,8 @@ if __name__ == "__main__":
         entry_points=[CommandHandler("registro", pide_nombre_usuario)],
         states={
             NOMBRE: [MessageHandler(filters.TEXT & ~filters.COMMAND, nombre_usuario)],
-            PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, contraseña)] 
+            PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, contraseña)],
+            EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, email)]
         },
         fallbacks=[CommandHandler("cancelar", cancelar)],
         per_message=False,
@@ -64,7 +65,6 @@ if __name__ == "__main__":
     fallbacks=[CommandHandler('cancel', cancelar)],
     per_message=False,
     per_chat=True,
-    map_to_parent={}, 
     allow_reentry=True 
     )
 
