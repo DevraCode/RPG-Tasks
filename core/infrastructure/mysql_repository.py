@@ -1,6 +1,6 @@
 import mysql.connector
 from core.application.ports import UsuarioRepository
-from core.domain.models import Usuario, Personaje
+from core.domain.models import Usuario, Plataformas
 
 class MySQLUsuarioRepository(UsuarioRepository):
 
@@ -133,30 +133,41 @@ class MySQLUsuarioRepository(UsuarioRepository):
         return None
     
 
-    def registrar_usuario(self, usuario: Usuario):
+    def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
 
         query = """ 
         INSERT INTO usuarios 
-        (nombre_usuario, password_usuario, email_usuario)
-        VALUES (%s, %s, %s)
+        (nombre_usuario, password_usuario, email_usuario, rango, tipo_usuario)
+        VALUES (%s, %s, %s, %s, %s)
         """
-    
+        query2 = """ 
+        INSERT INTO plataformas
+        (id_plataforma, nombre_plataforma, id_usuario, id_externo_usuario)
+        VALUES (%s, %s, %s, %s)
+        """
+
         valores = (
             usuario.nombre_usuario, 
             usuario.password_usuario, 
-            usuario.email_usuario 
+            usuario.email_usuario,
+            usuario.rango,
+            usuario.tipo_usuario
         )
 
         try:
             cursor.execute(query, valores)
+            id_usuario = cursor.lastrowid #Guarda el id del usuario
+            cursor.execute(query2, (id_plataforma, nombre_plataforma, id_usuario, id_externo_usuario))
             conn.commit()
+            return id_usuario
 
         finally:
             cursor.close()
             conn.close()
-    
+
+   
 
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------

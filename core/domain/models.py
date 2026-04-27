@@ -8,6 +8,19 @@ class CorrespondenciaPlataformas(IntEnum):
     TELEGRAM = 3
     DISCORD = 4
 
+class TiposUsuario(IntEnum):
+    USUARIO = 0
+    MODERADOR = 50
+    ADMINISTRADOR = 100
+
+class Rango:
+    novato: str = "NOVATO"
+    aprendiz: str = "APRENDIZ"
+    veterano: str = "VETERANO"
+    experto:str = "EXPERTO"
+    maestro: str = "MAESTRO"
+
+
 
 @dataclass
 class Usuario:
@@ -18,6 +31,8 @@ class Usuario:
     email_usuario : str = None
     fecha_registro: datetime = None
     activo: bool = True
+    rango: str = None
+    tipo_usuario: int = 0
 
 @dataclass
 class Personaje:
@@ -37,3 +52,4 @@ class Personaje:
 class Plataformas:
     id_plataforma: int
     nombre_plataforma: str
+

@@ -25,11 +25,13 @@ class UsuarioRepository(ABC):
         pass
 
 
-    
+
 
     @abstractmethod
-    def registrar_usuario(self, nombre_usuario: str, password_usuario: str, email_usuario: str):
+    def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str):
         pass
+
+    
 
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------

@@ -10,8 +10,9 @@ import hashlib
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #Internas
+from core.domain.models import CorrespondenciaPlataformas, TiposUsuario, Rango
 from core.infrastructure.mysql_repository import MySQLUsuarioRepository
-from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, NuevoUsuarioTelegramDiscordUseCase, BuscarPorIdExternoUseCase
+from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, NuevoUsuarioTelegramDiscordUseCase, BuscarPorIdExternoUseCase, RegistrarUsuarioUsecase
 from .dbconfig import db_config
 from .decoradores import usuario_registrado, usuario_inactivo
 
@@ -28,6 +29,7 @@ mensaje_bienvenida = MensajeInicioUseCase()
 crear_cuenta = CrearCuentaUseCase()
 registro_use_case = NuevoUsuarioTelegramDiscordUseCase(repo)
 buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
+registrar_usuario_use_case = RegistrarUsuarioUsecase(repo)
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -91,13 +93,21 @@ async def contraseña (update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
 
-    resultado = registro_use_case.ejecutar(
-            id_externo=id_generado,
-            plataforma='telegram',
+    registrar_usuario_use_case.registrar_usuario(
             nombre_usuario=nombre,
-            password_usuario=password_encriptado
+            password_usuario=password_encriptado,
+            email_usuario=" ",
+            rango= Rango.novato,
+            tipo_usuario=TiposUsuario.USUARIO,
+            id_plataforma = CorrespondenciaPlataformas.TELEGRAM,
+            nombre_plataforma="TELEGRAM",
+            id_externo_usuario=id_generado
+
         )
-    await update.message.reply_text(f"{resultado}")
+    
+    await update.message.reply_text(f"Cuenta creada")
+
+
 
     return ConversationHandler.END
 

@@ -32,26 +32,24 @@ class CrearCuentaUseCase:
     
 
 
-class NuevoUsuario:
+class RegistrarUsuarioUsecase:
     def __init__(self, repo):
         self.repo = repo
 
+    def registrar_usuario(self, nombre_usuario: str, password_usuario: str, email_usuario: str, rango: str, tipo_usuario:int, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str):
+        nuevo_usuario = Usuario(
+            id_usuario = None,
+            nombre_usuario = nombre_usuario,
+            password_usuario = password_usuario,
+            email_usuario = email_usuario,
+            rango = rango,
+            tipo_usuario = tipo_usuario
 
-    def ejecutar(self, id_usuario: str, nombre_usuario: str, password_usuario: str, id_externo_usuario:str, id_plataforma: int, email_usuario: str):
+        )
 
-        usuario = self.repo.buscar_usuario_en_bd(nombre_usuario)
-        if usuario:
-            return f"El nombre {usuario.nombre_usuario.capitalize()} ya existe"
-
-
-        nuevo_usuario = Usuario(id_usuario=id_usuario, nombre_usuario=nombre_usuario, password_usuario=password_usuario)
-        
-
-        # Guardamos todo en MySQL
-        self.repo.registrar_usuario_telegram_discord(nuevo_usuario, plataforma, id_externo)
-        
-        return f"¡Cuenta creada!"
-
+        registro = self.repo.registrar_usuario(nuevo_usuario, id_plataforma, nombre_plataforma, id_externo_usuario)
+        return registro
+   
 
 
 #Comprueba que el nombre de usuario ya exista en la base de datos

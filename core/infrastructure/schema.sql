@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     activo BOOLEAN DEFAULT TRUE,
     rango VARCHAR(50),
-    tipo_usuario INT
+    tipo_usuario INT DEFAULT 0
 ) ENGINE=InnoDB;
 
 -- TABLA PLATAFORMAS
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS plataformas (
     nombre_plataforma VARCHAR(100),
     id_usuario INT,
     id_externo_usuario VARCHAR(100), -- Id del usuario de Telegram, Discord, etc
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 
