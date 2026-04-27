@@ -24,6 +24,13 @@ class UsuarioRepository(ABC):
     def buscar_usuario_en_bd (self, nombre_usuario: str): #Busca al usuario por nombre en la db
         pass
 
+
+    
+
+    @abstractmethod
+    def registrar_usuario(self, nombre_usuario: str, password_usuario: str, email_usuario: str):
+        pass
+
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
     @abstractmethod
@@ -55,6 +62,13 @@ class UsuarioRepository(ABC):
 
     @abstractmethod
     def sesion_cerrada(self, id_externo_usuario: str):
+        pass
+
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+
+    @abstractmethod
+    def insertar_tarea(self, id_usuario, nombre_tarea):
         pass
 
     #-----------------------------------------------------------------------------------------------------------------------------

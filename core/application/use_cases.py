@@ -4,8 +4,6 @@ import hashlib
 import inspect
 from core.domain.models import Usuario, Personaje
 from core.domain.auth_utils import verificar_password
-
-
 from core.domain.clases_personajes import CLASES_DISPONIBLES
 
 #Mensaje de Inicio
@@ -31,6 +29,29 @@ class CrearCuentaUseCase:
     def contraseña(self):
         mensaje = "Introduce una contraseña"
         return inspect.cleandoc(mensaje)
+    
+
+
+class NuevoUsuario:
+    def __init__(self, repo):
+        self.repo = repo
+
+
+    def ejecutar(self, id_usuario: str, nombre_usuario: str, password_usuario: str, id_externo_usuario:str, id_plataforma: int, email_usuario: str):
+
+        usuario = self.repo.buscar_usuario_en_bd(nombre_usuario)
+        if usuario:
+            return f"El nombre {usuario.nombre_usuario.capitalize()} ya existe"
+
+
+        nuevo_usuario = Usuario(id_usuario=id_usuario, nombre_usuario=nombre_usuario, password_usuario=password_usuario)
+        
+
+        # Guardamos todo en MySQL
+        self.repo.registrar_usuario_telegram_discord(nuevo_usuario, plataforma, id_externo)
+        
+        return f"¡Cuenta creada!"
+
 
 
 #Comprueba que el nombre de usuario ya exista en la base de datos

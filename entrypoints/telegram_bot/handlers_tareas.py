@@ -20,3 +20,4 @@ vincular_id_externo_use_case = VincularIdExternoUseCase(repo)
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #INSERTAR TAREAS
+NOMBRE_TAREA, INSERTAR_TAREA = range(2)

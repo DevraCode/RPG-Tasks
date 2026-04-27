@@ -1,4 +1,3 @@
-# core/infrastructure/mysql_repository.py
 import mysql.connector
 from core.application.ports import UsuarioRepository
 from core.domain.models import Usuario, Personaje
@@ -13,7 +12,10 @@ class MySQLUsuarioRepository(UsuarioRepository):
     
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
-    
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #BUSCAR USUARIO
+
     def buscar_por_id_usuario(self, id_usuario: str):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
@@ -32,7 +34,8 @@ class MySQLUsuarioRepository(UsuarioRepository):
             return Usuario(id_usuario=res['id_usuario'], 
                            nombre_usuario=res['nombre_usuario'])
         return None
-        
+
+    #-----------------------------------------------------------------------------------------------------------------------------   
 
     def buscar_por_id_externo(self, id_externo_usuario: str, nombre_plataforma: str):
         conn = self._get_connection()
@@ -57,6 +60,8 @@ class MySQLUsuarioRepository(UsuarioRepository):
                            id_externo_usuario=res['id_externo_usuario'])
         return None
     
+    #-----------------------------------------------------------------------------------------------------------------------------
+    
     def buscar_usuario_por_nombre(self, nombre_usuario: str):
         conn = self._get_connection() 
         cursor = conn.cursor(dictionary=True)
@@ -76,6 +81,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
             )
         return None
     
+    #-----------------------------------------------------------------------------------------------------------------------------
 
     def buscar_usuario_por_plataforma(self, plataforma:str):
         conn = self._get_connection() 
@@ -99,6 +105,8 @@ class MySQLUsuarioRepository(UsuarioRepository):
                 nombre_usuario=row['nombre_usuario']
             )
         return None
+    
+    #-----------------------------------------------------------------------------------------------------------------------------
 
     def buscar_usuario_en_bd(self, nombre_usuario):
         conn = self._get_connection() 
@@ -124,11 +132,37 @@ class MySQLUsuarioRepository(UsuarioRepository):
             )
         return None
     
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
 
+    def registrar_usuario(self, usuario: Usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """ 
+        INSERT INTO usuarios 
+        (nombre_usuario, password_usuario, email_usuario)
+        VALUES (%s, %s, %s)
+        """
+    
+        valores = (
+            usuario.nombre_usuario, 
+            usuario.password_usuario, 
+            usuario.email_usuario 
+        )
+
+        try:
+            cursor.execute(query, valores)
+            conn.commit()
+
+        finally:
+            cursor.close()
+            conn.close()
+    
+
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #PERSONAJES
 
     def registrar_personaje_elegido(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje):
         conn = self._get_connection()
@@ -146,7 +180,68 @@ class MySQLUsuarioRepository(UsuarioRepository):
             conn.close()
 
     #-----------------------------------------------------------------------------------------------------------------------------
+
+    #Para establecer un máximo de 5 personajes por usuario
+    def limite_personajes_de_usuario(self, id_usuario):
+        
+        conn = self._get_connection() 
+        cursor = conn.cursor(buffered=True)
+        
+        try:
+            query = "SELECT COUNT(*) FROM personajes WHERE id_usuario = %s"
+            cursor.execute(query, (id_usuario,))
+            total_personajes = cursor.fetchone()[0]
+
+           
+            return total_personajes < 5
+            
+        except Exception as e:
+            print(f"Error contando personajes: {e}")
+            return False
+        finally:
+            
+            cursor.close()
+            conn.close()
+
     #-----------------------------------------------------------------------------------------------------------------------------
+    
+    def lista_personajes_usuario(self, id_usuario):
+        conn = self._get_connection() 
+        cursor = conn.cursor(dictionary=True, buffered=True)
+
+        query = "SELECT * FROM personajes p WHERE id_usuario = %s"
+        cursor.execute(query, (id_usuario,))
+        personajes = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+
+        return personajes
+    
+
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #TAREAS
+
+    def insertar_tarea(self, id_usuario, nombre_tarea):
+        conn = self._get_connection() 
+        cursor = conn.cursor(dictionary=True, buffered=True)
+        
+        query = "INSERT INTO tareas (id_usuario, nombre_tarea) VALUES (%s, %s)"
+
+        cursor.execute(query, (id_usuario, nombre_tarea,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+   
+
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #-----------------------------------------------------------------------------------------------------------------------------
+    #SESIONES
 
     def iniciar_sesion(self, id_externo_usuario):
         conn = self._get_connection()
@@ -165,8 +260,6 @@ class MySQLUsuarioRepository(UsuarioRepository):
             cursor.close()
             conn.close()
         
-        
-
     #-----------------------------------------------------------------------------------------------------------------------------
 
     def obtener_estado_sesion(self, id_externo_usuario, nombre_plataforma):
@@ -198,7 +291,6 @@ class MySQLUsuarioRepository(UsuarioRepository):
 
     #-----------------------------------------------------------------------------------------------------------------------------
 
-
     def sesion_cerrada(self, id_externo_usuario):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True, buffered=True)
@@ -225,49 +317,11 @@ class MySQLUsuarioRepository(UsuarioRepository):
         return None
     
     #-----------------------------------------------------------------------------------------------------------------------------
-    #Para establecer un máximo de 5 personajes por usuario
-    def limite_personajes_de_usuario(self, id_usuario):
-        
-        conn = self._get_connection() 
-        cursor = conn.cursor(buffered=True)
-        
-        try:
-            query = "SELECT COUNT(*) FROM personajes WHERE id_usuario = %s"
-            cursor.execute(query, (id_usuario,))
-            total_personajes = cursor.fetchone()[0]
-
-           
-            return total_personajes < 5
-            
-        except Exception as e:
-            print(f"Error contando personajes: {e}")
-            return False
-        finally:
-            
-            cursor.close()
-            conn.close()
-
-
-    
-    def lista_personajes_usuario(self, id_usuario):
-        conn = self._get_connection() 
-        cursor = conn.cursor(dictionary=True, buffered=True)
-
-        query = "SELECT * FROM personajes p WHERE id_usuario = %s"
-        cursor.execute(query, (id_usuario,))
-        personajes = cursor.fetchall()
-
-        cursor.close()
-        conn.close()
-
-        return personajes
-        
-
-    #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
     # TELEGRAM / DISCORD
+
     #Registra al usuario con su id, nombre, contraseña, plataforma y personaje
     def registrar_usuario_telegram_discord(self, usuario, plataforma, id_ext):
         conn = self._get_connection()
@@ -281,9 +335,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
             # Insertar en la tabla Plataformas
             cursor.execute("INSERT INTO plataformas (id_usuario, nombre_plataforma, id_externo_usuario) VALUES (%s, %s, %s)", 
                            (usuario.id_usuario, plataforma, str(id_ext)))
-            
-           
-            
+                  
             conn.commit() 
         except Exception as e:
             conn.rollback()
@@ -291,6 +343,8 @@ class MySQLUsuarioRepository(UsuarioRepository):
         finally:
             cursor.close()
             conn.close()
+
+    #-----------------------------------------------------------------------------------------------------------------------------
 
     #Para Telegram / Discord - Busca a que usuario pertenece su id externo
     def vincular_id_externo_con_interno(self, id_externo_usuario):
@@ -310,6 +364,8 @@ class MySQLUsuarioRepository(UsuarioRepository):
         finally:
             cursor.close()
             conn.close()
+
+    #-----------------------------------------------------------------------------------------------------------------------------
 
     #Para evitar que el usuario pueda volver a usar el comando /personaje si ya tiene un personaje elegido
     def vincular_id_personaje_con_usuario(self, id_externo_usuario):
@@ -338,9 +394,9 @@ class MySQLUsuarioRepository(UsuarioRepository):
                 
                 return {"id_usuario": id_interno, "id_personaje": row2['id_personaje']}
             
-            return {"id_usuario": id_interno, "id_personaje": None}
-            
+            return {"id_usuario": id_interno, "id_personaje": None}       
             
         finally:
             cursor.close()
             conn.close()
+    #-----------------------------------------------------------------------------------------------------------------------------
