@@ -20,8 +20,6 @@ class Rango:
     experto:str = "EXPERTO"
     maestro: str = "MAESTRO"
 
-
-
 @dataclass
 class Usuario:
     id_usuario: str

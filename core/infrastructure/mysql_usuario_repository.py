@@ -1,6 +1,6 @@
 import mysql.connector
 from core.application.ports import UsuarioRepository
-from core.domain.models import Usuario, Plataformas
+from core.domain.models import Usuario
 
 class MySQLUsuarioRepository(UsuarioRepository):
 
@@ -333,28 +333,6 @@ class MySQLUsuarioRepository(UsuarioRepository):
     #-----------------------------------------------------------------------------------------------------------------------------
     # TELEGRAM / DISCORD
 
-    #Registra al usuario con su id, nombre, contraseña, plataforma y personaje
-    def registrar_usuario_telegram_discord(self, usuario, plataforma, id_ext):
-        conn = self._get_connection()
-        cursor = conn.cursor()
-
-        try:
-            # Insertar en la tabla Usuarios
-            cursor.execute("INSERT INTO usuarios (id_usuario, nombre_usuario, password_usuario) VALUES (%s, %s, %s)", 
-                           (usuario.id_usuario, usuario.nombre_usuario, usuario.password_usuario))
-            
-            # Insertar en la tabla Plataformas
-            cursor.execute("INSERT INTO plataformas (id_usuario, nombre_plataforma, id_externo_usuario) VALUES (%s, %s, %s)", 
-                           (usuario.id_usuario, plataforma, str(id_ext)))
-                  
-            conn.commit() 
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            cursor.close()
-            conn.close()
-
     #-----------------------------------------------------------------------------------------------------------------------------
 
     #Para Telegram / Discord - Busca a que usuario pertenece su id externo
@@ -393,7 +371,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
                 return None
 
             id_interno = row1['id_usuario']
-            print(f"ÉXITO: Usuario encontrado: {id_interno}")
+            print(f"Usuario encontrado: {id_interno}")
 
             
             query2 = "SELECT id_personaje FROM personajes WHERE id_usuario = %s"
@@ -401,7 +379,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
             row2 = cursor.fetchone()
 
             if row2:
-                print(f"ÉXITO: Personaje {row2['id_personaje']} encontrado para usuario {id_interno}")
+                print(f"Personaje {row2['id_personaje']} encontrado para usuario {id_interno}")
                 
                 return {"id_usuario": id_interno, "id_personaje": row2['id_personaje']}
             

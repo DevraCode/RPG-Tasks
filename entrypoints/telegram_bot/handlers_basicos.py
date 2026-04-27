@@ -11,8 +11,8 @@ import hashlib
 
 #Internas
 from core.domain.models import CorrespondenciaPlataformas, TiposUsuario, Rango
-from core.infrastructure.mysql_repository import MySQLUsuarioRepository
-from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, NuevoUsuarioTelegramDiscordUseCase, BuscarPorIdExternoUseCase, RegistrarUsuarioUsecase
+from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
+from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, BuscarPorIdExternoUseCase, RegistrarUsuarioUsecase
 from .dbconfig import db_config
 from .decoradores import usuario_registrado, usuario_inactivo
 
@@ -24,12 +24,11 @@ from .decoradores import usuario_registrado, usuario_inactivo
 load_dotenv()
 
 #INYECCIÓN DE DEPENDENCIAS
-repo = MySQLUsuarioRepository(db_config)
+repo_usuario = MySQLUsuarioRepository(db_config)
 mensaje_bienvenida = MensajeInicioUseCase()
 crear_cuenta = CrearCuentaUseCase()
-registro_use_case = NuevoUsuarioTelegramDiscordUseCase(repo)
-buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
-registrar_usuario_use_case = RegistrarUsuarioUsecase(repo)
+buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo_usuario)
+registrar_usuario_use_case = RegistrarUsuarioUsecase(repo_usuario)
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -71,7 +70,7 @@ async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYP
 async def nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['nombre_usuario'] = update.message.text.strip().lower()
 
-    usuario_en_bd = repo.buscar_usuario_en_bd(context.user_data['nombre_usuario'])
+    usuario_en_bd = repo_usuario.buscar_usuario_en_bd(context.user_data['nombre_usuario'])
     if usuario_en_bd:
             await update.message.reply_text(f"Ya estás registrado")
             return ConversationHandler.END

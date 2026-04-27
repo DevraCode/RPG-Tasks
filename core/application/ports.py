@@ -78,15 +78,19 @@ class UsuarioRepository(ABC):
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
     #TELEGRAM / DISCORD
-    @abstractmethod
-    def registrar_usuario_telegram_discord(self, usuario: Usuario, plataforma: str, id_ext: str):
-        pass
 
-    def vincular_id_personaje_con_usuario(self, id_usuario:str):
-        pass
-    
-    #Esto para Telegram / Discord    
     @abstractmethod
     def vincular_id_externo_con_interno(self, id_externo_usuario: str):
         pass
+
+    def vincular_id_personaje_con_usuario(self, id_usuario:int):
+        pass
+    
+    
+class PersonajesRepository(ABC):
+    pass
+
+
+class TareasRepository(ABC):
+    pass
 

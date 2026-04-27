@@ -4,7 +4,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMedia
 from telegram.ext import CallbackContext
 import hashlib
 
-from core.infrastructure.mysql_repository import MySQLUsuarioRepository
+from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
 from core.application.use_cases import VincularIdExternoUseCase
 
 

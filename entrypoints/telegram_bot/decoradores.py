@@ -8,7 +8,7 @@ import hashlib
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #Internas
-from core.infrastructure.mysql_repository import MySQLUsuarioRepository
+from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
 from core.application.use_cases import SesionIniciadaUseCase, BuscarPorIdExternoUseCase, VincularIdPersonajeConUsuarioUseCase, LimitePersonajesUsuarioUseCase
 
 
