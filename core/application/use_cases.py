@@ -75,8 +75,10 @@ class UsuarioUsecase:
         resultado = self.repo.buscar_usuario_por_nombre(nombre_usuario)
         return resultado
     
-    def buscar_id_externo_usuario(self, id_externo, nombre_plataforma):
-        self.repo.buscar_por_id_externo(id_externo, nombre_plataforma)
+    def buscar_id_externo_usuario(self, id_externo):
+        usuario = self.repo.buscar_por_id_externo(id_externo)
+        return usuario
+
 
     def comprobar_usuario(self, nombre_usuario:str, password_usuario:str):
         resultado = self.repo.comprobar_usuario_contraseña(nombre_usuario, password_usuario)
@@ -140,9 +142,9 @@ class PlataformasUseCase:
     def __init__(self, repo):
         self.repo = repo
 
-    def usuario_activo(self, id_usuario):
+    def usuario_activo(self, id_externo_usuario):
 
-        sesion = self.repo.obtener_estado_sesion(id_usuario)
+        sesion = self.repo.obtener_estado_sesion(id_externo_usuario)
         
         return sesion
     

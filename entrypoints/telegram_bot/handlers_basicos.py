@@ -129,6 +129,7 @@ async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 PEDIR_NOMBRE, PEDIR_PASSWORD = range(2)
 
+@usuario_existe
 async def vincular(update:Update, context: ContextTypes.DEFAULT_TYPE):
      pide_usuario = crear_cuenta.nombre_usuario()
      await update.message.reply_text(pide_usuario)

@@ -37,25 +37,29 @@ class MySQLUsuarioRepository(UsuarioRepository):
     #-----------------------------------------------------------------------------------------------------------------------------   
 
     def buscar_por_id_externo(self, id_externo_usuario: str):
+        print(f"DEBUG: Buscando hash -> '{id_externo_usuario}' (Longitud: {len(id_externo_usuario)})")
+
+
         conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(dictionary=True, buffered=True)
         
         query = """
-            SELECT id_externo_usuario
-            FROM plataformas
-            WHERE p.id_externo_usuario = %s
+            SELECT u.id_usuario, u.nombre_usuario
+            FROM usuarios u
+            INNER JOIN plataformas p ON u.id_usuario = p.id_usuario
+            WHERE p.id_externo_usuario = %s AND p.sesion_activa = 1
         """
-        cursor.execute(query, (id_externo_usuario))
+        cursor.execute(query, (id_externo_usuario,))
         res = cursor.fetchone()
+
+        print(f"DEBUG: Resultado de la DB -> {res}") # Si esto sale None, la query no hizo match
         
         cursor.close()
         conn.close()
         
         if res:
             return Usuario(id_usuario=res['id_usuario'], 
-                           nombre_usuario=res['nombre_usuario'], 
-                           password_usuario=res['password_usuario'],
-                           id_externo_usuario=res['id_externo_usuario'])
+                           nombre_usuario=res['nombre_usuario'])
         return None
     
     #-----------------------------------------------------------------------------------------------------------------------------

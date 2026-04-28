@@ -62,23 +62,28 @@ class MySQLPlataformasRepository(PlataformasRepository):
             cursor.close()
             conn.close()
 
-    def obtener_estado_sesion(self, id_usuario):
+    def obtener_estado_sesion(self, id_externo_usuario):
 
         conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(dictionary=True, buffered=True) 
 
         query = """
         SELECT sesion_activa
         FROM plataformas
-        WHERE id_usuario = %s
+        WHERE id_externo_usuario = %s AND sesion_activa = 1
         """
         
         try:
-            cursor.execute(query, (id_usuario,))
+            cursor.execute(query, (id_externo_usuario,))
             resultado = cursor.fetchone()
 
-            return bool(resultado['sesion_activa'])
+            
+            if resultado:
+                return bool(resultado['sesion_activa'])
+            
+            return False 
 
         finally:
+            
             cursor.close()
             conn.close()

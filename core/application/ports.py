@@ -83,7 +83,7 @@ class PlataformasRepository(ABC):
         pass 
 
     @abstractmethod
-    def obtener_estado_sesion(self, id_usuario: int):
+    def obtener_estado_sesion(self, id_externo_usuario: str):
         pass
 
 

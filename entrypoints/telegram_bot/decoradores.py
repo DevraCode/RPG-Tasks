@@ -42,12 +42,14 @@ def usuario_existe(func):
         id_telegram = str(update.effective_user.id)
         id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
 
-        id_usuario = plataformas.vincular_id_externo_usuario(id_externo)
+        nombre_usuario = usuario.buscar_id_externo_usuario(id_externo)
+        
 
+        sesion = plataformas.usuario_activo(id_externo)
 
-        if usuario.id_usuario_existe(id_usuario):
+        if id_externo and sesion == True:
             await update.message.reply_text(
-                f"Ya estás registrado. Cierra la sesión o inicia sesión con otro usuario"
+                f"Ya estás registrado como {nombre_usuario.nombre_usuario.capitalize()}. Cierra la sesión o inicia sesión con otro usuario"
             )
             return 
         
