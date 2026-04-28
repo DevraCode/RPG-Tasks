@@ -254,52 +254,66 @@ class MySQLUsuarioRepository(UsuarioRepository):
     #-----------------------------------------------------------------------------------------------------------------------------
     #SESIONES
 
-    def iniciar_sesion(self, id_externo_usuario):
+    def iniciar_sesion(self, id_usuario):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True, buffered=True)
 
-        
-        query = """ UPDATE usuarios u
-                    JOIN plataformas p ON u.id_usuario = p.id_usuario
-                    SET u.activo = 1
-                    WHERE p.id_externo_usuario =  %s """
+        query = """ UPDATE plataformas
+                    SET sesion_activa = 1
+                    WHERE p.id_usuario =  %s """
 
         try:
-            cursor.execute(query, (id_externo_usuario,))
+            cursor.execute(query, (id_usuario,))
             conn.commit() 
         finally:
             cursor.close()
             conn.close()
+
+
+    def cerrar_sesion(self, id_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True, buffered=True)
+
+        query = """ UPDATE plataformas
+                    SET sesion_activa = 0
+                    WHERE p.id_usuario =  %s """
+
+        try:
+            cursor.execute(query, (id_usuario,))
+            conn.commit() 
+        finally:
+            cursor.close()
+            conn.close()
+
         
+
+
+
+
     #-----------------------------------------------------------------------------------------------------------------------------
 
-    def obtener_estado_sesion(self, id_externo_usuario, nombre_plataforma):
+    def obtener_estado_sesion(self, id_usuario):
 
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
 
         query = """
-        SELECT u.activo 
-        FROM usuarios u
-        JOIN plataformas p ON u.id_usuario = p.id_usuario
-        WHERE p.id_externo_usuario = %s 
-          AND p.nombre_plataforma = %s
-        LIMIT 1
+        SELECT sesion_activa
+        FROM plataformas
+        WHERE id_usuario = %s
         """
         
         try:
-            cursor.execute(query, (id_externo_usuario,nombre_plataforma,))
+            cursor.execute(query, (id_usuario,))
             resultado = cursor.fetchone()
             
-            return resultado is not None and resultado['activo'] == 1
+            return resultado
         finally:
             cursor.close()
             conn.close()
     
     #-----------------------------------------------------------------------------------------------------------------------------
-    def cerrar_sesion(self, id_externo_usuario):
-        pass
-
+   
     #-----------------------------------------------------------------------------------------------------------------------------
 
     def sesion_cerrada(self, id_externo_usuario):

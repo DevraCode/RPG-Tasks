@@ -25,8 +25,6 @@ class UsuarioRepository(ABC):
         pass
 
 
-
-
     @abstractmethod
     def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str):
         pass
@@ -51,15 +49,15 @@ class UsuarioRepository(ABC):
     #-----------------------------------------------------------------------------------------------------------------------------
 
     @abstractmethod
-    def iniciar_sesion(self, id_externo_usuario: str):
+    def iniciar_sesion(self, id_usuario: int):
         pass
     
     @abstractmethod
-    def obtener_estado_sesion(self, id_externo_usuario: str, nombre_plataforma: str):
+    def obtener_estado_sesion(self, id_usuario: int) -> bool:
         pass
 
     @abstractmethod
-    def cerrar_sesion(self, id_externo_usuario: str):
+    def cerrar_sesion(self, id_usuario: int):
         pass
 
     @abstractmethod

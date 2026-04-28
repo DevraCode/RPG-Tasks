@@ -2,7 +2,7 @@
 import uuid
 import hashlib
 import inspect
-from core.domain.models import Usuario, Personaje
+from core.domain.models import Usuario, Plataformas
 from core.domain.auth_utils import verificar_password
 from core.domain.clases_personajes import CLASES_DISPONIBLES
 
@@ -99,15 +99,15 @@ class RegistrarPersonajeUseCase:
 
     
 
-class SesionIniciadaUseCase:
+class ObtenerEstadoSesionUseCase:
     def __init__(self, repo):
         self.repo = repo
 
-    def usuario_activo(self, id_externo_usuario, nombre_plataforma):
+    def usuario_activo(self, id_usuario):
 
-        self.repo.obtener_estado_sesion(id_externo_usuario, nombre_plataforma)
+        sesion = self.repo.obtener_estado_sesion(id_usuario)
         
-        return None
+        return sesion
 
 
 

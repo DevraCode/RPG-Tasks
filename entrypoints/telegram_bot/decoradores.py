@@ -9,7 +9,7 @@ import hashlib
 
 #Internas
 from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
-from core.application.use_cases import SesionIniciadaUseCase, BuscarPorIdExternoUseCase, VincularIdPersonajeConUsuarioUseCase, LimitePersonajesUsuarioUseCase
+from core.application.use_cases import ObtenerEstadoSesionUseCase, BuscarPorIdExternoUseCase, VincularIdPersonajeConUsuarioUseCase, LimitePersonajesUsuarioUseCase
 
 
 from .dbconfig import db_config
@@ -21,7 +21,7 @@ from .dbconfig import db_config
 
 #INYECCIÓN DE DEPENDENCIAS
 repo = MySQLUsuarioRepository(db_config)
-sesion_iniciada = SesionIniciadaUseCase(repo)
+sesion_iniciada = ObtenerEstadoSesionUseCase(repo)
 buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
 vincular_id_personaje_con_usuario_use_case = VincularIdPersonajeConUsuarioUseCase(repo)
 limite_personajes_usuario_use_case = LimitePersonajesUsuarioUseCase(repo)
@@ -31,7 +31,7 @@ limite_personajes_usuario_use_case = LimitePersonajesUsuarioUseCase(repo)
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-#Si el usuario no está registrado
+""" #Si el usuario no está registrado
 def usuario_no_registrado(func):
     @wraps(func)
     async def usuario_no_existe(update, context, *args, **kwargs):
@@ -66,22 +66,24 @@ def usuario_registrado(func):
             return 
 
         return await func(update, context, *args, **kwargs)
-    return sesion_activa_true
+    return sesion_activa_true """
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #Si el usuario se ha dado de baja, es decir, en la tabla usuarios.activo = 0
 #Útil para usuarios baneados
-def usuario_inactivo(func):
+def sesion_usuario_iniciada(func):
     @wraps(func)
     async def id_externo_true(update, context, *args, **kwargs):
         id_telegram = str(update.effective_user.id)
         id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
+
+        id_usuario = repo.vincular_id_externo_con_interno(id_externo)
         
-        if repo.buscar_por_id_externo(id_externo,nombre_plataforma='telegram'):
+        if sesion_iniciada.usuario_activo(id_usuario):
             await update.message.reply_text(
-                "Este ID de Telegram ya está registrado pero no tiene la sesión activa"
+                "Ya has iniciado sesión"
             )
             return 
         

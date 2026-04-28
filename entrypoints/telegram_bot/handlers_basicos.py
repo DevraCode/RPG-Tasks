@@ -14,7 +14,7 @@ from core.domain.models import CorrespondenciaPlataformas, TiposUsuario, Rango
 from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
 from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, BuscarPorIdExternoUseCase, RegistrarUsuarioUsecase
 from .dbconfig import db_config
-from .decoradores import usuario_registrado, usuario_inactivo
+from .decoradores import sesion_usuario_iniciada
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -55,8 +55,8 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
 #-----------------------------------------------------------------------------------------------------------------------------
 NOMBRE, PASSWORD, EMAIL = range(3)
 
-@usuario_registrado # Comprueba si el usuario existe o no en la bd
-@usuario_inactivo # Comprueba que el usuario esté o no inactivo por alguna razón
+#@usuario_registrado # Comprueba si el usuario existe o no en la bd
+@sesion_usuario_iniciada # Comprueba que el usuario haya iniciado sesión
 async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 

@@ -50,4 +50,5 @@ class Personaje:
 class Plataformas:
     id_plataforma: int
     nombre_plataforma: str
+    sesion_activa: bool = True
 
