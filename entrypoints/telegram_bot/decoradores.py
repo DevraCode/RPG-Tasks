@@ -9,7 +9,7 @@ import hashlib
 
 #Internas
 from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
-from core.application.use_cases import ObtenerEstadoSesionUseCase, BuscarPorIdExternoUseCase, VincularIdPersonajeConUsuarioUseCase, LimitePersonajesUsuarioUseCase
+from core.application.use_cases import IdUsuarioExisteUseCase, ObtenerEstadoSesionUseCase, BuscarPorIdExternoUseCase, VincularIdPersonajeConUsuarioUseCase, LimitePersonajesUsuarioUseCase
 
 
 from .dbconfig import db_config
@@ -21,6 +21,10 @@ from .dbconfig import db_config
 
 #INYECCIÓN DE DEPENDENCIAS
 repo = MySQLUsuarioRepository(db_config)
+id_usuario_existe_use_case = IdUsuarioExisteUseCase(repo)
+
+
+
 sesion_iniciada = ObtenerEstadoSesionUseCase(repo)
 buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo)
 vincular_id_personaje_con_usuario_use_case = VincularIdPersonajeConUsuarioUseCase(repo)
@@ -31,48 +35,32 @@ limite_personajes_usuario_use_case = LimitePersonajesUsuarioUseCase(repo)
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-""" #Si el usuario no está registrado
-def usuario_no_registrado(func):
+
+def usuario_existe(func):
     @wraps(func)
-    async def usuario_no_existe(update, context, *args, **kwargs):
+    async def usuario_registrado(update, context, *args, **kwargs):
         id_telegram = str(update.effective_user.id)
         id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
-         
-        if not repo.obtener_estado_sesion(id_externo,nombre_plataforma='telegram'):
+
+        id_usuario = repo.vincular_id_externo_con_interno(id_externo)
+
+        if id_usuario_existe_use_case.id_usuario_existe(id_usuario):
             await update.message.reply_text(
-                "Debes registrarte primero"
+                f"Ya estás registrado. Cierra la sesión o inicia sesión con otro usuario"
             )
             return 
-
+        
         return await func(update, context, *args, **kwargs)
-    return usuario_no_existe
+    return usuario_registrado
+
+
+
+
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
 
-#Si el usuario está registrado y activo, tabla usuarios.activo = 1
-def usuario_registrado(func):
-    @wraps(func)
-    async def sesion_activa_true(update, context, *args, **kwargs):
-        id_telegram = str(update.effective_user.id)
-        id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
-         
-        if repo.obtener_estado_sesion(id_externo,nombre_plataforma='telegram'):
-            await update.message.reply_text(
-                "Ya te has registrado \n"
-                "En Telegram solo puedes tener una cuenta por usuario debido a las limitaciones"
-            )
-            return 
-
-        return await func(update, context, *args, **kwargs)
-    return sesion_activa_true """
-
-#-----------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------
-
-#Si el usuario se ha dado de baja, es decir, en la tabla usuarios.activo = 0
-#Útil para usuarios baneados
 def sesion_usuario_iniciada(func):
     @wraps(func)
     async def id_externo_true(update, context, *args, **kwargs):
@@ -83,7 +71,7 @@ def sesion_usuario_iniciada(func):
         
         if sesion_iniciada.usuario_activo(id_usuario):
             await update.message.reply_text(
-                "Ya has iniciado sesión"
+                "Ya has iniciado sesión. Cierra sesión o registrate con otro usuario"
             )
             return 
         

@@ -1,6 +1,6 @@
 import mysql.connector
 from core.application.ports import UsuarioRepository
-from core.domain.models import Usuario
+from core.domain.models import Usuario, Plataformas
 
 class MySQLUsuarioRepository(UsuarioRepository):
 
@@ -37,17 +37,16 @@ class MySQLUsuarioRepository(UsuarioRepository):
 
     #-----------------------------------------------------------------------------------------------------------------------------   
 
-    def buscar_por_id_externo(self, id_externo_usuario: str, nombre_plataforma: str):
+    def buscar_por_id_externo(self, id_externo_usuario: str):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
         
         query = """
-            SELECT u.id_usuario, u.nombre_usuario, u.password_usuario, p.id_externo_usuario
-            FROM usuarios u
-            JOIN plataformas p ON u.id_usuario = p.id_usuario
-            WHERE p.id_externo_usuario = %s AND p.nombre_plataforma = %s
+            SELECT id_externo_usuario
+            FROM plataformas
+            WHERE p.id_externo_usuario = %s
         """
-        cursor.execute(query, (id_externo_usuario,nombre_plataforma,))
+        cursor.execute(query, (id_externo_usuario))
         res = cursor.fetchone()
         
         cursor.close()
@@ -66,7 +65,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
         conn = self._get_connection() 
         cursor = conn.cursor(dictionary=True)
     
-        query = "SELECT * FROM usuarios WHERE nombre_usuario = %s"
+        query = "SELECT id_usuario FROM usuarios WHERE nombre_usuario = %s"
         cursor.execute(query, (nombre_usuario,))
         row = cursor.fetchone()
         
@@ -75,9 +74,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
 
         if row:
             return Usuario(
-                id_usuario=row['id_usuario'], 
-                nombre_usuario=row['nombre_usuario'], 
-                password_usuario=row['password_usuario']
+                id_usuario=row['id_usuario']
             )
         return None
     
@@ -127,6 +124,30 @@ class MySQLUsuarioRepository(UsuarioRepository):
         if row:
             return Usuario(
                 id_usuario=row['id_usuario'], 
+                nombre_usuario=row['nombre_usuario'],
+                password_usuario=row['password_usuario']
+            )
+        return None
+    
+
+    def comprobar_usuario_contraseña(self, nombre_usuario: str, password_usuario: str):
+        conn = self._get_connection() 
+        cursor = conn.cursor(dictionary=True)
+
+        query ="""
+            SELECT id_usuario, nombre_usuario, password_usuario
+            FROM usuarios 
+            WHERE nombre_usuario = %s AND password_usuario = %s
+        """
+        cursor.execute(query, (nombre_usuario,password_usuario))
+        row = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        if row:
+            return Usuario(
+                id_usuario=row['id_usuario'],
                 nombre_usuario=row['nombre_usuario'],
                 password_usuario=row['password_usuario']
             )
@@ -306,8 +327,9 @@ class MySQLUsuarioRepository(UsuarioRepository):
         try:
             cursor.execute(query, (id_usuario,))
             resultado = cursor.fetchone()
-            
-            return resultado
+
+            return bool(resultado['sesion_activa'])
+
         finally:
             cursor.close()
             conn.close()
@@ -403,3 +425,32 @@ class MySQLUsuarioRepository(UsuarioRepository):
             cursor.close()
             conn.close()
     #-----------------------------------------------------------------------------------------------------------------------------
+
+    #Vincula la plataforma al iniciar sesión en otro lugar
+    def vincular_plataforma(self, plataformas: Plataformas, id_usuario, id_externo_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True, buffered=True)
+
+        query = """ 
+        INSERT INTO plataformas 
+        (id_plataforma, nombre_plataforma, id_usuario, id_externo_usuario)
+        VALUES (%s, %s, %s, %s)
+        """
+
+        valores = (
+            plataformas.id_plataforma,
+            plataformas.nombre_plataforma,
+            id_usuario,
+            id_externo_usuario
+        )
+
+        
+
+        try:
+            cursor.execute(query, valores)
+            conn.commit()
+            
+
+        finally:
+            cursor.close()
+            conn.close()

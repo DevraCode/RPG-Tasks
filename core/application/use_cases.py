@@ -57,19 +57,37 @@ class RegistrarUsuarioUsecase:
    
 
 
-#Comprueba que el nombre de usuario ya exista en la base de datos
-class UsuarioExiste:
+class IdUsuarioExisteUseCase:
     def __init__(self, repo):
         self.repo = repo
 
-    def usuario_existe(self, nombre_usuario: str):
+    def id_usuario_existe(self, id_usuario: int):
+        usuario = self.repo.buscar_por_id_usuario(id_usuario)
+        
+        return usuario
+
+
+
+
+#Comprueba que el nombre de usuario ya exista en la base de datos
+class NombreUsuarioExisteUseCase:
+    def __init__(self, repo):
+        self.repo = repo
+
+    def nombre_usuario_existe(self, nombre_usuario: str):
         usuario = self.repo.buscar_usuario_en_bd(nombre_usuario)
         if usuario:
             mensaje = "Ese usuario ya existe"
             return mensaje
 
 
+class BuscarPorIdExternoUseCase:
+    def __init__(self, repo):
+        self.repo = repo
 
+    def id_externo(self, id_externo_usuario: str):
+        usuario = self.repo.buscar_usuario_en_bd(id_externo_usuario)
+        return usuario
 
     
 
@@ -177,5 +195,33 @@ class VincularIdPersonajeConUsuarioUseCase:
     def vincular_id_personaje_con_usuario(self, id_externo):
         resultado = self.repo.vincular_id_personaje_con_usuario(id_externo)
 
+        return resultado
+
+
+
+class VincularPlataformaUseCase:
+    def __init__(self, repo):
+        self.repo = repo
+
+    def comprobar_usuario(self, nombre_usuario:str, password_usuario:str):
+        resultado = self.repo.comprobar_usuario_contraseña(nombre_usuario, password_usuario)
+        return resultado
+
+    def vincular_plataforma(self, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str, id_usuario: int):
+        nueva_plataforma = Plataformas(
+            id_plataforma = id_plataforma,
+            nombre_plataforma = nombre_plataforma
+        )
+
+        vinculacion = self.repo.vincular_plataforma(nueva_plataforma, id_usuario, id_externo_usuario)
+        return vinculacion
+    
+
+class BuscarUsuarioUseCase:
+    def __init__(self, repo):
+        self.repo = repo
+    
+    def buscar_usuario_por_nombre(self, nombre_usuario: str):
+        resultado = self.repo.buscar_usuario_por_nombre(nombre_usuario)
         return resultado
     

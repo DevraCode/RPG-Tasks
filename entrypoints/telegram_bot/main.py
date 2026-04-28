@@ -12,8 +12,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMedia
 from telegram.ext import CallbackContext
 #-----------------------------------------------------------------------------------------------------------------------------
 #Importaciones propias del bot
-from .handlers_basicos import NOMBRE, PASSWORD, EMAIL
-from .handlers_basicos import start, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar
+from .handlers_basicos import NOMBRE, PASSWORD, EMAIL, PEDIR_NOMBRE, PEDIR_PASSWORD
+from .handlers_basicos import start, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar, vincular, obtener_username, obtener_password
 
 from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO, ASIGNAR_TAREA
 from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes, asignar_tarea
@@ -77,8 +77,20 @@ if __name__ == "__main__":
     fallbacks=[CommandHandler('cancel', cancelar)],
     per_message=False,
     per_chat=True,
-    map_to_parent={}, 
     allow_reentry=True 
+    )
+
+    vin_conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("vincular", vincular)],
+        states={
+            PEDIR_NOMBRE: [MessageHandler(filters.TEXT & ~filters.COMMAND, obtener_username)],
+            PEDIR_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, obtener_password)]
+            
+        },
+        fallbacks=[CommandHandler("cancelar", cancelar)],
+        per_message=False,
+        per_chat=True,
+        allow_reentry=True 
     )
 
 
@@ -87,6 +99,7 @@ if __name__ == "__main__":
     app.add_handler(reg_conv_handler)
     app.add_handler(personaje_conv_handler)
     app.add_handler(entrenar_personaje_conv_handler)
+    app.add_handler(vin_conv_handler)
 
     
     print("🤖 Bot de RPG iniciado y conectado a MySQL...")

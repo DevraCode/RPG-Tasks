@@ -5,15 +5,15 @@ from typing import Optional
 
 class UsuarioRepository(ABC):
     @abstractmethod
-    def buscar_por_id_usuario(self, id_usuario: str) -> Optional[Usuario]: 
+    def buscar_por_id_usuario(self, id_usuario: int) -> Optional[Usuario]: 
         pass
 
     @abstractmethod
-    def buscar_por_id_externo(self, id_ext: str, plataforma: str) -> Optional[Usuario]: 
+    def buscar_por_id_externo(self, id_ext: str) -> Optional[Usuario]: 
         pass
 
     @abstractmethod
-    def buscar_usuario_por_nombre(self,id_usuario:str): #Busca al usuario por el nombre
+    def buscar_usuario_por_nombre(self,id_usuario:int): #Busca al usuario por el nombre
         pass
 
     @abstractmethod
@@ -29,7 +29,9 @@ class UsuarioRepository(ABC):
     def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str):
         pass
 
-    
+    @abstractmethod
+    def comprobar_usuario_contraseña(self, nombre_usuario:str, password_usuario:str):
+        pass
 
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
@@ -53,7 +55,7 @@ class UsuarioRepository(ABC):
         pass
     
     @abstractmethod
-    def obtener_estado_sesion(self, id_usuario: int) -> bool:
+    def obtener_estado_sesion(self, id_usuario: int):
         pass
 
     @abstractmethod
@@ -80,10 +82,15 @@ class UsuarioRepository(ABC):
     @abstractmethod
     def vincular_id_externo_con_interno(self, id_externo_usuario: str):
         pass
-
+    
+    @abstractmethod
     def vincular_id_personaje_con_usuario(self, id_usuario:int):
         pass
     
+    @abstractmethod
+    def vincular_plataforma(self, id_usuario: int):
+        pass    
+
     
 class PersonajesRepository(ABC):
     pass

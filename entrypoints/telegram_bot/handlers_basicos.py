@@ -12,7 +12,7 @@ import hashlib
 #Internas
 from core.domain.models import CorrespondenciaPlataformas, TiposUsuario, Rango
 from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
-from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, BuscarPorIdExternoUseCase, RegistrarUsuarioUsecase
+from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, BuscarPorIdExternoUseCase, RegistrarUsuarioUsecase, VincularPlataformaUseCase, BuscarUsuarioUseCase
 from .dbconfig import db_config
 from .decoradores import sesion_usuario_iniciada
 
@@ -29,8 +29,8 @@ mensaje_bienvenida = MensajeInicioUseCase()
 crear_cuenta = CrearCuentaUseCase()
 buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo_usuario)
 registrar_usuario_use_case = RegistrarUsuarioUsecase(repo_usuario)
-
-
+vincular_plataforma_use_case = VincularPlataformaUseCase(repo_usuario)
+buscar_usuario_use_case = BuscarUsuarioUseCase(repo_usuario)
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
     mensaje_inicio = mensaje_bienvenida.mensaje()
 
     await update.message.reply_text(mensaje_inicio)
-    await update.message.reply_text(f"Utiliza el comando /registro para crear una cuenta o /iniciarsesion para iniciar sesión")
+    await update.message.reply_text(f"Utiliza el comando /registro para crear una cuenta. Si ya tienes cuenta, utiliza el comando /vincular para iniciar sesión")
     
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -55,8 +55,7 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
 #-----------------------------------------------------------------------------------------------------------------------------
 NOMBRE, PASSWORD, EMAIL = range(3)
 
-#@usuario_registrado # Comprueba si el usuario existe o no en la bd
-@sesion_usuario_iniciada # Comprueba que el usuario haya iniciado sesión
+@sesion_usuario_iniciada
 async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
@@ -128,3 +127,43 @@ async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 #----------------------------------------------------------------------------------------
+
+PEDIR_NOMBRE, PEDIR_PASSWORD = range(2)
+
+async def vincular(update:Update, context: ContextTypes.DEFAULT_TYPE):
+     pide_usuario = crear_cuenta.nombre_usuario()
+     await update.message.reply_text(pide_usuario)
+     return PEDIR_NOMBRE
+
+async def obtener_username (update:Update, context: ContextTypes.DEFAULT_TYPE):
+     context.user_data["nombre_usuario"] = update.message.text.strip().lower()
+     pide_password = crear_cuenta.contraseña()
+     await update.message.reply_text(pide_password)
+     return PEDIR_PASSWORD
+
+async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
+     context.user_data["password_usuario"] = update.message.text
+
+     nombre_usuario = context.user_data.get("nombre_usuario")
+     password_usuario = context.user_data.get("password_usuario")
+
+     id_plataforma = CorrespondenciaPlataformas.TELEGRAM
+     nombre_plataforma = "TELEGRAM"
+     id_externo_usuario = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+     
+
+     usuario_existe = vincular_plataforma_use_case.comprobar_usuario(nombre_usuario, password_usuario)
+     id_usuario = usuario_existe.id_usuario
+
+     if usuario_existe:
+          
+          vincular_plataforma_use_case.vincular_plataforma(id_plataforma,nombre_plataforma, id_externo_usuario, id_usuario)
+
+          await update.message.reply_text(f"Cuenta vinculada correctamente")
+          
+          return ConversationHandler.END
+     
+     else:
+          await update.message.reply_text(f"No se encuentra al usuario")
+          
+          return ConversationHandler.END

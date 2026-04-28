@@ -51,7 +51,7 @@ SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE = range(2)
 
 
 #Primero se enseña la galería de personajes
-#@usuario_no_registrado #Comprobar que el usuario se ha registrado primero o que esté o no baneado
+
 @personaje_elegido #Comprobar que el usuario haya elegido o no personaje
 async def mostrar_personaje(update:Update, context):
     chat_id = update.effective_chat.id

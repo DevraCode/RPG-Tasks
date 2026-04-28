@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
 
 -- TABLA PLATAFORMAS
 CREATE TABLE IF NOT EXISTS plataformas (
-    id_plataforma INT PRIMARY KEY,
+    id_conexion INT AUTO_INCREMENT PRIMARY KEY,
+    id_plataforma INT,
     nombre_plataforma VARCHAR(100),
     id_usuario INT,
     id_externo_usuario VARCHAR(100), -- Id del usuario de Telegram, Discord, etc
