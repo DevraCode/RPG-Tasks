@@ -14,7 +14,6 @@ class MySQLUsuarioRepository(UsuarioRepository):
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
-    #BUSCAR USUARIO
 
     def buscar_por_id_usuario(self, id_usuario: str):
         conn = self._get_connection()
@@ -190,90 +189,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
 
    
 
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #PERSONAJES
-
-    def registrar_personaje_elegido(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje):
-        conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        query = """ INSERT INTO personajes (id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """
-        
-        try:
-            cursor.execute(query, (id_usuario,nombre_personaje,genero,clase,imagen_personaje,icono_personaje,animacion_personaje,))
-            conn.commit() 
-        finally:
-            cursor.close()
-            conn.close()
-
-    #-----------------------------------------------------------------------------------------------------------------------------
-
-    #Para establecer un máximo de 5 personajes por usuario
-    def limite_personajes_de_usuario(self, id_usuario):
-        
-        conn = self._get_connection() 
-        cursor = conn.cursor(buffered=True)
-        
-        try:
-            query = "SELECT COUNT(*) FROM personajes WHERE id_usuario = %s"
-            cursor.execute(query, (id_usuario,))
-            total_personajes = cursor.fetchone()[0]
-
-           
-            return total_personajes < 5
-            
-        except Exception as e:
-            print(f"Error contando personajes: {e}")
-            return False
-        finally:
-            
-            cursor.close()
-            conn.close()
-
-    #-----------------------------------------------------------------------------------------------------------------------------
-    
-    def lista_personajes_usuario(self, id_usuario):
-        conn = self._get_connection() 
-        cursor = conn.cursor(dictionary=True, buffered=True)
-
-        query = "SELECT * FROM personajes p WHERE id_usuario = %s"
-        cursor.execute(query, (id_usuario,))
-        personajes = cursor.fetchall()
-
-        cursor.close()
-        conn.close()
-
-        return personajes
-    
-
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #TAREAS
-
-    def insertar_tarea(self, id_usuario, nombre_tarea):
-        conn = self._get_connection() 
-        cursor = conn.cursor(dictionary=True, buffered=True)
-        
-        query = "INSERT INTO tareas (id_usuario, nombre_tarea) VALUES (%s, %s)"
-
-        cursor.execute(query, (id_usuario, nombre_tarea,))
-        conn.commit()
-        cursor.close()
-        conn.close()
-   
-
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #SESIONES
+ 
 
     def iniciar_sesion(self, id_usuario):
         conn = self._get_connection()
@@ -306,37 +222,10 @@ class MySQLUsuarioRepository(UsuarioRepository):
             cursor.close()
             conn.close()
 
-        
-
-
-
-
-    #-----------------------------------------------------------------------------------------------------------------------------
-
-    def obtener_estado_sesion(self, id_usuario):
-
-        conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        query = """
-        SELECT sesion_activa
-        FROM plataformas
-        WHERE id_usuario = %s
-        """
-        
-        try:
-            cursor.execute(query, (id_usuario,))
-            resultado = cursor.fetchone()
-
-            return bool(resultado['sesion_activa'])
-
-        finally:
-            cursor.close()
-            conn.close()
     
-    #-----------------------------------------------------------------------------------------------------------------------------
-   
-    #-----------------------------------------------------------------------------------------------------------------------------
+
+    
+    
 
     def sesion_cerrada(self, id_externo_usuario):
         conn = self._get_connection()
@@ -363,94 +252,3 @@ class MySQLUsuarioRepository(UsuarioRepository):
             )
         return None
     
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------------------------------------------------
-    # TELEGRAM / DISCORD
-
-    #-----------------------------------------------------------------------------------------------------------------------------
-
-    #Para Telegram / Discord - Busca a que usuario pertenece su id externo
-    def vincular_id_externo_con_interno(self, id_externo_usuario):
-        conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True, buffered=True) 
-        try:
-            query = "SELECT id_usuario FROM plataformas WHERE id_externo_usuario = %s"
-            cursor.execute(query, (id_externo_usuario,))
-            row = cursor.fetchone()
-            
-            if row:
-                
-                return row['id_usuario']
-            
-            print(f"FALLO: No existe ninguna fila con el hash {id_externo_usuario} en la tabla plataformas")
-            return None
-        finally:
-            cursor.close()
-            conn.close()
-
-    #-----------------------------------------------------------------------------------------------------------------------------
-
-    #Para evitar que el usuario pueda volver a usar el comando /personaje si ya tiene un personaje elegido
-    def vincular_id_personaje_con_usuario(self, id_externo_usuario):
-        conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True, buffered=True)
-
-        try:
-            query1 = "SELECT id_usuario from plataformas WHERE id_externo_usuario = %s"
-            cursor.execute(query1, (id_externo_usuario,))
-            row1 = cursor.fetchone()
-
-            if not row1:
-                print(f"FALLO: No existe vínculo para el hash {id_externo_usuario}")
-                return None
-
-            id_interno = row1['id_usuario']
-            print(f"Usuario encontrado: {id_interno}")
-
-            
-            query2 = "SELECT id_personaje FROM personajes WHERE id_usuario = %s"
-            cursor.execute(query2, (id_interno,))
-            row2 = cursor.fetchone()
-
-            if row2:
-                print(f"Personaje {row2['id_personaje']} encontrado para usuario {id_interno}")
-                
-                return {"id_usuario": id_interno, "id_personaje": row2['id_personaje']}
-            
-            return {"id_usuario": id_interno, "id_personaje": None}       
-            
-        finally:
-            cursor.close()
-            conn.close()
-    #-----------------------------------------------------------------------------------------------------------------------------
-
-    #Vincula la plataforma al iniciar sesión en otro lugar
-    def vincular_plataforma(self, plataformas: Plataformas, id_usuario, id_externo_usuario):
-        conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True, buffered=True)
-
-        query = """ 
-        INSERT INTO plataformas 
-        (id_plataforma, nombre_plataforma, id_usuario, id_externo_usuario)
-        VALUES (%s, %s, %s, %s)
-        """
-
-        valores = (
-            plataformas.id_plataforma,
-            plataformas.nombre_plataforma,
-            id_usuario,
-            id_externo_usuario
-        )
-
-        
-
-        try:
-            cursor.execute(query, valores)
-            conn.commit()
-            
-
-        finally:
-            cursor.close()
-            conn.close()

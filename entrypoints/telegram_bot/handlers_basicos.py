@@ -12,9 +12,10 @@ import hashlib
 #Internas
 from core.domain.models import CorrespondenciaPlataformas, TiposUsuario, Rango
 from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
-from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, BuscarPorIdExternoUseCase, RegistrarUsuarioUsecase, VincularPlataformaUseCase, BuscarUsuarioUseCase
+from core.infrastructure.mysql_plataformas_repository import MySQLPlataformasRepository
+from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, UsuarioUsecase, PlataformasUseCase
 from .dbconfig import db_config
-from .decoradores import sesion_usuario_iniciada
+from .decoradores import usuario_existe
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -25,12 +26,12 @@ load_dotenv()
 
 #INYECCIÓN DE DEPENDENCIAS
 repo_usuario = MySQLUsuarioRepository(db_config)
+repo_plataformas = MySQLPlataformasRepository(db_config)
 mensaje_bienvenida = MensajeInicioUseCase()
 crear_cuenta = CrearCuentaUseCase()
-buscar_por_id_externo_use_case = BuscarPorIdExternoUseCase(repo_usuario)
-registrar_usuario_use_case = RegistrarUsuarioUsecase(repo_usuario)
-vincular_plataforma_use_case = VincularPlataformaUseCase(repo_usuario)
-buscar_usuario_use_case = BuscarUsuarioUseCase(repo_usuario)
+usuario = UsuarioUsecase(repo_usuario)
+plataformas = PlataformasUseCase(repo_plataformas)
+
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -39,7 +40,6 @@ buscar_usuario_use_case = BuscarUsuarioUseCase(repo_usuario)
 #HANDLERS
 async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
     mensaje_inicio = mensaje_bienvenida.mensaje()
-
     await update.message.reply_text(mensaje_inicio)
     await update.message.reply_text(f"Utiliza el comando /registro para crear una cuenta. Si ya tienes cuenta, utiliza el comando /vincular para iniciar sesión")
     
@@ -55,7 +55,7 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
 #-----------------------------------------------------------------------------------------------------------------------------
 NOMBRE, PASSWORD, EMAIL = range(3)
 
-@sesion_usuario_iniciada
+@usuario_existe
 async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
@@ -69,7 +69,7 @@ async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYP
 async def nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['nombre_usuario'] = update.message.text.strip().lower()
 
-    usuario_en_bd = repo_usuario.buscar_usuario_en_bd(context.user_data['nombre_usuario'])
+    usuario_en_bd = usuario.buscar_usuario_por_nombre(context.user_data['nombre_usuario'])
     if usuario_en_bd:
             await update.message.reply_text(f"Ya estás registrado")
             return ConversationHandler.END
@@ -83,7 +83,6 @@ async def nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def contraseña (update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['password_usuario'] = update.message.text
 
-    
     pide_email = crear_cuenta.email()
 
     await update.message.reply_text(f"De acuerdo, {update.message.text}." + f"{pide_email}")
@@ -102,7 +101,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
 
-    registrar_usuario_use_case.registrar_usuario(
+    usuario.registrar_usuario(
             nombre_usuario=nombre,
             password_usuario=password_encriptado,
             email_usuario=email,
@@ -152,12 +151,12 @@ async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
      id_externo_usuario = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
      
 
-     usuario_existe = vincular_plataforma_use_case.comprobar_usuario(nombre_usuario, password_usuario)
+     usuario_existe = usuario.comprobar_usuario(nombre_usuario, password_usuario)
      id_usuario = usuario_existe.id_usuario
 
      if usuario_existe:
           
-          vincular_plataforma_use_case.vincular_plataforma(id_plataforma,nombre_plataforma, id_externo_usuario, id_usuario)
+          plataformas.vincular_plataforma(id_plataforma,nombre_plataforma, id_externo_usuario, id_usuario)
 
           await update.message.reply_text(f"Cuenta vinculada correctamente")
           

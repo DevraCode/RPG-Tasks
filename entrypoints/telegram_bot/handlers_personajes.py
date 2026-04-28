@@ -5,21 +5,25 @@ from telegram.ext import CallbackContext
 import hashlib
 
 from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
-from core.application.use_cases import ObtenerCatalogoUseCase, VincularIdExternoUseCase, RegistrarPersonajeUseCase, ListaPersonajesUsuarioUseCase
+from core.infrastructure.mysql_personajes_repository import MySQLPersonajesRepository
+from core.infrastructure.mysql_plataformas_repository import MySQLPlataformasRepository
+from core.application.use_cases import UsuarioUsecase, PersonajeUseCase, PlataformasUseCase
 
 from .decoradores import personaje_elegido
 
 from .dbconfig import db_config
 
-repo = MySQLUsuarioRepository(db_config)
-use_case = ObtenerCatalogoUseCase()
-vincular_id_externo_use_case = VincularIdExternoUseCase(repo)
-registrar_personaje_use_case = RegistrarPersonajeUseCase(repo)
-lista_personajes_usuarios_use_case = ListaPersonajesUsuarioUseCase(repo)
+repo_usuarios = MySQLUsuarioRepository(db_config)
+repo_personajes = MySQLPersonajesRepository(db_config)
+repo_plataformas = MySQLPlataformasRepository(db_config)
+
+usuarios = UsuarioUsecase(repo_usuarios)
+personajes = PersonajeUseCase(repo_personajes)
+plataformas = PlataformasUseCase(repo_plataformas)
 
 
-catalogo = use_case.personajes_dic()
-lista_personajes = use_case.personajes_list()
+catalogo = personajes.personajes_dic()
+lista_personajes = personajes.personajes_list()
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -163,10 +167,10 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
     
 
-    id_usuario = vincular_id_externo_use_case.vincular_id_externo_usuario(id_generado) #Se busca el id de usuario interno a través del id_enterno
+    id_usuario = plataformas.vincular_id_externo_usuario(id_generado) #Se busca el id de usuario interno a través del id_enterno
 
     
-    resultado = registrar_personaje_use_case.ejecutar(
+    resultado = personajes.registrar_personaje(
             id_usuario=id_usuario,
             nombre_personaje=nombre,
             genero=genero,
@@ -197,13 +201,13 @@ async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT
     chat_id = update.effective_chat.id
 
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
-    id_usuario = vincular_id_externo_use_case.vincular_id_externo_usuario(id_generado)
+    id_usuario = plataformas.vincular_id_externo_usuario(id_generado)
 
-    personajes = lista_personajes_usuarios_use_case.lista_personajes_usuario(id_usuario) #Devuelve los personajes que tiene el usuario
+    personajes_user = personajes.lista_personajes_usuario(id_usuario) #Devuelve los personajes que tiene el usuario
 
     index = 0 
 
-    personaje_usuario = personajes[index]
+    personaje_usuario = personajes_user[index]
 
     img, icon, anim = ruta_webm(personaje_usuario["clase"].lower())
 
@@ -240,19 +244,19 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
     indice_actual = int(data[1])
 
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
-    id_usuario = vincular_id_externo_use_case.vincular_id_externo_usuario(id_generado)
+    id_usuario = plataformas.vincular_id_externo_usuario(id_generado)
 
-    personajes = lista_personajes_usuarios_use_case.lista_personajes_usuario(id_usuario) #Devuelve los personajes que tiene el usuario
+    personajes_user = personajes.lista_personajes_usuario(id_usuario) #Devuelve los personajes que tiene el usuario
 
     
     if accion == "NEXT":
-        nuevo_indice = (indice_actual + 1) % len(personajes) 
+        nuevo_indice = (indice_actual + 1) % len(personajes_user) 
     elif accion == "PREV":
-        nuevo_indice = (indice_actual - 1) % len(personajes)
+        nuevo_indice = (indice_actual - 1) % len(personajes_user)
     else:
         nuevo_indice = indice_actual
 
-        personaje_a_entrenar = personajes[nuevo_indice]
+        personaje_a_entrenar = personajes_user[nuevo_indice]
         
         print(f"Usuario eligió a: {personaje_a_entrenar["nombre_personaje"]}")
 
@@ -266,7 +270,7 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
 
 
     
-    nuevo_personaje = personajes[nuevo_indice]
+    nuevo_personaje = personajes_user[nuevo_indice]
     img, icon, anim = ruta_webm(nuevo_personaje["clase"].lower())
     
         

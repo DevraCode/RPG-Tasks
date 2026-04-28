@@ -52,3 +52,7 @@ class Plataformas:
     nombre_plataforma: str
     sesion_activa: bool = True
 
+@dataclass
+class Tareas:
+    id_tarea: int
+

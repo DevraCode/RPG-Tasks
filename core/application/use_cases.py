@@ -19,8 +19,7 @@ class MensajeInicioUseCase:
             • Monje
             • Arquero"""
         return inspect.cleandoc(mensaje_inicio)
-
-
+    
 #Simplemente pide las credenciales para crear una cuenta nueva
 class CrearCuentaUseCase:
     def nombre_usuario(self):
@@ -34,10 +33,13 @@ class CrearCuentaUseCase:
     def email(self):
         mensaje = "Introduce tu email"
         return inspect.cleandoc(mensaje)
-    
 
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------    
 
-class RegistrarUsuarioUsecase:
+class UsuarioUsecase:
     def __init__(self, repo):
         self.repo = repo
 
@@ -51,52 +53,45 @@ class RegistrarUsuarioUsecase:
             tipo_usuario = tipo_usuario
 
         )
-
         registro = self.repo.registrar_usuario(nuevo_usuario, id_plataforma, nombre_plataforma, id_externo_usuario)
         return registro
-   
-
-
-class IdUsuarioExisteUseCase:
-    def __init__(self, repo):
-        self.repo = repo
-
+    
     def id_usuario_existe(self, id_usuario: int):
         usuario = self.repo.buscar_por_id_usuario(id_usuario)
         
         return usuario
-
-
-
-
-#Comprueba que el nombre de usuario ya exista en la base de datos
-class NombreUsuarioExisteUseCase:
-    def __init__(self, repo):
-        self.repo = repo
-
+    
     def nombre_usuario_existe(self, nombre_usuario: str):
         usuario = self.repo.buscar_usuario_en_bd(nombre_usuario)
         if usuario:
             mensaje = "Ese usuario ya existe"
             return mensaje
-
-
-class BuscarPorIdExternoUseCase:
-    def __init__(self, repo):
-        self.repo = repo
-
+        
     def id_externo(self, id_externo_usuario: str):
         usuario = self.repo.buscar_usuario_en_bd(id_externo_usuario)
         return usuario
-
     
+    def buscar_usuario_por_nombre(self, nombre_usuario: str):
+        resultado = self.repo.buscar_usuario_por_nombre(nombre_usuario)
+        return resultado
+    
+    def buscar_id_externo_usuario(self, id_externo, nombre_plataforma):
+        self.repo.buscar_por_id_externo(id_externo, nombre_plataforma)
 
+    def comprobar_usuario(self, nombre_usuario:str, password_usuario:str):
+        resultado = self.repo.comprobar_usuario_contraseña(nombre_usuario, password_usuario)
+        return resultado
 
-class RegistrarPersonajeUseCase:
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------   
+
+class PersonajeUseCase:
     def __init__(self, repo):
         self.repo = repo
 
-    def ejecutar(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje):
+    def registrar_personaje(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje):
         usuario = self.repo.buscar_por_id_usuario(id_usuario)
         if usuario is None:
             
@@ -113,11 +108,35 @@ class RegistrarPersonajeUseCase:
             animacion_personaje
         )
         return "¡Personaje elegido!"
-
-
     
+    def personajes_dic(self):
+        return CLASES_DISPONIBLES
+    
+    def personajes_list(self) -> list:
+        claves = list(CLASES_DISPONIBLES.keys())
+        return claves
+    
+    def limite_personajes_usuario(self, id_usuario):
+        limite = self.repo.limite_personajes_de_usuario(id_usuario)
+        
+        return limite
+    
+    def lista_personajes_usuario(self,id_usuario):
+        lista_personajes = self.repo.lista_personajes_usuario(id_usuario)
 
-class ObtenerEstadoSesionUseCase:
+        return lista_personajes
+    
+    def vincular_id_personaje_con_usuario(self, id_externo):
+        resultado = self.repo.vincular_id_personaje_con_usuario(id_externo)
+
+        return resultado
+
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
+class PlataformasUseCase:
     def __init__(self, repo):
         self.repo = repo
 
@@ -126,86 +145,13 @@ class ObtenerEstadoSesionUseCase:
         sesion = self.repo.obtener_estado_sesion(id_usuario)
         
         return sesion
-
-
-
-class BuscarPorIdExternoUseCase: #Útil para Telegram/Discord
-    def __init__(self, repo):
-        self.repo = repo
-
-    def buscar_id_externo_usuario(self, id_externo, nombre_plataforma):
-        self.repo.buscar_por_id_externo(id_externo, nombre_plataforma)
     
-
-
-
-
-
-
-class ObtenerCatalogoUseCase:
-    #Devuelve el diccionario entero con las clases de los personajes
-    def personajes_dic(self):
-        return CLASES_DISPONIBLES
-    
-    def personajes_list(self) -> list:
-        claves = list(CLASES_DISPONIBLES.keys())
-        return claves
-    
-
-    
-class LimitePersonajesUsuarioUseCase:
-    def __init__(self, repo):
-        self.repo = repo
-
-    def limite_personajes_usuario(self, id_usuario):
-        limite = self.repo.limite_personajes_de_usuario(id_usuario)
-        
-        return limite
-    
-
-class ListaPersonajesUsuarioUseCase:
-    def __init__(self, repo):
-        self.repo = repo
-
-    def lista_personajes_usuario(self,id_usuario):
-        lista_personajes = self.repo.lista_personajes_usuario(id_usuario)
-
-        return lista_personajes
-        
-
-#-----------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------
-# TELEGRAM / DISCORD
-
-class VincularIdExternoUseCase: #Vincula el id de Telegram / Discord con el id interno del usuario
-    def __init__(self, repo):
-        self.repo = repo
-
     def vincular_id_externo_usuario(self, id_externo):
         resultado = self.repo.vincular_id_externo_con_interno(id_externo)
 
         return resultado
-
-class VincularIdPersonajeConUsuarioUseCase:
-    def __init__(self, repo):
-        self.repo = repo
-
-    def vincular_id_personaje_con_usuario(self, id_externo):
-        resultado = self.repo.vincular_id_personaje_con_usuario(id_externo)
-
-        return resultado
-
-
-
-class VincularPlataformaUseCase:
-    def __init__(self, repo):
-        self.repo = repo
-
-    def comprobar_usuario(self, nombre_usuario:str, password_usuario:str):
-        resultado = self.repo.comprobar_usuario_contraseña(nombre_usuario, password_usuario)
-        return resultado
+    
+    
 
     def vincular_plataforma(self, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str, id_usuario: int):
         nueva_plataforma = Plataformas(
@@ -215,13 +161,7 @@ class VincularPlataformaUseCase:
 
         vinculacion = self.repo.vincular_plataforma(nueva_plataforma, id_usuario, id_externo_usuario)
         return vinculacion
-    
-
-class BuscarUsuarioUseCase:
-    def __init__(self, repo):
-        self.repo = repo
-    
-    def buscar_usuario_por_nombre(self, nombre_usuario: str):
-        resultado = self.repo.buscar_usuario_por_nombre(nombre_usuario)
-        return resultado
-    
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
