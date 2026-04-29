@@ -52,7 +52,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
         cursor.execute(query, (id_externo_usuario,))
         res = cursor.fetchone()
 
-        print(f"DEBUG: Resultado de la DB -> {res}") # Si esto sale None, la query no hizo match
+        
         
         cursor.close()
         conn.close()

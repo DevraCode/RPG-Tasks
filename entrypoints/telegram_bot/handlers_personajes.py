@@ -9,7 +9,7 @@ from core.infrastructure.mysql_personajes_repository import MySQLPersonajesRepos
 from core.infrastructure.mysql_plataformas_repository import MySQLPlataformasRepository
 from core.application.use_cases import UsuarioUsecase, PersonajeUseCase, PlataformasUseCase
 
-from .decoradores import personaje_elegido
+from .decoradores import usuario_no_existe_o_sesion_cerrada
 
 from .dbconfig import db_config
 
@@ -56,7 +56,7 @@ SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE = range(2)
 
 #Primero se enseña la galería de personajes
 
-@personaje_elegido #Comprobar que el usuario haya elegido o no personaje
+@usuario_no_existe_o_sesion_cerrada #Comprobar que el usuario haya elegido o no personaje
 async def mostrar_personaje(update:Update, context):
     chat_id = update.effective_chat.id
 

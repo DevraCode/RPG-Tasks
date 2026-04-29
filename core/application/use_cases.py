@@ -27,7 +27,7 @@ class CrearCuentaUseCase:
         return inspect.cleandoc(mensaje)
     
     def contraseña(self):
-        mensaje = "Introduce una contraseña"
+        mensaje = "Introduce tu contraseña"
         return inspect.cleandoc(mensaje)
     
     def email(self):

@@ -35,7 +35,8 @@ plataformas = PlataformasUseCase(repo_plataformas)
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-
+#Comprueba que exista el usuario y que tenga la sesion activa
+#Si existe y tiene la sesión activa no podrá volver a registrarse o volver la vincular una cuenta hasta que cierre sesión
 def usuario_existe(func):
     @wraps(func)
     async def usuario_registrado(update, context, *args, **kwargs):
@@ -43,8 +44,6 @@ def usuario_existe(func):
         id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
 
         nombre_usuario = usuario.buscar_id_externo_usuario(id_externo)
-        
-
         sesion = plataformas.usuario_activo(id_externo)
 
         if id_externo and sesion == True:
@@ -56,6 +55,26 @@ def usuario_existe(func):
         return await func(update, context, *args, **kwargs)
     return usuario_registrado
 
+
+#Comprueba si el usuario existe o tiene cerrada la sesión
+#Si no existe, no tiene vinculada una cuenta o no tiene abierta la sesión, no podrá usar los comandos de personajes ni tareas
+def usuario_no_existe_o_sesion_cerrada(func):
+    @wraps(func)
+    async def comprobacion(update,context, *args, **kwargs):
+        id_telegram = str(update.effective_user.id)
+        id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
+
+        id_usuario = usuario.buscar_id_externo_usuario(id_externo)
+        sesion = plataformas.usuario_activo(id_externo)
+
+        if not id_usuario or not id_externo or sesion == False:
+            await update.message.reply_text(
+                f"Debes registrarte o vincular una cuenta primero"
+            )
+            return
+        
+        return await func(update, context, *args, **kwargs)
+    return comprobacion
 
 
 
@@ -71,7 +90,7 @@ def personaje_elegido(func):
     async def id_personaje(update, context, *args, **kwargs):
         id_telegram = str(update.effective_user.id)
         id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
-        id_interno_obj = usuario.buscar_id_externo_usuario(id_externo,nombre_plataforma='telegram')
+        id_interno_obj = usuario.buscar_id_externo_usuario(id_externo)
         id_interno = id_interno_obj.id_usuario
 
         personaje_elegido_id = personaje.vincular_id_personaje_con_usuario(id_externo)
