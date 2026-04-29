@@ -83,7 +83,7 @@ class MySQLPersonajesRepository(PersonajesRepository):
                 return None
 
             id_interno = row1['id_usuario']
-            print(f"Usuario encontrado: {id_interno}")
+            
 
             
             query2 = "SELECT id_personaje FROM personajes WHERE id_usuario = %s"
@@ -91,7 +91,6 @@ class MySQLPersonajesRepository(PersonajesRepository):
             row2 = cursor.fetchone()
 
             if row2:
-                print(f"Personaje {row2['id_personaje']} encontrado para usuario {id_interno}")
                 
                 return {"id_usuario": id_interno, "id_personaje": row2['id_personaje']}
             

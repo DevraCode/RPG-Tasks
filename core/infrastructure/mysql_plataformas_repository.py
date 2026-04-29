@@ -28,7 +28,7 @@ class MySQLPlataformasRepository(PlataformasRepository):
                 
                 return row['id_usuario']
             
-            print(f"FALLO: No existe ninguna fila con el hash {id_externo_usuario} en la tabla plataformas")
+            
             return None
         finally:
             cursor.close()
@@ -85,5 +85,36 @@ class MySQLPlataformasRepository(PlataformasRepository):
 
         finally:
             
+            cursor.close()
+            conn.close()
+
+    def iniciar_sesion(self, id_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True, buffered=True)
+
+        query = """ UPDATE plataformas
+                    SET sesion_activa = 1
+                    WHERE p.id_usuario =  %s """
+
+        try:
+            cursor.execute(query, (id_usuario,))
+            conn.commit() 
+        finally:
+            cursor.close()
+            conn.close()
+
+
+    def cerrar_sesion(self, id_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True, buffered=True)
+
+        query = """ UPDATE plataformas
+                    SET sesion_activa = 0
+                    WHERE p.id_usuario =  %s """
+
+        try:
+            cursor.execute(query, (id_usuario,))
+            conn.commit() 
+        finally:
             cursor.close()
             conn.close()

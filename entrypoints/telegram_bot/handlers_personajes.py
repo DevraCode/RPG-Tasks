@@ -9,7 +9,7 @@ from core.infrastructure.mysql_personajes_repository import MySQLPersonajesRepos
 from core.infrastructure.mysql_plataformas_repository import MySQLPlataformasRepository
 from core.application.use_cases import UsuarioUsecase, PersonajeUseCase, PlataformasUseCase
 
-from .decoradores import usuario_no_existe_o_sesion_cerrada
+from .decoradores import usuario_no_existe_o_sesion_cerrada, limite_personajes
 
 from .dbconfig import db_config
 
@@ -18,7 +18,7 @@ repo_personajes = MySQLPersonajesRepository(db_config)
 repo_plataformas = MySQLPlataformasRepository(db_config)
 
 usuarios = UsuarioUsecase(repo_usuarios)
-personajes = PersonajeUseCase(repo_personajes)
+personajes = PersonajeUseCase(repo_personajes, repo_usuarios)
 plataformas = PlataformasUseCase(repo_plataformas)
 
 
@@ -57,6 +57,7 @@ SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE = range(2)
 #Primero se enseña la galería de personajes
 
 @usuario_no_existe_o_sesion_cerrada #Comprobar que el usuario haya elegido o no personaje
+@limite_personajes
 async def mostrar_personaje(update:Update, context):
     chat_id = update.effective_chat.id
 

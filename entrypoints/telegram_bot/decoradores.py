@@ -22,12 +22,12 @@ from .dbconfig import db_config
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #INYECCIÓN DE DEPENDENCIAS
-repo_usuario = MySQLUsuarioRepository(db_config)
+repo_usuarios = MySQLUsuarioRepository(db_config)
 repo_personajes = MySQLPersonajesRepository(db_config)
 repo_plataformas = MySQLPlataformasRepository(db_config)
 
-usuario = UsuarioUsecase(repo_usuario)
-personaje = PersonajeUseCase(repo_personajes)
+usuario = UsuarioUsecase(repo_usuarios)
+personaje = PersonajeUseCase(repo_personajes, repo_usuarios)
 plataformas = PlataformasUseCase(repo_plataformas)
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -82,19 +82,17 @@ def usuario_no_existe_o_sesion_cerrada(func):
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-
-
-#Busca que personaje pertence al usuario
-def personaje_elegido(func):
+#Límite de personajes del usuario
+def limite_personajes(func):
     @wraps(func)
     async def id_personaje(update, context, *args, **kwargs):
         id_telegram = str(update.effective_user.id)
         id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
-        id_interno_obj = usuario.buscar_id_externo_usuario(id_externo)
-        id_interno = id_interno_obj.id_usuario
+        id_interno = usuario.buscar_id_externo_usuario(id_externo)
+        
 
         personaje_elegido_id = personaje.vincular_id_personaje_con_usuario(id_externo)
-        total_personajes = personaje.limite_personajes_usuario(id_interno)
+        total_personajes = personaje.limite_personajes_usuario(id_interno.id_usuario)
         
         
         if personaje_elegido_id and personaje_elegido_id.get("id_personaje") is not None and total_personajes == False:
