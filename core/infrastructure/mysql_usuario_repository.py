@@ -192,37 +192,5 @@ class MySQLUsuarioRepository(UsuarioRepository):
             conn.close()
 
    
-
- 
-
     
-    
-
-    
-    
-
-    def sesion_cerrada(self, id_externo_usuario):
-        conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True, buffered=True)
-
-        query ="""
-            SELECT u.id_usuario, u.nombre_usuario, u.activo, p.id_externo_usuario
-            FROM usuarios u, plataformas p
-            WHERE p.id_externo_usuario = %s AND u.activo = 0
-        """
-        cursor.execute(query, (id_externo_usuario,))
-        row = cursor.fetchone()
-        
-        
-        cursor.close()
-        conn.close()
-
-        if row:
-            return Usuario(
-                id_usuario=row['id_usuario'],
-                id_externo_usuario=row["id_externo_usuario"],
-                nombre_usuario=row['nombre_usuario'],
-                activo=row['activo'] 
-            )
-        return None
     

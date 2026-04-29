@@ -31,19 +31,7 @@ class UsuarioRepository(ABC):
     def comprobar_usuario_contraseña(self, nombre_usuario:str, password_usuario:str):
         pass
 
-    @abstractmethod
-    def iniciar_sesion(self, id_usuario: int):
-        pass
     
-    
-
-    @abstractmethod
-    def cerrar_sesion(self, id_usuario: int):
-        pass
-
-    @abstractmethod
-    def sesion_cerrada(self, id_externo_usuario: str):
-        pass
   
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -84,6 +72,18 @@ class PlataformasRepository(ABC):
 
     @abstractmethod
     def obtener_estado_sesion(self, id_externo_usuario: str):
+        pass
+
+    @abstractmethod
+    def iniciar_sesion(self, id_usuario: int):
+        pass
+
+    @abstractmethod
+    def cerrar_sesion(self, id_usuario: int):
+        pass
+
+    @abstractmethod
+    def sesion_cerrada(self, id_externo_usuario: str):
         pass
 
 

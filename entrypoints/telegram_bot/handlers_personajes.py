@@ -198,6 +198,7 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 SELECCIONANDO, ASIGNAR_TAREA = range(2)
 
 #Se muestran los personajes que tiene el usuario en una galeria, igual que para elegir personaje
+@usuario_no_existe_o_sesion_cerrada
 async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 

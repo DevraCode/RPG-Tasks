@@ -118,3 +118,10 @@ class MySQLPlataformasRepository(PlataformasRepository):
         finally:
             cursor.close()
             conn.close()
+
+
+
+    def sesion_cerrada(self, id_externo_usuario):
+        pass
+
+
