@@ -3,7 +3,7 @@
 
 ## Spanish
 
-###Importante
+### Importante
 Las imágenes de los personajes son sprites de Ragnarok Online animados sacados del simulador de sprites de Ro y utilizados únicamente para probar la aplicación. Puedes añadir tus propios personajes animados.
 Ten en cuenta:
 - Para Telegram he utilizado el formato .webm para los stickers. Esto es así para asegurar que se muestre el personaje animado sin un fondo blanco.
