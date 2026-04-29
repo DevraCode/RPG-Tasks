@@ -1,10 +1,7 @@
 import sys
 import os
 
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
-
-
 
 from mcp.server.fastmcp import FastMCP
 from core.application.use_cases import TareasUseCase
@@ -23,7 +20,7 @@ def crear_nueva_tarea(id_usuario: int, nombre: str) -> str:
     """
     Crea una nueva tarea en el RPG para un usuario específico.
     """
-    # Llamamos a tu lógica existente
+    
     resultado = tareas_logic.insertar_tarea(id_usuario, nombre)
     return resultado
 
