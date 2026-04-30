@@ -9,4 +9,5 @@ class UsuarioIAUsecase:
         
         resultado = self.repo.buscar_usuario_ia(nombre_usuario)
         return resultado.id_usuario
+    
 
