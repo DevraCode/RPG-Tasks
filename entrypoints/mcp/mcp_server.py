@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"
 
 from mcp.server.fastmcp import FastMCP
 from core.application.use_cases import TareasUseCase
-from core.infrastructure.mysql_tareas_repository import MySQLTareasRepository
+from core.infrastructure.repositorios.mysql_tareas_repository import MySQLTareasRepository
 from core.infrastructure.dbconfig import db_config
 
 mcp = FastMCP("RPG-Tasks-Server")

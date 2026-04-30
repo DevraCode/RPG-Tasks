@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 #----------------------------------------------------------------------------------------------------------------
 
 #Locales
-from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
+from core.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from core.application.use_cases import MensajeInicioUseCase, RegistroNuevoJugadorUseCase, ObtenerCatalogoUseCase
 #----------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------

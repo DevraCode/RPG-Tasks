@@ -4,9 +4,9 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMedia
 from telegram.ext import CallbackContext
 import hashlib
 
-from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
-from core.infrastructure.mysql_personajes_repository import MySQLPersonajesRepository
-from core.infrastructure.mysql_plataformas_repository import MySQLPlataformasRepository
+from core.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
+from core.infrastructure.repositorios.mysql_personajes_repository import MySQLPersonajesRepository
+from core.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
 from core.application.use_cases import UsuarioUsecase, PersonajeUseCase, PlataformasUseCase
 
 from .decoradores import usuario_no_existe_o_sesion_cerrada, limite_personajes

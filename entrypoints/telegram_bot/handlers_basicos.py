@@ -2,6 +2,7 @@
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #Externas
+import os
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
@@ -11,11 +12,30 @@ import hashlib
 
 #Internas
 from core.domain.models import CorrespondenciaPlataformas, TiposUsuario, Rango
-from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
-from core.infrastructure.mysql_plataformas_repository import MySQLPlataformasRepository
+from core.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
+from core.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
 from core.application.use_cases import MensajeInicioUseCase, CrearCuentaUseCase, UsuarioUsecase, PlataformasUseCase
 from .dbconfig import db_config
 from .decoradores import usuario_existe
+
+from core.infrastructure.servicios_ia.cliente_gemini import GeminiService
+from core.infrastructure.servicios_ia.gemini_tools import gemini_tools
+
+token_gemini = os.getenv("GEMINI_API_KEY")
+
+
+herramientas = gemini_tools(db_config)
+ia = GeminiService(
+    api_key=token_gemini, 
+    model_name="gemini-2.5-flash", 
+    tools=herramientas
+)
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    respuesta_ia = ia.ask(update.message.text)
+    
+    await update.message.reply_text(respuesta_ia)
+
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------

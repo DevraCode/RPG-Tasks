@@ -8,9 +8,9 @@ import hashlib
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #Internas
-from core.infrastructure.mysql_usuario_repository import MySQLUsuarioRepository
-from core.infrastructure.mysql_personajes_repository import MySQLPersonajesRepository
-from core.infrastructure.mysql_plataformas_repository import MySQLPlataformasRepository
+from core.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
+from core.infrastructure.repositorios.mysql_personajes_repository import MySQLPersonajesRepository
+from core.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
 from core.application.use_cases import UsuarioUsecase, PersonajeUseCase, PlataformasUseCase
 
 

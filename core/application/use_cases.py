@@ -83,6 +83,12 @@ class UsuarioUsecase:
     def comprobar_usuario(self, nombre_usuario:str, password_usuario:str):
         resultado = self.repo.comprobar_usuario_contraseña(nombre_usuario, password_usuario)
         return resultado
+    
+    def buscar_usuario_ia(self, nombre_usuario:str):
+        """Busca el ID del usuario por su nombre."""
+        print(f"DEBUG: Ejecutando función con: {nombre_usuario}") # IMPORTANTE: Mira si esto sale en tu consola
+        resultado = self.repo.buscar_usuario_ia(nombre_usuario)
+        return resultado
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------

@@ -192,5 +192,19 @@ class MySQLUsuarioRepository(UsuarioRepository):
             conn.close()
 
    
-    
+    def buscar_usuario_ia(self, nombre_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
+        query = "SELECT id_usuario FROM usuarios WHERE nombre_usuario = %s"
+        cursor.execute(query, (nombre_usuario,))
+        row = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        if row:
+            return Usuario(
+                id_usuario=row['id_usuario']
+            )
+        return None
     

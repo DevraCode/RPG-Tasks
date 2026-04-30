@@ -31,6 +31,10 @@ class UsuarioRepository(ABC):
     def comprobar_usuario_contraseña(self, nombre_usuario:str, password_usuario:str):
         pass
 
+    @abstractmethod
+    def buscar_usuario_ia(self, nombre_usuario:str):
+        pass
+
     
   
 #-----------------------------------------------------------------------------------------------------------------------------
