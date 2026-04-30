@@ -11,12 +11,12 @@ from dotenv import load_dotenv
 
 #Locales
 from core.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
-from core.application.use_cases import MensajeInicioUseCase, RegistroNuevoJugadorUseCase, ObtenerCatalogoUseCase
+from core.application.use_cases.basico.basic_use_cases import MensajeInicioUseCase
 #----------------------------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------
 
 
-load_dotenv()
+""" load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
 
@@ -92,3 +92,4 @@ async def elegir_clase(ctx):
         await ctx.send(file=archivo_discord, embed=embed)
 
 bot.run(DISCORD_TOKEN)
+ """

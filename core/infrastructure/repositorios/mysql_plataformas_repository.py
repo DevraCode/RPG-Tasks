@@ -1,5 +1,5 @@
 import mysql.connector
-from core.application.ports import PlataformasRepository
+from core.application.ports.plataformas_ports import PlataformasRepository
 from core.domain.models import Plataformas
 
 class MySQLPlataformasRepository(PlataformasRepository):

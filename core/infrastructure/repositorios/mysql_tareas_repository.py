@@ -1,5 +1,5 @@
 import mysql.connector
-from core.application.ports import TareasRepository
+from core.application.ports.tareas_ports import TareasRepository
 from core.domain.models import Tareas
 
 class MySQLTareasRepository(TareasRepository):

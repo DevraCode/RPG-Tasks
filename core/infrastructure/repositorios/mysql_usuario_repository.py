@@ -1,5 +1,5 @@
 import mysql.connector
-from core.application.ports import UsuarioRepository
+from core.application.ports.usuarios_ports import UsuarioRepository
 from core.domain.models import Usuario, Plataformas
 
 class MySQLUsuarioRepository(UsuarioRepository):

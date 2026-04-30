@@ -11,10 +11,11 @@ import hashlib
 from core.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from core.infrastructure.repositorios.mysql_personajes_repository import MySQLPersonajesRepository
 from core.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
-from core.application.use_cases import UsuarioUsecase, PersonajeUseCase, PlataformasUseCase
+from core.application.use_cases.basico.usuarios_use_cases import UsuarioUsecase
+from core.application.use_cases.basico.personajes_use_cases import PersonajeUseCase
+from core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
 
-
-from .dbconfig import db_config
+from core.infrastructure.dbconfig import db_config
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------

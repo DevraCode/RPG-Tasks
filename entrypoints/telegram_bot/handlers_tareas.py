@@ -7,10 +7,12 @@ import hashlib
 from core.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from core.infrastructure.repositorios.mysql_tareas_repository import MySQLTareasRepository
 from core.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
-from core.application.use_cases import UsuarioUsecase, TareasUseCase, PlataformasUseCase
+from core.application.use_cases.basico.usuarios_use_cases import UsuarioUsecase
+from core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
+from core.application.use_cases.basico.tareas_use_cases import TareasUseCase
 
 
-from .dbconfig import db_config
+from core.infrastructure.dbconfig import db_config
 
 repo_usuarios = MySQLUsuarioRepository(db_config)
 repo_tareas = MySQLTareasRepository(db_config)

@@ -15,3 +15,6 @@
 !assets/personajes/arquero/gif/.gitkeep
 !assets/personajes/arquero/icon/.gitkeep
 !assets/personajes/arquero/webm/.gitkeep
+
+__pycache__/
+*.pyc

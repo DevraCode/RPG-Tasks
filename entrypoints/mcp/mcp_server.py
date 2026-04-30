@@ -4,7 +4,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from mcp.server.fastmcp import FastMCP
-from core.application.use_cases import TareasUseCase
+from core.application.use_cases.basico.basic_use_cases import TareasUseCase
 from core.infrastructure.repositorios.mysql_tareas_repository import MySQLTareasRepository
 from core.infrastructure.dbconfig import db_config
 
@@ -26,3 +26,5 @@ def crear_nueva_tarea(id_usuario: int, nombre: str) -> str:
 
 if __name__ == "__main__":
     mcp.run(transport='stdio')
+
+    #ARREGLAR ESTO CON TAREAS IA
