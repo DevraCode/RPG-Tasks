@@ -3,7 +3,7 @@ from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, Con
 import os
 from dotenv import load_dotenv
 
-from .handlers_basicos import handle_message
+from .gemini.handlers_basicos import handle_message
 
 load_dotenv()
 
