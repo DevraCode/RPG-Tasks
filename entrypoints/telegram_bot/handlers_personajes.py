@@ -37,7 +37,7 @@ from core.infrastructure.servicios_ia.ollama_tools import OllamaTools
 tools = OllamaTools()
 
 ia = OllamaClient(
-    model_name="llama3", 
+    model_name="llama3.1", 
     system_instructions=SYSTEM_INSTRUCTION,
     tools=tools.ollama_tools()
 )
@@ -199,6 +199,7 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     await context.bot.send_sticker(
         chat_id=update.effective_chat.id,
         sticker=sticker_carga)
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
     
     
     #Llamada a la IA 

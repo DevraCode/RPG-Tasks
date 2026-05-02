@@ -45,7 +45,7 @@ from core.infrastructure.servicios_ia.ollama_tools import OllamaTools
 tools = OllamaTools()
 
 ia = OllamaClient(
-    model_name="llama3", 
+    model_name="llama3.1", 
     system_instructions=SYSTEM_INSTRUCTION,
     tools=tools.ollama_tools()
 )
@@ -62,7 +62,22 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(mensaje_inicio)
     await update.message.reply_text(f"Utiliza el comando /registro para crear una cuenta. Si ya tienes cuenta, utiliza el comando /vincular para iniciar sesión")
     
+async def interaccion_ia(update, context):
+    mensaje_usuario = update.message.text
+    
+    if mensaje_usuario.startswith('/'):
+        return 
 
+    try:
+        
+        await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+        respuesta_ia = ia.preguntar(mensaje_usuario)
+        
+        await update.message.reply_text(respuesta_ia, parse_mode="Markdown")
+        
+    except Exception as e:
+        print(f"Error en IA: {e}")
+        await update.message.reply_text("El cronista está confundido... (Error de conexión)")
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------

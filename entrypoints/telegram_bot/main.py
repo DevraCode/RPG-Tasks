@@ -13,7 +13,7 @@ from telegram.ext import CallbackContext
 #-----------------------------------------------------------------------------------------------------------------------------
 #Importaciones propias del bot
 from .handlers_basicos import NOMBRE, PASSWORD, EMAIL, PEDIR_NOMBRE, PEDIR_PASSWORD
-from .handlers_basicos import start, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar, vincular, obtener_username, obtener_password
+from .handlers_basicos import start, interaccion_ia, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar, vincular, obtener_username, obtener_password
 
 from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO, ASIGNAR_TAREA
 from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes, asignar_tarea
@@ -40,6 +40,7 @@ if __name__ == "__main__":
 
     #HANDLERS
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, interaccion_ia))
     
     
    
