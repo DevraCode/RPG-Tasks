@@ -15,16 +15,16 @@ class MySQLPersonajesRepository(PersonajesRepository):
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
 
-    def registrar_personaje_elegido(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje):
+    def registrar_personaje_elegido(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje, descripcion_personaje):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        query = """ INSERT INTO personajes (id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+        query = """ INSERT INTO personajes (id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje, descripcion_personaje)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s,%s)
                 """
         
         try:
-            cursor.execute(query, (id_usuario,nombre_personaje,genero,clase,imagen_personaje,icono_personaje,animacion_personaje,))
+            cursor.execute(query, (id_usuario,nombre_personaje,genero,clase,imagen_personaje,icono_personaje,animacion_personaje,descripcion_personaje,))
             conn.commit() 
         finally:
             cursor.close()

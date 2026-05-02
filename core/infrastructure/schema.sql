@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS personajes (
     icono_personaje TEXT,
     imagen_personaje TEXT,
     animacion_personaje TEXT,
+    descripcion_personaje TEXT,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

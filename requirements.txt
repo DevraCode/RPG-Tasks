@@ -3,3 +3,4 @@ python-telegram-bot
 mysql-connector-python
 discord.py
 mcp
+ollama

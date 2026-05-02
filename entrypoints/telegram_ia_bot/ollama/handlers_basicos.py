@@ -12,7 +12,7 @@ from core.infrastructure.servicios_ia.config_ia import SYSTEM_INSTRUCTION
 
 ia = OllamaClient(
     model_name="llama3", 
-    system_instruction=SYSTEM_INSTRUCTION 
+    system_instructions=SYSTEM_INSTRUCTION 
 )
 
 

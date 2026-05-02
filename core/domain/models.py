@@ -45,6 +45,7 @@ class Personaje:
     icono_personaje: str = "Ruta_Imagen"
     imagen_personaje: str = "Ruta_Imagen"
     animacion_personaje : str = "Ruta_imagen"
+    descripcion_personaje: str = "Descripcion"
 
 @dataclass
 class Plataformas:

@@ -6,7 +6,7 @@ class PersonajeUseCase:
         self.repo_personajes = repo_personajes  # Para guardar el personaje
         self.repo_usuarios = repo_usuarios
 
-    def registrar_personaje(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje):
+    def registrar_personaje(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje, descripcion_personaje):
         usuario = self.repo_usuarios.buscar_por_id_usuario(id_usuario)
         if usuario is None:
             
@@ -20,7 +20,8 @@ class PersonajeUseCase:
             clase, 
             imagen_personaje,
             icono_personaje,
-            animacion_personaje
+            animacion_personaje,
+            descripcion_personaje
         )
         return "¡Personaje elegido!"
     

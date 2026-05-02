@@ -11,6 +11,8 @@ from core.application.use_cases.basico.usuarios_use_cases import UsuarioUsecase
 from core.application.use_cases.basico.personajes_use_cases import PersonajeUseCase
 from core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
 
+from core.infrastructure.servicios_ia.cliente_ollama import OllamaClient
+
 
 from .decoradores import usuario_no_existe_o_sesion_cerrada, limite_personajes
 
@@ -27,6 +29,14 @@ plataformas = PlataformasUseCase(repo_plataformas)
 
 catalogo = personajes.personajes_dic()
 lista_personajes = personajes.personajes_list()
+
+
+from core.infrastructure.servicios_ia.config_ia import SYSTEM_INSTRUCTION
+
+ia = OllamaClient(
+    model_name="llama3", 
+    system_instructions=SYSTEM_INSTRUCTION 
+)
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -97,6 +107,9 @@ async def manejador_botones (update:Update, context: CallbackContext):
 
     await query.answer()
 
+
+    
+
     data = query.data.split("_") #Split para que separe el data y obtenga NEXT O PREV con el índice separado ([NEXT, 0] [PREV, 0])
     accion = data[0] #Primera posición de los data obtenidos, o sea, NEXT o PREV
     indice_actual = int(data[1]) #Se convierte a int la segunda posición del data obtenido, que fue 0, que se guardó en la variable index de la función anterior
@@ -111,13 +124,15 @@ async def manejador_botones (update:Update, context: CallbackContext):
 
         personaje_elegido = lista_personajes[nuevo_indice]
         datos_personaje = catalogo[personaje_elegido]
+
         
-        print(f"Usuario eligió a: {personaje_elegido}")
+        
         context.user_data['imagen_personaje'] = datos_personaje["imagen_personaje_gif"]
         context.user_data['clase_personaje'] = datos_personaje["clase"]
         context.user_data['genero_personaje'] = datos_personaje["genero"]
         context.user_data['icono_personaje'] = datos_personaje["icono_personaje_gif"]
         context.user_data['animacion_personaje'] = datos_personaje["animacion_personaje_gif"]
+        context.user_data['nivel_personaje'] = datos_personaje["nivel"]
         
         await query.message.reply_text(f"Has seleccionado la clase {datos_personaje["clase"]}. Ahora, escribe el nombre de tu personaje:")
         
@@ -162,6 +177,29 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     genero = context.user_data.get('genero_personaje')
     icono = context.user_data.get('icono_personaje')
     animacion = context.user_data.get('animacion_personaje')
+    nivel = context.user_data.get("nivel_personaje")
+
+
+
+    prompt_para_ia =(
+            f"Escribe una descripción de bardo para este héroe:\n"
+            f"Nombre: {nombre}\n"
+            f"Clase: {clase}\n"
+            f"Género: {genero}\n"
+            f"Nivel:{nivel}"
+        )
+    
+    #Mejor poner esto antes de la llamada a la IA, porque tardará en responder
+    sticker_carga = "./assets/animaciones/carga/animacion_puntos_suspensivos.webm"
+    
+    await update.message.reply_text(f"🖋️ Registrando a {nombre} en el gremio, tardará un momento...") 
+    await context.bot.send_sticker(
+        chat_id=update.effective_chat.id,
+        sticker=sticker_carga)
+    
+    
+    #Llamada a la IA 
+    descripcion_epica = ia.ask(prompt_para_ia)
 
 
     """ Como el id de Telegram no cambia y está asociado al usuario, 
@@ -181,11 +219,22 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
             clase=clase,
             imagen_personaje = imagen,
             icono_personaje= icono,
-            animacion_personaje = animacion
+            animacion_personaje = animacion,
+            descripcion_personaje = descripcion_epica
 
         )
+    
+
+    img, icon, anim = ruta_webm(clase.lower())
+    
 
     await update.message.reply_text(f"{resultado}")
+
+    await context.bot.send_sticker(
+        chat_id=update.effective_chat.id,
+        sticker=img)
+    
+    await update.message.reply_text(f"{descripcion_epica}")
 
     return ConversationHandler.END
 
