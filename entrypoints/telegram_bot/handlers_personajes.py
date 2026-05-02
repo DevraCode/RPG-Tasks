@@ -32,10 +32,14 @@ lista_personajes = personajes.personajes_list()
 
 
 from core.infrastructure.servicios_ia.config_ia import SYSTEM_INSTRUCTION
+from core.infrastructure.servicios_ia.ollama_tools import OllamaTools
+
+tools = OllamaTools()
 
 ia = OllamaClient(
     model_name="llama3", 
-    system_instructions=SYSTEM_INSTRUCTION 
+    system_instructions=SYSTEM_INSTRUCTION,
+    tools=tools.ollama_tools()
 )
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -180,7 +184,6 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     nivel = context.user_data.get("nivel_personaje")
 
 
-
     prompt_para_ia =(
             f"Escribe una descripción de bardo para este héroe:\n"
             f"Nombre: {nombre}\n"
@@ -199,7 +202,7 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     
     
     #Llamada a la IA 
-    descripcion_epica = ia.ask(prompt_para_ia)
+    descripcion_epica = ia.descripcion(prompt_para_ia)
 
 
     """ Como el id de Telegram no cambia y está asociado al usuario, 

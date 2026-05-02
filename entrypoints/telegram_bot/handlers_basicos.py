@@ -36,6 +36,21 @@ crear_cuenta = CrearCuentaUseCase()
 usuario = UsuarioUsecase(repo_usuario)
 plataformas = PlataformasUseCase(repo_plataformas)
 
+
+
+from core.infrastructure.servicios_ia.config_ia import SYSTEM_INSTRUCTION
+from core.infrastructure.servicios_ia.cliente_ollama import OllamaClient
+from core.infrastructure.servicios_ia.ollama_tools import OllamaTools
+
+tools = OllamaTools()
+
+ia = OllamaClient(
+    model_name="llama3", 
+    system_instructions=SYSTEM_INSTRUCTION,
+    tools=tools.ollama_tools()
+)
+
+
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------

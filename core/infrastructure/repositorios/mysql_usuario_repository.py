@@ -37,7 +37,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
     #-----------------------------------------------------------------------------------------------------------------------------   
 
     def buscar_por_id_externo(self, id_externo_usuario: str):
-        print(f"DEBUG: Buscando hash -> '{id_externo_usuario}' (Longitud: {len(id_externo_usuario)})")
+        
 
 
         conn = self._get_connection()

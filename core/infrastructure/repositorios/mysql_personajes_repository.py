@@ -79,7 +79,7 @@ class MySQLPersonajesRepository(PersonajesRepository):
             row1 = cursor.fetchone()
 
             if not row1:
-                print(f"FALLO: No existe vínculo para el hash {id_externo_usuario}")
+                
                 return None
 
             id_interno = row1['id_usuario']
