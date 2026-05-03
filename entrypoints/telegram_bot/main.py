@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     #HANDLERS
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, interaccion_ia))
+    
     
     
    
@@ -119,6 +119,9 @@ if __name__ == "__main__":
     app.add_handler(entrenar_personaje_conv_handler)
     app.add_handler(vin_conv_handler)
     app.add_handler(tarea_conv_handler)
+
+
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, interaccion_ia))
 
     
     print("🤖 Bot de RPG iniciado y conectado a MySQL...")

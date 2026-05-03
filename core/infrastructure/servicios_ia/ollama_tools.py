@@ -39,11 +39,11 @@ class OllamaTools:
 
     def ollama_tools(self):
         busca_usuario_ia = traducir_para_ollama(self.usuarios.buscar_usuario_ia)
-        descripcion_personaje = traducir_para_ollama(self.personajes.descripcion_personaje)
+        
 
 
         return [
             busca_usuario_ia,
-            descripcion_personaje
+            
         ]
 
