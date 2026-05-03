@@ -18,12 +18,12 @@ class OllamaClient:
         )
 
          
-            # 1. Verificar si hay llamadas a herramientas
+            
         if hasattr(response.message, 'tool_calls') and response.message.tool_calls:
             llamadas_procesadas = []
             
             for tool in response.message.tool_calls:
-                # Convertimos el objeto ToolCall a un diccionario simple
+                
                 llamadas_procesadas.append({
                     'function': {
                         'name': tool.function.name,
@@ -31,10 +31,10 @@ class OllamaClient:
                     }
                 })
             
-            # Devolvemos la lista de diccionarios (esto ya es serializable)
+            
             return llamadas_procesadas
 
-        # 2. Si es una respuesta de texto normal
+        
         return response.message.content
 
 

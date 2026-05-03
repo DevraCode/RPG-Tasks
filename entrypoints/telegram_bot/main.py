@@ -9,7 +9,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ConversationHandler
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMedia
-from telegram.ext import CallbackContext
+from telegram.ext import CallbackContext, InlineQueryHandler
 #-----------------------------------------------------------------------------------------------------------------------------
 #Importaciones propias del bot
 from .handlers_basicos import NOMBRE, PASSWORD, EMAIL, PEDIR_NOMBRE, PEDIR_PASSWORD
@@ -20,6 +20,8 @@ from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_n
 
 from .handlers_tareas import INSERTAR_TAREA
 from .handlers_tareas import preguntar_nombre_tarea, crear_tarea
+
+from .handlers_inline import inline_handler
 
 from .menu import menu
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -39,7 +41,12 @@ if __name__ == "__main__":
     #-----------------------------------------------------------------------------------------------------------------------------
 
     #HANDLERS
+    
+
+
+
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(InlineQueryHandler(inline_handler))
     
     
     
