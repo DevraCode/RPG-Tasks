@@ -198,7 +198,7 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     await context.bot.send_sticker(
         chat_id=update.effective_chat.id,
         sticker=sticker_carga)
-    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+    
     
     
     #Llamada a la IA 
@@ -228,7 +228,7 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
         )
     
 
-    img, icon, anim = ruta_webm(clase.lower())
+    img, icon, anim = ruta_webm(clase.lower()) # Desempaquetar
     
 
     await update.message.reply_text(f"{resultado}")

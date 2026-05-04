@@ -60,7 +60,8 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
     mensaje_inicio = mensaje_bienvenida.mensaje()
     await update.message.reply_text(mensaje_inicio)
     await update.message.reply_text(f"Utiliza el comando /registro para crear una cuenta. Si ya tienes cuenta, utiliza el comando /vincular para iniciar sesión")
-    
+
+
 async def interaccion_ia(update, context):
     mensaje_usuario = update.message.text
     
@@ -70,13 +71,21 @@ async def interaccion_ia(update, context):
     try:
         
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+        await update.message.reply_text("Buscando en los Registros Antiguos... Ten un poco de paciencia, por favor")
+        sticker_carga = "./assets/animaciones/carga/animacion_puntos_suspensivos.webm"
+
+        await context.bot.send_sticker(
+        chat_id=update.effective_chat.id,
+        sticker=sticker_carga)
+
+        #Llamada a la IA
         respuesta_ia = ia.preguntar(mensaje_usuario)
         
         await update.message.reply_text(respuesta_ia, parse_mode="Markdown")
         
     except Exception as e:
         print(f"Error en IA: {e}")
-        await update.message.reply_text("El cronista está confundido... (Error de conexión)")
+        await update.message.reply_text("Error al buscar en los Registros Antiguos... Puede que hayan sido robados por seres malignos ajenos al Gremio")
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
