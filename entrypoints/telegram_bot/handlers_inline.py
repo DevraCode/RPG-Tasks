@@ -1,5 +1,5 @@
-from telegram import Update, InlineQueryResultArticle, InputTextMessageContent
-from telegram.ext import ContextTypes
+from telegram import Update, InlineQueryResultArticle, InputTextMessageContent, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
+from telegram.ext import ContextTypes, CallbackContext, CallbackQueryHandler
 
 import hashlib
 
@@ -39,7 +39,10 @@ async def inline_handler(update:Update, context: ContextTypes.DEFAULT_TYPE):
     for personaje in lista_personajes:
             nombre_personaje = personaje.get('nombre_personaje', 'Sin nombre')
             id_personaje = personaje.get('id_personaje')
-            
+
+            keyboard = [
+                 [InlineKeyboardButton(text="Ver Personaje", callback_data=f"stats_{id_personaje}")]
+            ]
             
             if not query or query in personaje["nombre_personaje"].lower():
             
@@ -51,10 +54,46 @@ async def inline_handler(update:Update, context: ContextTypes.DEFAULT_TYPE):
                     thumbnail_url="https://i.postimg.cc/FRMXST6j/rpg-game-(1).png",
                     input_message_content=InputTextMessageContent(
                         message_text=f"{nombre_personaje}"
-                    )
+                    ),
+                    reply_markup=InlineKeyboardMarkup(keyboard)
                 )
                 )
             
             
     print(f"Enviando {len(resultados)} resultados a Telegram")
     await update.inline_query.answer(resultados, cache_time=5)
+
+
+async def manejador_stats(update:Update, context:ContextTypes.DEFAULT_TYPE):
+         query = update.callback_query
+         await query.answer()
+
+         data = query.data.split("_")
+         id_personaje = int(data[1])
+
+         personaje = personajes.buscar_personaje_por_id(id_personaje)
+         print(f"📦 Resultado obtenido: {personaje}")
+
+
+         if personaje is None:
+            print(f"ERROR: No se encontró el personaje con ID {id_personaje}")
+            await context.bot.edit_message_text(
+                inline_message_id=query.inline_message_id,
+                text="❌ Error: El personaje ya no existe en la base de datos."
+            )
+            return
+
+
+         mensaje_stats = (
+            f"📊 *ESTADÍSTICAS DE {personaje['nombre_personaje']}*\n\n"
+            f"⚔️ EXP: {personaje['exp']}\n"
+            
+        )
+
+         await context.bot.edit_message_text(
+            inline_message_id=query.inline_message_id,
+            text=mensaje_stats,
+            parse_mode="Markdown"
+            )
+
+         

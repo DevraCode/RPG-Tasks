@@ -31,6 +31,21 @@ class MySQLPersonajesRepository(PersonajesRepository):
             conn.close()
 
     #-----------------------------------------------------------------------------------------------------------------------------
+    def buscar_personaje_por_id(self, id_personaje):
+        conn = self._get_connection() 
+        cursor = conn.cursor(buffered=True, dictionary=True)
+
+        query = "SELECT * FROM personajes WHERE id_personaje = %s"
+        cursor.execute(query, (id_personaje,))
+        personaje = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return personaje
+    
+
+
 
     #Para establecer un máximo de 5 personajes por usuario
     def limite_personajes_de_usuario(self, id_usuario):

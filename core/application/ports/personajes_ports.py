@@ -8,6 +8,10 @@ class PersonajesRepository(ABC):
         pass
 
     @abstractmethod
+    def buscar_personaje_por_id(self, id_personaje: int): 
+        pass
+
+    @abstractmethod
     def limite_personajes_de_usuario(self, id_usuario: str): 
         pass
 

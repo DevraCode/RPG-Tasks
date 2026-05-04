@@ -25,6 +25,14 @@ class PersonajeUseCase:
         )
         return "¡Personaje elegido!"
     
+
+    def buscar_personaje_por_id(self, id_personaje):
+        personaje = self.repo_personajes.buscar_personaje_por_id(id_personaje)
+
+        return personaje
+    
+    
+    
     def personajes_dic(self):
         return CLASES_DISPONIBLES
     
