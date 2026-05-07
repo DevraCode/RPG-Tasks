@@ -7,4 +7,14 @@ class TareasRepository(ABC):
     def insertar_tarea(self, id_usuario, nombre_tarea):
         pass
 
+    @abstractmethod
+    def lista_tareas_usuario(self,id_usuario):
+        pass
 
+    @abstractmethod
+    def buscar_tarea_usuario(self,id_usuario):
+        pass
+
+    @abstractmethod
+    def completar_tarea(self, id_tarea, nombre_tarea):
+        pass

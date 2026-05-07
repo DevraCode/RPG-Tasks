@@ -10,3 +10,7 @@ class TareasUseCase:
         mensaje = f"Tarea {nombre_tarea_minusculas.capitalize()} añadida correctamente "
 
         return mensaje
+    
+    def lista_tareas_usuario(self, id_usuario):
+        lista = self.repo.lista_tareas_usuario(id_usuario)
+        return lista

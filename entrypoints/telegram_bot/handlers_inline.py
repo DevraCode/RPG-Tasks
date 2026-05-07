@@ -85,8 +85,11 @@ async def manejador_stats(update:Update, context:ContextTypes.DEFAULT_TYPE):
 
 
          mensaje_stats = (
-            f"📊 *ESTADÍSTICAS DE {personaje['nombre_personaje']}*\n\n"
-            f"⚔️ EXP: {personaje['exp']}\n"
+            f"*{personaje['nombre_personaje']}*\n\n"
+            f"Clase: {personaje['clase']}\n"
+            f"Nivel: {personaje['nivel']}\n"
+            f"EXP: {personaje['exp']}\n"
+            
             
         )
 

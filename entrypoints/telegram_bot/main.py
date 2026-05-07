@@ -19,7 +19,7 @@ from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIO
 from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes, asignar_tarea
 
 from .handlers_tareas import INSERTAR_TAREA
-from .handlers_tareas import preguntar_nombre_tarea, crear_tarea
+from .handlers_tareas import preguntar_nombre_tarea, crear_tarea, lista_tareas
 
 from .handlers_inline import inline_handler, manejador_stats
 
@@ -46,6 +46,7 @@ if __name__ == "__main__":
 
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("tareas", lista_tareas))
     app.add_handler(InlineQueryHandler(inline_handler))
     app.add_handler(CallbackQueryHandler(manejador_stats, pattern=r"^stats_"))
     

@@ -50,4 +50,25 @@ async def crear_tarea(update:Update, context:ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
+async def lista_tareas(update:Update, context:ContextTypes.DEFAULT_TYPE):
+
+    id_externo = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+    id_usuario = plataformas.vincular_id_externo_usuario(id_externo)
+
+    lista_tareas = tareas.lista_tareas_usuario(id_usuario)
+
+    lista = []
+
+    for tarea in lista_tareas:
+        lista.append(tarea["nombre_tarea"])
+
+    lista_formateada = "\n".join([f"🔹 {t.capitalize()}" for t in lista])
+
+    mensaje = f"Tienes las siguientes tareas pendientes: \n" + f"{lista_formateada}\n"
+
+    await update.message.reply_text(mensaje)
+
+
+              
+    
 
