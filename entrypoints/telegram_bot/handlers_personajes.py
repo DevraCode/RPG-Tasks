@@ -354,4 +354,4 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
 async def asignar_tarea(update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     #Aquí se mostraria una lista de tareas que el usuario ha registrado previamente, se elige la tarea y se altera la tabla tareas con el id del personaje para luego hacer la lógica de subida de exp, etc
-    await update.message.reply_text(f"wiiiiiii") #Mensaje de prueba
+    await update.message.reply_text(f"wigggiiiiii") #Mensaje de prueba
