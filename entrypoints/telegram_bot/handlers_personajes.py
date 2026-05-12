@@ -7,9 +7,12 @@ import hashlib
 from core.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from core.infrastructure.repositorios.mysql_personajes_repository import MySQLPersonajesRepository
 from core.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
+from core.infrastructure.repositorios.mysql_tareas_repository import MySQLTareasRepository
+
 from core.application.use_cases.basico.usuarios_use_cases import UsuarioUsecase
 from core.application.use_cases.basico.personajes_use_cases import PersonajeUseCase
 from core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
+from core.application.use_cases.basico.tareas_use_cases import TareasUseCase
 
 from core.infrastructure.servicios_ia.cliente_ollama import OllamaClient
 
@@ -21,11 +24,12 @@ from core.infrastructure.dbconfig import db_config
 repo_usuarios = MySQLUsuarioRepository(db_config)
 repo_personajes = MySQLPersonajesRepository(db_config)
 repo_plataformas = MySQLPlataformasRepository(db_config)
+repo_tareas = MySQLTareasRepository(db_config)
 
 usuarios = UsuarioUsecase(repo_usuarios)
 personajes = PersonajeUseCase(repo_personajes, repo_usuarios)
 plataformas = PlataformasUseCase(repo_plataformas)
-
+tareas = TareasUseCase(repo_tareas)
 
 catalogo = personajes.personajes_dic()
 lista_personajes = personajes.personajes_list()
@@ -317,10 +321,12 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
         
         print(f"Usuario eligió a: {personaje_a_entrenar["nombre_personaje"]}")
 
+        id_personaje = personaje_a_entrenar["id_personaje"]
+
         await query.message.reply_text(f"Has seleccionado a {personaje_a_entrenar["nombre_personaje"]}. Elige la tarea con la que quieres entrenarle")
         
         
-        return ASIGNAR_TAREA #Pasa al siguiente estado
+        return await menu_tareas(update, context, id_personaje) #Muestra el listado de tareas
 
     
     await query.message.delete()
@@ -351,7 +357,50 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
     return SELECCIONANDO  
 
 
-async def asignar_tarea(update:Update, context: ContextTypes.DEFAULT_TYPE):
+async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE, id_personaje):
+    id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+    id_usuario = plataformas.vincular_id_externo_usuario(id_generado)
+
+    lista_tareas = tareas.lista_tareas_usuario(id_usuario)
+
+    keyboard = []
+
+    for tarea in lista_tareas:
+        boton = [InlineKeyboardButton(
+            text=f"📋 {tarea['nombre_tarea']}", 
+            callback_data=f"{id_personaje}" 
+        )]
+        keyboard.append(boton)
+    
+    print(keyboard)
+    
 
     #Aquí se mostraria una lista de tareas que el usuario ha registrado previamente, se elige la tarea y se altera la tabla tareas con el id del personaje para luego hacer la lógica de subida de exp, etc
-    await update.message.reply_text(f"wigggiiiiii") #Mensaje de prueba
+    await context.bot.send_message(
+    chat_id=update.effective_chat.id,
+    text="🎯 *Selecciona la tarea que quieres asignar:*",
+    reply_markup=InlineKeyboardMarkup(keyboard),
+    parse_mode="Markdown"
+    )
+
+    
+
+    return ASIGNAR_TAREA
+
+async def asignar_tarea(update:Update, context: CallbackContext):
+    query = update.callback_query
+    data = query.data
+
+    personaje = personajes.buscar_personaje_por_id(data)
+
+    print(data)
+    img, icon, anim = ruta_webm(personaje["clase"].lower())
+
+    
+    await context.bot.send_sticker(
+    chat_id=query.message.chat_id,
+    sticker=anim
+    )
+    
+
+    await context.bot.send_message(chat_id=update.effective_chat.id, text = "Wiiiiiiiiii") #Mensaje de prueba

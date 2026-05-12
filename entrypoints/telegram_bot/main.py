@@ -87,7 +87,7 @@ if __name__ == "__main__":
     entry_points=[CommandHandler('entrenar', lista_personajes_usuarios)],
     states={
         SELECCIONANDO: [CallbackQueryHandler(manejador_lista_personajes)],
-        ASIGNAR_TAREA: [MessageHandler(filters.TEXT & ~filters.COMMAND, asignar_tarea)]
+        ASIGNAR_TAREA: [CallbackQueryHandler(asignar_tarea)]
     },
     fallbacks=[CommandHandler('cancel', cancelar)],
     per_message=False,
