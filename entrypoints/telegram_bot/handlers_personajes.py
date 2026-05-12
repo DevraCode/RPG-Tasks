@@ -384,7 +384,6 @@ async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE, id_pers
     )
 
     
-
     return ASIGNAR_TAREA
 
 async def asignar_tarea(update:Update, context: CallbackContext):
@@ -395,6 +394,13 @@ async def asignar_tarea(update:Update, context: CallbackContext):
 
     print(data)
     img, icon, anim = ruta_webm(personaje["clase"].lower())
+
+    boss = "./assets/bosses/webm/orc_animation.webm"
+
+    await context.bot.send_sticker(
+    chat_id=query.message.chat_id,
+    sticker=boss
+    )
 
     
     await context.bot.send_sticker(
