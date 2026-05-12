@@ -319,14 +319,13 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
 
         personaje_a_entrenar = personajes_user[nuevo_indice]
         
-        print(f"Usuario eligió a: {personaje_a_entrenar["nombre_personaje"]}")
 
-        id_personaje = personaje_a_entrenar["id_personaje"]
+        context.user_data["id_personaje"] = personaje_a_entrenar["id_personaje"] #Guardamos el id del personaje
 
         await query.message.reply_text(f"Has seleccionado a {personaje_a_entrenar["nombre_personaje"]}. Elige la tarea con la que quieres entrenarle")
         
         
-        return await menu_tareas(update, context, id_personaje) #Muestra el listado de tareas
+        return await menu_tareas(update, context) #Muestra el listado de tareas
 
     
     await query.message.delete()
@@ -357,7 +356,7 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
     return SELECCIONANDO  
 
 
-async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE, id_personaje):
+async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE):
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
     id_usuario = plataformas.vincular_id_externo_usuario(id_generado)
 
@@ -368,13 +367,11 @@ async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE, id_pers
     for tarea in lista_tareas:
         boton = [InlineKeyboardButton(
             text=f"📋 {tarea['nombre_tarea']}", 
-            callback_data=f"{id_personaje}" 
+            callback_data=f"{tarea["id_tarea"]}" 
         )]
         keyboard.append(boton)
     
-    print(keyboard)
-    
-
+  
     #Aquí se mostraria una lista de tareas que el usuario ha registrado previamente, se elige la tarea y se altera la tabla tareas con el id del personaje para luego hacer la lógica de subida de exp, etc
     await context.bot.send_message(
     chat_id=update.effective_chat.id,
@@ -388,11 +385,21 @@ async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE, id_pers
 
 async def asignar_tarea(update:Update, context: CallbackContext):
     query = update.callback_query
-    data = query.data
+    id_tarea = query.data
 
-    personaje = personajes.buscar_personaje_por_id(data)
+    tarea = tareas.buscar_tarea_por_id(id_tarea)
 
-    print(data)
+    nombre_tarea = tarea["nombre_tarea"]
+
+    await query.edit_message_text(f"Has elegido {nombre_tarea.capitalize()}. ¡Comienza la batalla!")
+
+    id_personaje = context.user_data.get("id_personaje") #Recuperamos el id del personaje
+    personaje = personajes.buscar_personaje_por_id(id_personaje) # Y lo buscamos en la BD
+
+    tareas.vincular_personaje_con_tarea(id_personaje, id_tarea) #Vinculamos la tarea al personaje en la BD
+
+    
+
     img, icon, anim = ruta_webm(personaje["clase"].lower())
 
     boss = "./assets/bosses/webm/orc_animation.webm"
@@ -410,3 +417,5 @@ async def asignar_tarea(update:Update, context: CallbackContext):
     
 
     await context.bot.send_message(chat_id=update.effective_chat.id, text = "Wiiiiiiiiii") #Mensaje de prueba
+
+    #Ahora colocar la opción de poner un temporizador o comenzar la batalla directamente

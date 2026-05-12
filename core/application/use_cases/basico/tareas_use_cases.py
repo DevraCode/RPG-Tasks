@@ -14,3 +14,11 @@ class TareasUseCase:
     def lista_tareas_usuario(self, id_usuario):
         lista = self.repo.lista_tareas_usuario(id_usuario)
         return lista
+    
+    def buscar_tarea_por_id(self, id_tarea):
+        tarea = self.repo.buscar_tarea_por_id(id_tarea)
+        return tarea
+    
+    def vincular_personaje_con_tarea(self, id_personaje, id_tarea):
+        self.repo.vincular_id_personaje_con_id_tarea(id_personaje, id_tarea)
+        

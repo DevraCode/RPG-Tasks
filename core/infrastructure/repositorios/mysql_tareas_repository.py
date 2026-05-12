@@ -45,3 +45,32 @@ class MySQLTareasRepository(TareasRepository):
     
     def completar_tarea(self, id_tarea, nombre_tarea):
         pass
+
+    def buscar_tarea_por_id(self, id_tarea):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = "SELECT * FROM tareas WHERE id_tarea = %s"
+
+        cursor.execute(query,(id_tarea,))
+        resultado = cursor.fetchone()
+
+        cursor.close()
+        conn.close()
+
+        return resultado
+    
+    def vincular_id_personaje_con_id_tarea(self, id_personaje, id_tarea):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = "UPDATE tareas SET id_personaje = %s WHERE id_tarea = %s"
+
+        cursor.execute(query,(id_personaje, id_tarea,))
+
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
+
+        

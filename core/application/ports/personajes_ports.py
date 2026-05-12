@@ -23,3 +23,6 @@ class PersonajesRepository(ABC):
     def vincular_id_personaje_con_usuario(self, id_usuario:int):
         pass
 
+    
+
+
