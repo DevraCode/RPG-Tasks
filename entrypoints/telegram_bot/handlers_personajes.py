@@ -591,12 +591,12 @@ async def completar_tarea(update:Update, context:CallbackContext):
 
         segundos_enteros = int(tiempo.total_seconds())
 
-        tiempo_transcurrido = time.strftime("%H:%M:%S", time.gmtime(segundos_enteros))
+        horas, resto = divmod(segundos_enteros, 3600)
+        minutos, segundos = divmod(resto, 60)
+
+        tiempo_transcurrido = f"Has tardado {horas} Horas, {minutos} minutos y {segundos} segundos"
 
         await context.bot.send_message(chat_id = update.effective_chat.id, text = f"¡Tarea Completada! Has conseguido +{nueva_exp} EXP y has tardado {tiempo_transcurrido} en completar la tarea")
-
-
-
 
         return ConversationHandler.END
     else:
