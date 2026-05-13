@@ -10,3 +10,7 @@ class LogicaTareas:
     
     def temporizador(self,minutos: int):
          return datetime.now() + timedelta(minutes=minutos)
+    
+    def temporizador_interno(self, tiempo_inicio: int, tiempo_fin: int):
+         return tiempo_fin - tiempo_inicio
+         

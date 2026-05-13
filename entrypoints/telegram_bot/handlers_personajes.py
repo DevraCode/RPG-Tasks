@@ -1,8 +1,11 @@
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMedia
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
+from datetime import datetime
+import time
 import hashlib
+
 
 from core.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from core.infrastructure.repositorios.mysql_personajes_repository import MySQLPersonajesRepository
@@ -511,6 +514,9 @@ async def manejador_minutos(update:Update, context: CallbackContext):
         await context.bot.send_message(chat_id=update.effective_chat.id, text = "¡Que empiece la batalla!")
         await batalla(update, context)
         await query.message.reply_text(text = "Quest en proceso...", reply_markup=InlineKeyboardMarkup(boton_completar_tarea))
+
+        
+
         return COMPLETAR
         
 
@@ -529,6 +535,11 @@ async def entrenar(update:Update, context: CallbackContext):
         await context.bot.send_message(chat_id=update.effective_chat.id, text = "¡Que empiece la batalla!")
         await batalla(update, context)
         await query.message.reply_text(text = "Quest en proceso...", reply_markup=InlineKeyboardMarkup(boton_completar_tarea))
+
+        #Guardamos el tiempo al que se inicia la tarea
+        tiempo_inicio = datetime.now()
+        context.user_data["tiempo_inicio"] = tiempo_inicio
+
         return COMPLETAR
         
     else:
@@ -560,13 +571,30 @@ async def completar_tarea(update:Update, context:CallbackContext):
         #Se sube la exp a la bd
         personajes.subir_exp_bd(subida_exp,id_personaje)
 
-        await context.bot.send_message(chat_id = update.effective_chat.id, text = f"¡Tarea Completada! Has conseguido +{nueva_exp} EXP")
+        
 
         #Ahora llamariamos a subida de nivel si ha llegado al límite de exp del personaje
         #Primero buscamos la exp actual del personaje (ya la tenemos)
         #Lo comparamos con el limite de exp definido en la lógica de personajes
         #Si lo supera se llamará a la función subida de nivel que habrá que definir ahora
-        #Y se sube el resultado  a la BD 
+        #Y se sube el resultado  a la BD
+
+        #Hay que arreglar también el sistema de enemigos y bosses aleatorios
+
+        #Poner un temporizador interno que empiece a partir del "que empiece la batalla" que sume el tiempo que se tarda en darle al botón terminar
+        #Cuanto menos tiempo se tarde, más exp (hacer funcion que de bonos de exp cada x segundos a partir de cierto tiempo hasta cierto tiempo, se reduce la exp a medida que pasa el tiempo)
+        tiempo_inicio = context.user_data.get("tiempo_inicio") #Recuperamos el tiempo en el que empezó la tarea
+
+        tiempo_fin = datetime.now()
+
+        tiempo = tareas.temporizador_interno(tiempo_inicio, tiempo_fin)
+
+        segundos_enteros = int(tiempo.total_seconds())
+
+        tiempo_transcurrido = time.strftime("%H:%M:%S", time.gmtime(segundos_enteros))
+
+        await context.bot.send_message(chat_id = update.effective_chat.id, text = f"¡Tarea Completada! Has conseguido +{nueva_exp} EXP y has tardado {tiempo_transcurrido} en completar la tarea")
+
 
 
 

@@ -1,5 +1,7 @@
 from core.domain.logica_tareas import LogicaTareas
 
+logica_tareas = LogicaTareas()
+
 
 class TareasUseCase:
     def __init__(self, repo):
@@ -29,10 +31,12 @@ class TareasUseCase:
         self.repo.vincular_id_personaje_con_id_tarea(id_personaje, id_tarea)
 
     def temporizador(self, minutos):
-        logica_tareas = LogicaTareas()
         logica_tareas.temporizador(minutos)
     
     def experiencia_tarea_completada(self):
-        logica_tareas = LogicaTareas()
         return logica_tareas.tarea_completada()
+    
+    def temporizador_interno(self, tiempo_inicio, tiempo_fin):
+        return logica_tareas.temporizador_interno(tiempo_inicio, tiempo_fin)
+
         
