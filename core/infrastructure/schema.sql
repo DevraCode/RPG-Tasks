@@ -51,6 +51,6 @@ CREATE TABLE IF NOT EXISTS tareas (
     nombre_tarea VARCHAR(500),
     fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
     tarea_completada BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (id_personaje) REFERENCES personajes(id_personaje),
+    FOREIGN KEY (id_personaje) REFERENCES personajes(id_personaje) ON DELETE CASCADE,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB;

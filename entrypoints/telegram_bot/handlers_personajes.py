@@ -323,12 +323,9 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
 
         personaje_a_entrenar = personajes_user[nuevo_indice]
         
-
         context.user_data["id_personaje"] = personaje_a_entrenar["id_personaje"] #Guardamos el id del personaje
 
         return await menu_tareas(update, context) #Muestra el listado de tareas
-
-        
 
     
     await query.message.delete()
@@ -374,9 +371,7 @@ async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE):
         )]
         keyboard.append(boton)
         
-    
-  
-    #Aquí se mostraria una lista de tareas que el usuario ha registrado previamente, se elige la tarea y se altera la tabla tareas con el id del personaje para luego hacer la lógica de subida de exp, etc
+
     await context.bot.send_message(
     chat_id=update.effective_chat.id,
     text="Selecciona la tarea que quieres asignar:",
@@ -482,7 +477,6 @@ async def manejador_minutos(update:Update, context: CallbackContext):
         
         nuevo_valor = valor_actual
         
-        
         keyboard = [
             [InlineKeyboardButton(text=f"{nuevo_valor} min", callback_data="ignore")],
             [
@@ -510,9 +504,6 @@ async def manejador_minutos(update:Update, context: CallbackContext):
             data=context.user_data.get("id_personaje") 
         )
 
-
-
-
         boton_completar_tarea = [
             [InlineKeyboardButton(text="Terminar", callback_data="TERMINAR")]
         ]
@@ -534,15 +525,12 @@ async def entrenar(update:Update, context: CallbackContext):
             [InlineKeyboardButton(text="Terminar", callback_data="TERMINAR")]
         ]
 
-
         await query.delete_message()
         await context.bot.send_message(chat_id=update.effective_chat.id, text = "¡Que empiece la batalla!")
         await batalla(update, context)
         await query.message.reply_text(text = "Quest en proceso...", reply_markup=InlineKeyboardMarkup(boton_completar_tarea))
         return COMPLETAR
         
-        
-
     else:
 
         await query.delete_message() 
@@ -558,32 +546,30 @@ async def completar_tarea(update:Update, context:CallbackContext):
         id_tarea = context.user_data.get("id_tarea") #Recuperamos el id de la tarea
         id_personaje = context.user_data.get("id_personaje") #Recuperamos el id del personaje
 
-
-        print(id_tarea)
-        print(id_personaje)
-
         #Llamar a funcion de completar tarea y subir exp
         tareas.completar_tarea(id_tarea) #Completar tarea
 
-        #Buscamos al perosnaje en la BD para saber su exp
+        #Buscamos al personaje en la BD para saber su exp
         personaje = personajes.buscar_personaje_por_id(id_personaje)
         exp_personaje = int(personaje["exp"])
 
-        print(exp_personaje)
-
         #Aplicamos la lógica de subida de exp
         nueva_exp = tareas.experiencia_tarea_completada() #+150 exp por tarea completada
-
         subida_exp = personajes.subir_exp(exp_personaje,nueva_exp)
-
-        print(nueva_exp)
-
-        print(subida_exp)
 
         #Se sube la exp a la bd
         personajes.subir_exp_bd(subida_exp,id_personaje)
 
         await context.bot.send_message(chat_id = update.effective_chat.id, text = f"¡Tarea Completada! Has conseguido +{nueva_exp} EXP")
+
+        #Ahora llamariamos a subida de nivel si ha llegado al límite de exp del personaje
+        #Primero buscamos la exp actual del personaje (ya la tenemos)
+        #Lo comparamos con el limite de exp definido en la lógica de personajes
+        #Si lo supera se llamará a la función subida de nivel que habrá que definir ahora
+        #Y se sube el resultado  a la BD 
+
+
+
         return ConversationHandler.END
     else:
         await context.bot.send_message(chat_id = update.effective_chat.id, text = "Aun no has terminado la Quest")
@@ -596,5 +582,5 @@ async def aviso_finalizacion(context: CallbackContext):
     
     await context.bot.send_message(
         chat_id=job.chat_id, 
-        text=f"✅ ¡El entrenamiento ha terminado! Tu personaje ha ganado experiencia."
+        text=f"¡El entrenamiento ha terminado! Tu personaje ha ganado experiencia."
     )
