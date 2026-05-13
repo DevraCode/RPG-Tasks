@@ -5,8 +5,8 @@ class LogicaTareas:
     def __init__(self):
          pass
     
-    def tarea_completada(exp):
-         return exp + 150
+    def tarea_completada(self):
+         return 150
     
-    def temporizador(minutos: int):
+    def temporizador(self,minutos: int):
          return datetime.now() + timedelta(minutes=minutos)

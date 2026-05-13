@@ -15,8 +15,8 @@ from telegram.ext import CallbackContext, InlineQueryHandler
 from .handlers_basicos import NOMBRE, PASSWORD, EMAIL, PEDIR_NOMBRE, PEDIR_PASSWORD
 from .handlers_basicos import start, interaccion_ia, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar, vincular, obtener_username, obtener_password
 
-from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR
-from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes, asignar_tarea, entrenar
+from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR, COMPLETAR, TEMPORIZADOR
+from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes, asignar_tarea, entrenar, completar_tarea, teclado_minutos, manejador_minutos
 
 from .handlers_tareas import INSERTAR_TAREA
 from .handlers_tareas import preguntar_nombre_tarea, crear_tarea, lista_tareas
@@ -49,6 +49,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("tareas", lista_tareas))
     app.add_handler(InlineQueryHandler(inline_handler))
     app.add_handler(CallbackQueryHandler(manejador_stats, pattern=r"^stats_"))
+    
     
     
     
@@ -88,7 +89,9 @@ if __name__ == "__main__":
     states={
         SELECCIONANDO: [CallbackQueryHandler(manejador_lista_personajes)],
         ASIGNAR_TAREA: [CallbackQueryHandler(asignar_tarea)],
-        ENTRENAR: [CallbackQueryHandler(entrenar)]
+        ENTRENAR: [CallbackQueryHandler(entrenar)],
+        COMPLETAR: [CallbackQueryHandler(completar_tarea)],
+        TEMPORIZADOR: [CallbackQueryHandler(manejador_minutos)],
     },
     fallbacks=[CommandHandler('cancel', cancelar)],
     per_message=False,

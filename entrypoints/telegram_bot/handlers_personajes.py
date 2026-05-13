@@ -14,7 +14,7 @@ from core.application.use_cases.basico.personajes_use_cases import PersonajeUseC
 from core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
 from core.application.use_cases.basico.tareas_use_cases import TareasUseCase
 
-from core.domain.logica_tareas import LogicaTareas
+
 
 from core.infrastructure.servicios_ia.cliente_ollama import OllamaClient
 
@@ -36,7 +36,7 @@ tareas = TareasUseCase(repo_tareas)
 catalogo = personajes.personajes_dic()
 lista_personajes = personajes.personajes_list()
 
-logica_tareas = LogicaTareas()
+
 
 
 from core.infrastructure.servicios_ia.config_ia import SYSTEM_INSTRUCTION
@@ -258,7 +258,7 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 
 #El usuario elige a un personaje que va a ser entrenado conforme cumple tareas
 
-SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR = range(3)
+SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR, COMPLETAR, TEMPORIZADOR = range(5)
 
 #Se muestran los personajes que tiene el usuario en una galeria, igual que para elegir personaje
 @usuario_no_existe_o_sesion_cerrada
@@ -369,11 +369,11 @@ async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     for tarea in lista_tareas:
         boton = [InlineKeyboardButton(
-            text=f"📋 {tarea['nombre_tarea'].capitalize()}", 
+            text=f"{tarea['nombre_tarea'].capitalize()}", 
             callback_data=f"{tarea["id_tarea"]}" 
         )]
         keyboard.append(boton)
-        context.user_data["id_tarea"] = tarea["id_tarea"] #Guardamos el id de la tarea
+        
     
   
     #Aquí se mostraria una lista de tareas que el usuario ha registrado previamente, se elige la tarea y se altera la tabla tareas con el id del personaje para luego hacer la lógica de subida de exp, etc
@@ -392,6 +392,8 @@ async def asignar_tarea(update:Update, context: CallbackContext):
     query = update.callback_query
     id_tarea = query.data
 
+    context.user_data["id_tarea"] = id_tarea #Guardamos el id de la tarea
+
     tarea = tareas.buscar_tarea_por_id(id_tarea)
 
     nombre_tarea = tarea["nombre_tarea"]
@@ -403,11 +405,11 @@ async def asignar_tarea(update:Update, context: CallbackContext):
 
     await query.edit_message_text(f"Has elegido a {nombre_personaje} con la misión {nombre_tarea.capitalize()}")
 
-    return await temporizador(update, context) #Llama a la función temporizador
+    return await teclado_temporizador(update, context) #Llama a la función teclado_temporizador
 
 
-
-async def temporizador(update:Update, context:ContextTypes.DEFAULT_TYPE):
+#Solo muestra las opciones
+async def teclado_temporizador(update:Update, context:ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton(text="Si", callback_data="SI")],
         [InlineKeyboardButton(text="No", callback_data="NO")],
@@ -421,6 +423,105 @@ async def temporizador(update:Update, context:ContextTypes.DEFAULT_TYPE):
 
     return ENTRENAR
 
+#Solo muestra la animacion de batalla
+async def batalla(update:Update, context:ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    id_personaje = context.user_data.get("id_personaje") #Recuperamos el id del personaje
+    personaje = personajes.buscar_personaje_por_id(id_personaje) # Y lo buscamos en la BD
+
+    id_tarea = context.user_data.get("id_tarea") #Recuperamos el id de la tarea
+
+    tareas.vincular_personaje_con_tarea(id_personaje, id_tarea) #Vinculamos la tarea al personaje en la BD
+
+    img, icon, anim = ruta_webm(personaje["clase"].lower())
+
+    boss = "./assets/bosses/webm/orc_animation.webm"
+
+    await context.bot.send_sticker(
+    chat_id=query.message.chat_id,
+    sticker=boss
+    )
+
+    await context.bot.send_sticker(
+    chat_id=query.message.chat_id,
+    sticker=anim
+    )
+
+#Funcion que muestra el teclado de los minutos
+async def teclado_minutos(update:Update, context:CallbackContext):
+    valor_inicial = 0
+    
+    keyboard = [
+        [InlineKeyboardButton(text=str(valor_inicial), callback_data="ignore")],
+        [
+            InlineKeyboardButton(text="+", callback_data=f"CAMBIAR_{valor_inicial + 1}"),
+            InlineKeyboardButton(text="-", callback_data=f"CAMBIAR_{max(0, valor_inicial - 1)}")
+        ],
+        [InlineKeyboardButton(text="✅ Confirmar", callback_data=f"CONFIRMAR_{valor_inicial}")]
+    ]
+
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Selecciona los minutos:",
+        reply_markup=InlineKeyboardMarkup(keyboard)
+    )
+
+async def manejador_minutos(update:Update, context: CallbackContext):
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data.split("_")
+    accion = data[0]
+    
+    if accion == "ignore":
+        return
+
+    valor_actual = int(data[1])
+
+    if accion == "CAMBIAR":
+        
+        nuevo_valor = valor_actual
+        
+        
+        keyboard = [
+            [InlineKeyboardButton(text=f"{nuevo_valor} min", callback_data="ignore")],
+            [
+                InlineKeyboardButton(text="+", callback_data=f"CAMBIAR_{nuevo_valor + 1}"),
+                InlineKeyboardButton(text="-", callback_data=f"CAMBIAR_{max(0, nuevo_valor - 1)}")
+            ],
+            [InlineKeyboardButton(text="Confirmar", callback_data=f"CONFIRMAR_{nuevo_valor}")]
+        ]
+        
+        
+        await query.edit_message_reply_markup(
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
+    elif accion == "CONFIRMAR":
+        await query.edit_message_text(text=f"La tarea se completará automáticamente en {valor_actual} minutos.")
+        minutos = valor_actual
+        segundos = minutos * 60
+        chat_id = update.effective_chat.id
+
+        context.job_queue.run_once(
+            callback=aviso_finalizacion, 
+            when=segundos, 
+            chat_id=chat_id,
+            data=context.user_data.get("id_personaje") 
+        )
+
+
+
+
+        boton_completar_tarea = [
+            [InlineKeyboardButton(text="Terminar", callback_data="TERMINAR")]
+        ]
+
+        await context.bot.send_message(chat_id=update.effective_chat.id, text = "¡Que empiece la batalla!")
+        await batalla(update, context)
+        await query.message.reply_text(text = "Quest en proceso...", reply_markup=InlineKeyboardMarkup(boton_completar_tarea))
+        return COMPLETAR
+        
 
 
 async def entrenar(update:Update, context: CallbackContext):
@@ -429,35 +530,71 @@ async def entrenar(update:Update, context: CallbackContext):
 
     if data == "NO":
 
+        boton_completar_tarea = [
+            [InlineKeyboardButton(text="Terminar", callback_data="TERMINAR")]
+        ]
+
+
         await query.delete_message()
-
         await context.bot.send_message(chat_id=update.effective_chat.id, text = "¡Que empiece la batalla!")
-
-        id_personaje = context.user_data.get("id_personaje") #Recuperamos el id del personaje
-        personaje = personajes.buscar_personaje_por_id(id_personaje) # Y lo buscamos en la BD
-
-        id_tarea = context.user_data.get("id_tarea") #Recuperamos el id de la tarea
-
-        tareas.vincular_personaje_con_tarea(id_personaje, id_tarea) #Vinculamos la tarea al personaje en la BD
-
-        img, icon, anim = ruta_webm(personaje["clase"].lower())
-
-        boss = "./assets/bosses/webm/orc_animation.webm"
-
-        await context.bot.send_sticker(
-        chat_id=query.message.chat_id,
-        sticker=boss
-        )
-
-        await context.bot.send_sticker(
-        chat_id=query.message.chat_id,
-        sticker=anim
-        )
+        await batalla(update, context)
+        await query.message.reply_text(text = "Quest en proceso...", reply_markup=InlineKeyboardMarkup(boton_completar_tarea))
+        return COMPLETAR
+        
+        
 
     else:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text = "Wiiiiiiiiii") #Mensaje de prueba
 
-    
+        await query.delete_message() 
+        await teclado_minutos(update, context)   
+        return TEMPORIZADOR
+
+
+async def completar_tarea(update:Update, context:CallbackContext):
+    query = update.callback_query
+    data = query.data
+
+    if data == "TERMINAR":
+        id_tarea = context.user_data.get("id_tarea") #Recuperamos el id de la tarea
+        id_personaje = context.user_data.get("id_personaje") #Recuperamos el id del personaje
+
+
+        print(id_tarea)
+        print(id_personaje)
+
+        #Llamar a funcion de completar tarea y subir exp
+        tareas.completar_tarea(id_tarea) #Completar tarea
+
+        #Buscamos al perosnaje en la BD para saber su exp
+        personaje = personajes.buscar_personaje_por_id(id_personaje)
+        exp_personaje = int(personaje["exp"])
+
+        print(exp_personaje)
+
+        #Aplicamos la lógica de subida de exp
+        nueva_exp = tareas.experiencia_tarea_completada() #+150 exp por tarea completada
+
+        subida_exp = personajes.subir_exp(exp_personaje,nueva_exp)
+
+        print(nueva_exp)
+
+        print(subida_exp)
+
+        #Se sube la exp a la bd
+        personajes.subir_exp_bd(subida_exp,id_personaje)
+
+        await context.bot.send_message(chat_id = update.effective_chat.id, text = f"¡Tarea Completada! Has conseguido +{nueva_exp} EXP")
+        return ConversationHandler.END
+    else:
+        await context.bot.send_message(chat_id = update.effective_chat.id, text = "Aun no has terminado la Quest")
+        return COMPLETAR
     
 
+async def aviso_finalizacion(context: CallbackContext):
+    job = context.job
+    id_personaje = job.data
     
+    await context.bot.send_message(
+        chat_id=job.chat_id, 
+        text=f"✅ ¡El entrenamiento ha terminado! Tu personaje ha ganado experiencia."
+    )

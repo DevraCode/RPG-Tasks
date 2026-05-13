@@ -23,6 +23,10 @@ class PersonajesRepository(ABC):
     def vincular_id_personaje_con_usuario(self, id_usuario:int):
         pass
 
+    @abstractmethod
+    def subida_experiencia(self,id_personaje,exp):
+        pass
+
     
 
 

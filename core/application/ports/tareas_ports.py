@@ -16,7 +16,7 @@ class TareasRepository(ABC):
         pass
 
     @abstractmethod
-    def completar_tarea(self, id_tarea, nombre_tarea):
+    def completar_tarea(self, id_tarea):
         pass
 
     @abstractmethod

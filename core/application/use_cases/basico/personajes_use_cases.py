@@ -1,4 +1,5 @@
 from core.domain.clases_personajes import CLASES_DISPONIBLES
+from core.domain.logica_personajes import LogicaPersonajes
 
 
 class PersonajeUseCase:
@@ -54,4 +55,10 @@ class PersonajeUseCase:
         resultado = self.repo_personajes.vincular_id_personaje_con_usuario(id_externo)
 
         return resultado
+    
+    def subir_exp(self,exp_actual, nueva_exp):
+        logica_personajes = LogicaPersonajes()
+        return logica_personajes.subir_exp(exp_actual, nueva_exp)
 
+    def subir_exp_bd(self,exp,id_personaje):
+        self.repo_personajes.subida_experiencia(exp,id_personaje)

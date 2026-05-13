@@ -115,5 +115,16 @@ class MySQLPersonajesRepository(PersonajesRepository):
             cursor.close()
             conn.close()
     
+    def subida_experiencia(self, exp,id_personaje):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
 
+        query = "UPDATE personajes SET exp = %s WHERE id_personaje = %s"
+
+        cursor.execute(query,(exp,id_personaje,))
+
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
     
