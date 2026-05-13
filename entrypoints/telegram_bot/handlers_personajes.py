@@ -14,6 +14,8 @@ from core.application.use_cases.basico.personajes_use_cases import PersonajeUseC
 from core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
 from core.application.use_cases.basico.tareas_use_cases import TareasUseCase
 
+from core.domain.logica_tareas import LogicaTareas
+
 from core.infrastructure.servicios_ia.cliente_ollama import OllamaClient
 
 
@@ -33,6 +35,8 @@ tareas = TareasUseCase(repo_tareas)
 
 catalogo = personajes.personajes_dic()
 lista_personajes = personajes.personajes_list()
+
+logica_tareas = LogicaTareas()
 
 
 from core.infrastructure.servicios_ia.config_ia import SYSTEM_INSTRUCTION
@@ -254,7 +258,7 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 
 #El usuario elige a un personaje que va a ser entrenado conforme cumple tareas
 
-SELECCIONANDO, ASIGNAR_TAREA = range(2)
+SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR = range(3)
 
 #Se muestran los personajes que tiene el usuario en una galeria, igual que para elegir personaje
 @usuario_no_existe_o_sesion_cerrada
@@ -322,20 +326,15 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
 
         context.user_data["id_personaje"] = personaje_a_entrenar["id_personaje"] #Guardamos el id del personaje
 
-        await query.message.reply_text(f"Has seleccionado a {personaje_a_entrenar["nombre_personaje"]}. Elige la tarea con la que quieres entrenarle")
-        
-        
         return await menu_tareas(update, context) #Muestra el listado de tareas
+
+        
 
     
     await query.message.delete()
-
-
     
     nuevo_personaje = personajes_user[nuevo_indice]
     img, icon, anim = ruta_webm(nuevo_personaje["clase"].lower())
-    
-        
     
     nuevo_keyboard = [
         [InlineKeyboardButton(nuevo_personaje["nombre_personaje"], callback_data="ignore")],
@@ -357,6 +356,10 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
 
 
 async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.message.delete()
+
+
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
     id_usuario = plataformas.vincular_id_externo_usuario(id_generado)
 
@@ -366,16 +369,17 @@ async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     for tarea in lista_tareas:
         boton = [InlineKeyboardButton(
-            text=f"📋 {tarea['nombre_tarea']}", 
+            text=f"📋 {tarea['nombre_tarea'].capitalize()}", 
             callback_data=f"{tarea["id_tarea"]}" 
         )]
         keyboard.append(boton)
+        context.user_data["id_tarea"] = tarea["id_tarea"] #Guardamos el id de la tarea
     
   
     #Aquí se mostraria una lista de tareas que el usuario ha registrado previamente, se elige la tarea y se altera la tabla tareas con el id del personaje para luego hacer la lógica de subida de exp, etc
     await context.bot.send_message(
     chat_id=update.effective_chat.id,
-    text="🎯 *Selecciona la tarea que quieres asignar:*",
+    text="Selecciona la tarea que quieres asignar:",
     reply_markup=InlineKeyboardMarkup(keyboard),
     parse_mode="Markdown"
     )
@@ -383,6 +387,7 @@ async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE):
     
     return ASIGNAR_TAREA
 
+  
 async def asignar_tarea(update:Update, context: CallbackContext):
     query = update.callback_query
     id_tarea = query.data
@@ -391,31 +396,68 @@ async def asignar_tarea(update:Update, context: CallbackContext):
 
     nombre_tarea = tarea["nombre_tarea"]
 
-    await query.edit_message_text(f"Has elegido {nombre_tarea.capitalize()}. ¡Comienza la batalla!")
-
     id_personaje = context.user_data.get("id_personaje") #Recuperamos el id del personaje
     personaje = personajes.buscar_personaje_por_id(id_personaje) # Y lo buscamos en la BD
 
-    tareas.vincular_personaje_con_tarea(id_personaje, id_tarea) #Vinculamos la tarea al personaje en la BD
+    nombre_personaje = personaje["nombre_personaje"]
 
-    
+    await query.edit_message_text(f"Has elegido a {nombre_personaje} con la misión {nombre_tarea.capitalize()}")
 
-    img, icon, anim = ruta_webm(personaje["clase"].lower())
+    return await temporizador(update, context) #Llama a la función temporizador
 
-    boss = "./assets/bosses/webm/orc_animation.webm"
 
-    await context.bot.send_sticker(
-    chat_id=query.message.chat_id,
-    sticker=boss
+
+async def temporizador(update:Update, context:ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton(text="Si", callback_data="SI")],
+        [InlineKeyboardButton(text="No", callback_data="NO")],
+    ]
+    await context.bot.send_message(
+    chat_id=update.effective_chat.id,
+    text="¿Quieres establecer un temporizador?",
+    reply_markup=InlineKeyboardMarkup(keyboard),
+    parse_mode="Markdown"
     )
 
+    return ENTRENAR
+
+
+
+async def entrenar(update:Update, context: CallbackContext):
+    query = update.callback_query
+    data = query.data
+
+    if data == "NO":
+
+        await query.delete_message()
+
+        await context.bot.send_message(chat_id=update.effective_chat.id, text = "¡Que empiece la batalla!")
+
+        id_personaje = context.user_data.get("id_personaje") #Recuperamos el id del personaje
+        personaje = personajes.buscar_personaje_por_id(id_personaje) # Y lo buscamos en la BD
+
+        id_tarea = context.user_data.get("id_tarea") #Recuperamos el id de la tarea
+
+        tareas.vincular_personaje_con_tarea(id_personaje, id_tarea) #Vinculamos la tarea al personaje en la BD
+
+        img, icon, anim = ruta_webm(personaje["clase"].lower())
+
+        boss = "./assets/bosses/webm/orc_animation.webm"
+
+        await context.bot.send_sticker(
+        chat_id=query.message.chat_id,
+        sticker=boss
+        )
+
+        await context.bot.send_sticker(
+        chat_id=query.message.chat_id,
+        sticker=anim
+        )
+
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text = "Wiiiiiiiiii") #Mensaje de prueba
+
     
-    await context.bot.send_sticker(
-    chat_id=query.message.chat_id,
-    sticker=anim
-    )
     
 
-    await context.bot.send_message(chat_id=update.effective_chat.id, text = "Wiiiiiiiiii") #Mensaje de prueba
-
-    #Ahora colocar la opción de poner un temporizador o comenzar la batalla directamente
+    
