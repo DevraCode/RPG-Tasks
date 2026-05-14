@@ -580,7 +580,7 @@ async def completar_tarea(update:Update, context:CallbackContext):
 
         
 
-        #Poner un temporizador interno que empiece a partir del "que empiece la batalla" que sume el tiempo que se tarda en darle al botón terminar
+        #Poner un temporizador interno que empiece a partir del "¡Ha aparecido un enemigo!" que sume el tiempo que se tarda en darle al botón terminar
         tiempo_inicio = context.user_data.get("tiempo_inicio") #Recuperamos el tiempo en el que empezó la tarea
         tiempo_fin = datetime.now()
         tiempo = tareas.temporizador_interno(tiempo_inicio, tiempo_fin)
