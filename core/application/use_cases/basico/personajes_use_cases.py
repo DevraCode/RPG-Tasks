@@ -2,6 +2,11 @@ from core.domain.clases_personajes import CLASES_DISPONIBLES
 from core.domain.logica_personajes import LogicaPersonajes
 
 
+
+logica_personajes = LogicaPersonajes()
+
+
+
 class PersonajeUseCase:
     def __init__(self, repo_personajes, repo_usuarios):
         self.repo_personajes = repo_personajes  # Para guardar el personaje
@@ -57,8 +62,10 @@ class PersonajeUseCase:
         return resultado
     
     def subir_exp(self,exp_actual, nueva_exp):
-        logica_personajes = LogicaPersonajes()
         return logica_personajes.subir_exp(exp_actual, nueva_exp)
 
     def subir_exp_bd(self,exp,id_personaje):
         self.repo_personajes.subida_experiencia(exp,id_personaje)
+
+
+    

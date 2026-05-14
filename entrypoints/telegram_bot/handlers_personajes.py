@@ -16,6 +16,7 @@ from core.application.use_cases.basico.usuarios_use_cases import UsuarioUsecase
 from core.application.use_cases.basico.personajes_use_cases import PersonajeUseCase
 from core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
 from core.application.use_cases.basico.tareas_use_cases import TareasUseCase
+from core.application.use_cases.basico.enemigos_use_cases import EnemigosUseCase
 
 
 
@@ -35,6 +36,7 @@ usuarios = UsuarioUsecase(repo_usuarios)
 personajes = PersonajeUseCase(repo_personajes, repo_usuarios)
 plataformas = PlataformasUseCase(repo_plataformas)
 tareas = TareasUseCase(repo_tareas)
+enemigos = EnemigosUseCase()
 
 catalogo = personajes.personajes_dic()
 lista_personajes = personajes.personajes_list()
@@ -377,7 +379,7 @@ async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     await context.bot.send_message(
     chat_id=update.effective_chat.id,
-    text="Selecciona la tarea que quieres asignar:",
+    text="Selecciona una Quest del tablón de Misiones:",
     reply_markup=InlineKeyboardMarkup(keyboard),
     parse_mode="Markdown"
     )
@@ -401,7 +403,7 @@ async def asignar_tarea(update:Update, context: CallbackContext):
 
     nombre_personaje = personaje["nombre_personaje"]
 
-    await query.edit_message_text(f"Has elegido a {nombre_personaje} con la misión {nombre_tarea.capitalize()}")
+    await query.edit_message_text(f"Has elegido a {nombre_personaje} con la Quest {nombre_tarea.capitalize()}")
 
     return await teclado_temporizador(update, context) #Llama a la función teclado_temporizador
 
@@ -433,7 +435,7 @@ async def batalla(update:Update, context:ContextTypes.DEFAULT_TYPE):
 
     img, icon, anim = ruta_webm(personaje["clase"].lower())
 
-    boss = "./assets/bosses/webm/orc_animation.webm"
+    boss = enemigos.enemigo_aleatorio_webm()
 
     await context.bot.send_sticker(
     chat_id=query.message.chat_id,
@@ -452,10 +454,11 @@ async def teclado_minutos(update:Update, context:CallbackContext):
     keyboard = [
         [InlineKeyboardButton(text=str(valor_inicial), callback_data="ignore")],
         [
-            InlineKeyboardButton(text="+", callback_data=f"CAMBIAR_{valor_inicial + 1}"),
-            InlineKeyboardButton(text="-", callback_data=f"CAMBIAR_{max(0, valor_inicial - 1)}")
+            InlineKeyboardButton(text="-", callback_data=f"CAMBIAR_{max(0, valor_inicial - 1)}"),
+            InlineKeyboardButton(text="+", callback_data=f"CAMBIAR_{valor_inicial + 1}")
+            
         ],
-        [InlineKeyboardButton(text="✅ Confirmar", callback_data=f"CONFIRMAR_{valor_inicial}")]
+        [InlineKeyboardButton(text="Confirmar", callback_data=f"CONFIRMAR_{valor_inicial}")]
     ]
 
     await context.bot.send_message(
@@ -483,8 +486,9 @@ async def manejador_minutos(update:Update, context: CallbackContext):
         keyboard = [
             [InlineKeyboardButton(text=f"{nuevo_valor} min", callback_data="ignore")],
             [
-                InlineKeyboardButton(text="+", callback_data=f"CAMBIAR_{nuevo_valor + 1}"),
-                InlineKeyboardButton(text="-", callback_data=f"CAMBIAR_{max(0, nuevo_valor - 1)}")
+                InlineKeyboardButton(text="-", callback_data=f"CAMBIAR_{max(0, nuevo_valor - 1)}"),
+                InlineKeyboardButton(text="+", callback_data=f"CAMBIAR_{nuevo_valor + 1}")
+                
             ],
             [InlineKeyboardButton(text="Confirmar", callback_data=f"CONFIRMAR_{nuevo_valor}")]
         ]
@@ -532,9 +536,9 @@ async def entrenar(update:Update, context: CallbackContext):
         ]
 
         await query.delete_message()
-        await context.bot.send_message(chat_id=update.effective_chat.id, text = "¡Que empiece la batalla!")
+        await context.bot.send_message(chat_id=update.effective_chat.id, text = "¡Ha aparecido un enemigo! ¡Completa la Quest para vencerlo!")
         await batalla(update, context)
-        await query.message.reply_text(text = "Quest en proceso...", reply_markup=InlineKeyboardMarkup(boton_completar_tarea))
+        await query.message.reply_text(text = "Completando la Quest...", reply_markup=InlineKeyboardMarkup(boton_completar_tarea))
 
         #Guardamos el tiempo al que se inicia la tarea
         tiempo_inicio = datetime.now()
@@ -568,35 +572,33 @@ async def completar_tarea(update:Update, context:CallbackContext):
         nueva_exp = tareas.experiencia_tarea_completada() #+150 exp por tarea completada
         subida_exp = personajes.subir_exp(exp_personaje,nueva_exp)
 
-        #Se sube la exp a la bd
-        personajes.subir_exp_bd(subida_exp,id_personaje)
-
-        
-
         #Ahora llamariamos a subida de nivel si ha llegado al límite de exp del personaje
         #Primero buscamos la exp actual del personaje (ya la tenemos)
         #Lo comparamos con el limite de exp definido en la lógica de personajes
         #Si lo supera se llamará a la función subida de nivel que habrá que definir ahora
         #Y se sube el resultado  a la BD
 
-        #Hay que arreglar también el sistema de enemigos y bosses aleatorios
+        
 
         #Poner un temporizador interno que empiece a partir del "que empiece la batalla" que sume el tiempo que se tarda en darle al botón terminar
-        #Cuanto menos tiempo se tarde, más exp (hacer funcion que de bonos de exp cada x segundos a partir de cierto tiempo hasta cierto tiempo, se reduce la exp a medida que pasa el tiempo)
         tiempo_inicio = context.user_data.get("tiempo_inicio") #Recuperamos el tiempo en el que empezó la tarea
-
         tiempo_fin = datetime.now()
-
         tiempo = tareas.temporizador_interno(tiempo_inicio, tiempo_fin)
 
         segundos_enteros = int(tiempo.total_seconds())
-
         horas, resto = divmod(segundos_enteros, 3600)
         minutos, segundos = divmod(resto, 60)
 
-        tiempo_transcurrido = f"Has tardado {horas} Horas, {minutos} minutos y {segundos} segundos"
+        tiempo_transcurrido = f"{horas} Horas, {minutos} minutos y {segundos} segundos"
 
-        await context.bot.send_message(chat_id = update.effective_chat.id, text = f"¡Tarea Completada! Has conseguido +{nueva_exp} EXP y has tardado {tiempo_transcurrido} en completar la tarea")
+        await context.bot.send_message(chat_id = update.effective_chat.id, text = f"¡Quest Completada! Has conseguido +{nueva_exp} EXP y Has tardado {tiempo_transcurrido} en completar la tarea")
+
+        #Cuanto menos tiempo se tarde, más exp (hacer funcion que de bonos de exp cada x segundos a partir de cierto tiempo hasta cierto tiempo, se reduce la exp a medida que pasa el tiempo)
+
+
+        #Se sube la exp a la bd
+        personajes.subir_exp_bd(subida_exp,id_personaje)
+
 
         return ConversationHandler.END
     else:
