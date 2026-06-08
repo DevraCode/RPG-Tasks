@@ -1,6 +1,6 @@
 # <img width="99" height="101" alt="espadas-ezgif com-gif-maker (1) (1)" src="https://github.com/user-attachments/assets/2b223684-1a8c-4892-b718-ee356fbfa3a1" /> RPG TaskBot <img width="99" height="101" alt="espadas-ezgif com-gif-maker (1) (1)" src="https://github.com/user-attachments/assets/16710121-78cc-4480-9579-0dad964cc930" />
 
-## English
+# English
 
 ### Important
 The character images are animated Ragnarok Online sprites taken from the Ro sprite simulator and used solely for testing the app. You can add your own animated characters.
@@ -15,7 +15,7 @@ Please note:
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-## Spanish
+# Spanish
 
 ### Importante
 Las imágenes de los personajes son sprites de Ragnarok Online animados sacados del simulador de sprites de Ro y utilizados únicamente para probar la aplicación. Puedes añadir tus propios personajes animados.
