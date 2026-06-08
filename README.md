@@ -11,6 +11,12 @@ Please note:
 - In the character icons folder, they are in .gif and .webm formats. The app automatically separates each format for its corresponding app.
 - Make sure each image format is in its corresponding folder; each app handles finding the paths on its own.
 
+The app will be available on the following platforms:
+* Telegram Bot - Development nearly complete
+* Discord Bot - In development
+* Web App - In development
+* Android - In development
+
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -25,6 +31,11 @@ Ten en cuenta:
 - En la carpeta de iconos de los personajes están en .gif y .webm. La aplicación ya se encarga de separar cada formato para su aplicación correspondiente.
 - Asegurate de que cada formato de imagen esté en su carpeta correspondiente, cada aplicacion ya se encarga de buscar las rutas.
 
+La aplicación estará disponible para las siguientes plataformas:
+* Telegram Bot - Desarollo casi completado
+* Discord Bot - En desarrollo
+* Web App - En desarollo
+* Android - En desarollo
 
 
 
