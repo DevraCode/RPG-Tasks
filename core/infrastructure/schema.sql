@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     activo BOOLEAN DEFAULT TRUE,
     rango VARCHAR(50),
-    tipo_usuario INT DEFAULT 0
+    tipo_usuario INT DEFAULT 0,
+    idioma_usuario VARCHAR(2)
 ) ENGINE=InnoDB;
 
 -- TABLA PLATAFORMAS

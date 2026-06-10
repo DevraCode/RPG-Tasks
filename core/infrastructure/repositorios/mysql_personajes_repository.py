@@ -1,6 +1,6 @@
 import mysql.connector
 from core.application.ports.personajes_ports import PersonajesRepository
-from core.domain.models import Personaje
+from core.domain.entidades import Personaje
 
 class MySQLPersonajesRepository(PersonajesRepository):
 

@@ -1,7 +1,7 @@
 import uuid
 import hashlib
 import inspect
-from core.domain.models import Usuario, Plataformas
+from core.domain.entidades import Usuario, Plataformas
 from core.domain.auth_utils import verificar_password
 from core.domain.clases_personajes import CLASES_DISPONIBLES
 

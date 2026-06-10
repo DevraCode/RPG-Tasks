@@ -9,11 +9,11 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ConversationHandler
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMedia
-from telegram.ext import CallbackContext, InlineQueryHandler
+from telegram.ext import CallbackContext, InlineQueryHandler, TypeHandler
 #-----------------------------------------------------------------------------------------------------------------------------
 #Importaciones propias del bot
 from .handlers_basicos import NOMBRE, PASSWORD, EMAIL, PEDIR_NOMBRE, PEDIR_PASSWORD
-from .handlers_basicos import start, interaccion_ia, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar, vincular, obtener_username, obtener_password
+from .handlers_basicos import start, manejador_start, interaccion_ia, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar, vincular, obtener_username, obtener_password
 
 from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR, COMPLETAR, TEMPORIZADOR
 from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes, asignar_tarea, entrenar, completar_tarea, teclado_minutos, manejador_minutos
@@ -32,7 +32,30 @@ load_dotenv()
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-#INICIO DEL BOT
+
+from core.infrastructure.traduccion.traduccion import IDIOMAS_USUARIOS, translate
+import builtins
+
+
+
+async def filtro_idioma_middleware(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.effective_user:
+        return
+    
+    user_id = update.effective_user.id
+    
+    idioma_elegido = IDIOMAS_USUARIOS.get(user_id, "es")
+    
+    print(f"--- MIDDLEWARE ACTIVO ---")
+    print(f"Usuario: {user_id} | Idioma en el juego: {idioma_elegido}")
+    
+    
+    if idioma_elegido == "es":
+        builtins._ = lambda texto: texto
+    else:
+        builtins._ = lambda texto: translate(key=texto, lang=idioma_elegido)
+
+
 if __name__ == "__main__":
     
     token = os.getenv("TELEGRAM_TOKEN")
@@ -41,6 +64,8 @@ if __name__ == "__main__":
     #-----------------------------------------------------------------------------------------------------------------------------
 
     #HANDLERS
+    app.add_handler(TypeHandler(Update, filtro_idioma_middleware), group=-1)
+    
     
 
 
@@ -48,6 +73,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("tareas", lista_tareas))
     app.add_handler(InlineQueryHandler(inline_handler))
+    app.add_handler(CallbackQueryHandler(manejador_start))
     app.add_handler(CallbackQueryHandler(manejador_stats, pattern=r"^stats_"))
     
     

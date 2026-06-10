@@ -4,14 +4,14 @@
 #Externas
 import os
 from dotenv import load_dotenv
-from telegram import Update
-from telegram.ext import ContextTypes, ConversationHandler
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes, ConversationHandler, CallbackContext
 import hashlib
 
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #Internas
-from core.domain.models import CorrespondenciaPlataformas, TiposUsuario, Rango
+from core.domain.entidades import CorrespondenciaPlataformas, TiposUsuario, Rango
 from core.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from core.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
 from core.application.use_cases.basico.basic_use_cases import MensajeInicioUseCase, CrearCuentaUseCase
@@ -20,6 +20,9 @@ from core.application.use_cases.basico.plataformas_use_cases import PlataformasU
 from core.infrastructure.dbconfig import db_config
 from .decoradores import usuario_existe
 
+from core.infrastructure.traduccion.traduccion import IDIOMAS_USUARIOS
+from core.infrastructure.traduccion.traduccion import translate
+import builtins
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -57,10 +60,36 @@ ia = OllamaClient(
 
 #HANDLERS
 async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
-    mensaje_inicio = mensaje_bienvenida.mensaje()
-    await update.message.reply_text(mensaje_inicio)
-    await update.message.reply_text(f"Utiliza el comando /registro para crear una cuenta. Si ya tienes cuenta, utiliza el comando /vincular para iniciar sesión")
 
+    keyboard = [
+         [InlineKeyboardButton(text="English", callback_data="lang_en"), InlineKeyboardButton(text="Español", callback_data="lang_es")]
+    ]
+   
+
+    await context.bot.send_message(chat_id=update.effective_chat.id, text="Select your language / Selecciona tu idioma", reply_markup=InlineKeyboardMarkup(keyboard))
+
+
+#Crear manjeador de botones
+async def manejador_start(update:Update, context:CallbackContext):
+     query = update.callback_query
+     data = query.data
+     
+     id_telegram = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+
+     if data == "lang_es":
+        IDIOMAS_USUARIOS[id_telegram] = "es"
+        builtins._ = lambda texto: texto 
+        await query.edit_message_text(text=("Idioma configurado en Español."))
+        await context.bot.send_message(chat_id = update.effective_chat.id, text = mensaje_bienvenida.mensaje())
+        await context.bot.send_message(chat_id = update.effective_chat.id, text = mensaje_bienvenida.mensaje_registro_telegram())
+
+     elif data == "lang_en":
+        IDIOMAS_USUARIOS[id_telegram] = "en"
+        builtins._ = lambda texto: translate(key=texto, lang="en")
+        await query.edit_message_text(text=("Language set to English."))
+        await context.bot.send_message(chat_id = update.effective_chat.id, text = mensaje_bienvenida.mensaje())
+        await context.bot.send_message(chat_id = update.effective_chat.id, text = mensaje_bienvenida.mensaje_registro_telegram())
+          
 
 async def interaccion_ia(update, context):
     mensaje_usuario = update.message.text
@@ -140,6 +169,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
     password_bytes = f"{password}".encode()
     password_encriptado = hashlib.sha256(password_bytes).hexdigest()[:8]
     email = context.user_data.get('email_usuario')
+    idioma = update.effective_user.language_code
 
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
 
@@ -149,6 +179,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
             email_usuario=email,
             rango= Rango.novato,
             tipo_usuario=TiposUsuario.USUARIO,
+            idioma_usuario= idioma,
             id_plataforma = CorrespondenciaPlataformas.TELEGRAM,
             nombre_plataforma="TELEGRAM",
             id_externo_usuario=id_generado

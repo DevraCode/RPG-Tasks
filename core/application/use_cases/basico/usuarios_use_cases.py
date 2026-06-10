@@ -1,17 +1,18 @@
-from core.domain.models import Usuario
+from core.domain.entidades import Usuario
 
 class UsuarioUsecase:
     def __init__(self, repo):
         self.repo = repo
 
-    def registrar_usuario(self, nombre_usuario: str, password_usuario: str, email_usuario: str, rango: str, tipo_usuario:int, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str):
+    def registrar_usuario(self, nombre_usuario: str, password_usuario: str, email_usuario: str, rango: str, tipo_usuario:int, idioma_usuario: str, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str):
         nuevo_usuario = Usuario(
             id_usuario = None,
             nombre_usuario = nombre_usuario,
             password_usuario = password_usuario,
             email_usuario = email_usuario,
             rango = rango,
-            tipo_usuario = tipo_usuario
+            tipo_usuario = tipo_usuario,
+            idioma_usuario= idioma_usuario
 
         )
         registro = self.repo.registrar_usuario(nuevo_usuario, id_plataforma, nombre_plataforma, id_externo_usuario)

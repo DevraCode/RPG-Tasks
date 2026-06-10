@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from core.domain.models import Usuario
+from core.domain.entidades import Usuario
 from typing import Optional
 
 

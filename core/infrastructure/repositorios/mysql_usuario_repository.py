@@ -1,6 +1,6 @@
 import mysql.connector
 from core.application.ports.usuarios_ports import UsuarioRepository
-from core.domain.models import Usuario, Plataformas
+from core.domain.entidades import Usuario
 
 class MySQLUsuarioRepository(UsuarioRepository):
 
@@ -163,7 +163,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
 
         query = """ 
         INSERT INTO usuarios 
-        (nombre_usuario, password_usuario, email_usuario, rango, tipo_usuario)
+        (nombre_usuario, password_usuario, email_usuario, rango, tipo_usuario, idioma_usuario)
         VALUES (%s, %s, %s, %s, %s)
         """
         query2 = """ 
@@ -177,7 +177,8 @@ class MySQLUsuarioRepository(UsuarioRepository):
             usuario.password_usuario, 
             usuario.email_usuario,
             usuario.rango,
-            usuario.tipo_usuario
+            usuario.tipo_usuario,
+            usuario.idioma_usuario
         )
 
         try:

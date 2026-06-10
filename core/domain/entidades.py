@@ -31,6 +31,7 @@ class Usuario:
     activo: bool = True
     rango: str = None
     tipo_usuario: int = 0
+    idioma_usuario: str = None
 
 @dataclass
 class Personaje:
