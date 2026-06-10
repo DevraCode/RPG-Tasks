@@ -24,6 +24,9 @@ from .handlers_tareas import preguntar_nombre_tarea, crear_tarea, lista_tareas
 from .handlers_inline import inline_handler, manejador_stats
 
 from .menu import menu
+
+from core.infrastructure.traduccion.traduccion import IDIOMAS_USUARIOS, traducir
+import builtins
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
@@ -32,12 +35,7 @@ load_dotenv()
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-
-from core.infrastructure.traduccion.traduccion import IDIOMAS_USUARIOS, translate
-import builtins
-
-
-
+#FUNCIÓN DE TRADUCCIÓN
 async def filtro_idioma_middleware(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.effective_user:
         return
@@ -45,35 +43,34 @@ async def filtro_idioma_middleware(update: Update, context: ContextTypes.DEFAULT
     user_id = update.effective_user.id
     
     idioma_elegido = IDIOMAS_USUARIOS.get(user_id, "es")
-    
-    print(f"--- MIDDLEWARE ACTIVO ---")
-    print(f"Usuario: {user_id} | Idioma en el juego: {idioma_elegido}")
-    
-    
+       
     if idioma_elegido == "es":
         builtins._ = lambda texto: texto
     else:
-        builtins._ = lambda texto: translate(key=texto, lang=idioma_elegido)
+        builtins._ = lambda texto: traducir(texto=texto, lang=idioma_elegido)
+
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
     
     token = os.getenv("TELEGRAM_TOKEN")
     app = ApplicationBuilder().token(token).post_init(menu).build()
+
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
 
     #HANDLERS
     app.add_handler(TypeHandler(Update, filtro_idioma_middleware), group=-1)
     
-    
-
-
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("tareas", lista_tareas))
     app.add_handler(InlineQueryHandler(inline_handler))
-    app.add_handler(CallbackQueryHandler(manejador_start))
+
+    #He puesto expresiones regulares para que no se intercepten los data query de los botones entre los comandos
+    app.add_handler(CallbackQueryHandler(manejador_start, pattern=r"^lang_"))
     app.add_handler(CallbackQueryHandler(manejador_stats, pattern=r"^stats_"))
     
     
@@ -163,5 +160,5 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, interaccion_ia))
 
     
-    print("🤖 Bot de RPG iniciado y conectado a MySQL...")
+    print("Bot Iniciado")
     app.run_polling()

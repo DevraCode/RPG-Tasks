@@ -4,7 +4,7 @@
 #Externas
 import os
 from dotenv import load_dotenv
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommandScopeChat
 from telegram.ext import ContextTypes, ConversationHandler, CallbackContext
 import hashlib
 
@@ -21,7 +21,7 @@ from core.infrastructure.dbconfig import db_config
 from .decoradores import usuario_existe
 
 from core.infrastructure.traduccion.traduccion import IDIOMAS_USUARIOS
-from core.infrastructure.traduccion.traduccion import translate
+from core.infrastructure.traduccion.traduccion import traducir
 import builtins
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -78,17 +78,41 @@ async def manejador_start(update:Update, context:CallbackContext):
 
      if data == "lang_es":
         IDIOMAS_USUARIOS[id_telegram] = "es"
+        context.user_data["idioma"] = IDIOMAS_USUARIOS[id_telegram] #Guardamos el idioma elegido en una variable temporal
+
         builtins._ = lambda texto: texto 
         await query.edit_message_text(text=("Idioma configurado en Español."))
         await context.bot.send_message(chat_id = update.effective_chat.id, text = mensaje_bienvenida.mensaje())
         await context.bot.send_message(chat_id = update.effective_chat.id, text = mensaje_bienvenida.mensaje_registro_telegram())
+        await context.bot.set_my_commands(
+        commands=[
+            ("registro", "Crear una cuenta de héroe"),
+            ("vincular", "Vincula una cuenta existente"),
+            ("personaje", "Elige un personaje"),
+            ("entrenar", "Elige uno de tus personajes y asígnale una tarea para entrenarlo"),
+            ("nuevatarea", "Crea una tarea nueva"),
+        ],
+        scope=BotCommandScopeChat(chat_id=update.effective_chat.id)
+    )
 
      elif data == "lang_en":
         IDIOMAS_USUARIOS[id_telegram] = "en"
-        builtins._ = lambda texto: translate(key=texto, lang="en")
+        context.user_data["idioma"] = IDIOMAS_USUARIOS[id_telegram] #Guardamos el idioma elegido en una variable temporal
+
+        builtins._ = lambda texto: traducir(texto=texto, lang="en")
         await query.edit_message_text(text=("Language set to English."))
         await context.bot.send_message(chat_id = update.effective_chat.id, text = mensaje_bienvenida.mensaje())
         await context.bot.send_message(chat_id = update.effective_chat.id, text = mensaje_bienvenida.mensaje_registro_telegram())
+        await context.bot.set_my_commands(
+        [
+            ("signup", "Create a hero account"),
+            ("link", "Link an existing account"),
+            ("character", "Choose a character"),
+            ("train", "Choose one of your characters and assign a task to train them"),
+            ("newtask", "Create a new task"),
+        ],
+        scope=BotCommandScopeChat(chat_id=update.effective_chat.id)
+    )
           
 
 async def interaccion_ia(update, context):
@@ -169,7 +193,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
     password_bytes = f"{password}".encode()
     password_encriptado = hashlib.sha256(password_bytes).hexdigest()[:8]
     email = context.user_data.get('email_usuario')
-    idioma = update.effective_user.language_code
+    idioma = context.user_data.get("idioma")
 
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
 

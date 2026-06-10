@@ -6,8 +6,7 @@ from core.domain.clases_personajes import CLASES_DISPONIBLES
 #Mensaje de Inicio
 class MensajeInicioUseCase:
     def mensaje(self):
-        mensaje_inicio = _(""" Bienvenido a RPG Tasks 
-        Crea tu cuenta o inicia sesión y ya podrás empezar a usar la aplicación. 
+        mensaje_inicio = _(""" Bienvenido a RPG Tasks. 
         ¡Diviértete eligiendo un personaje y subiendo de nivel a medida que completas tareas!
         ¡Los personajes también evolucionan!
         Puedes elegir entre:
@@ -18,7 +17,7 @@ class MensajeInicioUseCase:
         return inspect.cleandoc(mensaje_inicio)
     
     def mensaje_registro_telegram(self):
-        mensaje = _("Utiliza el comando /registro para crear una cuenta. Si ya tienes cuenta, utiliza el comando /vincular para iniciar sesión")
+        mensaje = _("En el Menu de abajo tienes un listado de comandos, comienza por crear un usuario o vincular una cuenta y luego elige un personaje")
         return inspect.cleandoc(mensaje)
     
 #Simplemente pide las credenciales para crear una cuenta nueva
