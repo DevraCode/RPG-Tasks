@@ -69,6 +69,18 @@ Para usar la aplicación, primero deberás crear o vincular una cuenta
 
 <img width="300" height="250" alt="3" src="https://github.com/user-attachments/assets/331e27fb-50c9-4011-9a0a-7f30981188b2" />
 
+Al crear un personaje, puedes elegir entre las clases Guerrero, Mago, Monje y Arquero (de momento solo esas cuatro están disponibles), como se ve en el vídeo a continuación:
+
+https://github.com/user-attachments/assets/0bc9a2f3-3d8b-475b-a0bb-9ae84179554f
+
+Como mencioné antes, los personajes son "stickers" en formato .webm para dar la sensación de dinamismo
+
+
+
+
+
+
+
 
 
 
