@@ -19,6 +19,21 @@ The app will be available on the following platforms:
 * Web App - In development
 * Android - In development
 
+## Telegram Bot
+When you start the bot, it will ask you to select a language
+
+<img width="300" height="150" alt="1" src="https://github.com/user-attachments/assets/3969a03e-d2e6-4cd6-83ed-1a24686e9162" />
+
+Once you've selected your language, it will welcome you and explain how the bot works
+
+<img width="300" height="250" alt="2" src="https://github.com/user-attachments/assets/55ebeedd-7e18-4ee5-9044-064e348fb610" />
+
+To use the app, you'll need to create an account first or link an existing one
+
+<img width="300" height="250" alt="3" src="https://github.com/user-attachments/assets/9074b142-4e43-4e41-8a4d-da8c114773f9" />
+
+
+
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
