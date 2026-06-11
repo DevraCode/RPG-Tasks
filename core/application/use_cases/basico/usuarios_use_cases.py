@@ -45,4 +45,8 @@ class UsuarioUsecase:
     def comprobar_usuario(self, nombre_usuario:str, password_usuario:str):
         resultado = self.repo.comprobar_usuario_contraseña(nombre_usuario, password_usuario)
         return resultado
+    
+    def idioma_usuario(self, id_usuario):
+        resultado = self.repo.buscar_idioma_usuario(id_usuario)
+        return resultado
 

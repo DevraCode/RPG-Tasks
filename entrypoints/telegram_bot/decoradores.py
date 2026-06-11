@@ -42,6 +42,30 @@ plataformas = PlataformasUseCase(repo_plataformas)
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
+"""Para traducir, se buscará el idioma del usuario en la bd una vez registrado"""
+def traduccion(func):
+    @wraps(func)
+    async def wrapper(update: Update, context: CallbackContext, *args, **kwargs):
+
+        id_telegram = str(update.effective_user.id)
+        id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
+        id_interno = usuario.buscar_id_externo_usuario(id_externo)
+
+        
+        idioma = usuario.idioma_usuario(id_interno.id_usuario)
+
+        if idioma != "es":
+          builtins.t = lambda texto: traducir(texto=texto, lang=idioma)
+        
+        
+        return await func(update, context, *args, **kwargs)
+    return wrapper
+
+
+
+t = traduccion
+
+
 #Comprueba que exista el usuario y que tenga la sesion activa
 #Si existe y tiene la sesión activa no podrá volver a registrarse o volver la vincular una cuenta hasta que cierre sesión
 def usuario_existe(func):
@@ -53,10 +77,9 @@ def usuario_existe(func):
         nombre_usuario = usuario.buscar_id_externo_usuario(id_externo)
         sesion = plataformas.usuario_activo(id_externo)
 
+
         if id_externo and sesion == True:
-            await update.message.reply_text(
-                f"Ya estás registrado como {nombre_usuario.nombre_usuario.capitalize()}. Cierra la sesión o inicia sesión con otro usuario"
-            )
+            await update.message.reply_text(t(f"Ya estás registrado como {nombre_usuario.nombre_usuario.capitalize()}. Cierra la sesión o inicia sesión con otro usuario"))
             return 
         
         return await func(update, context, *args, **kwargs)
@@ -112,12 +135,13 @@ def limite_personajes(func):
     return id_personaje
 
 
-def idioma(func):
+"""SOLO PARA EL REGISTRO. Como el usuario todavía no está registrado en la base de datos, se utilizará la variable temporal para traducir el idioma"""
+def idioma_elegido(func):
     @wraps(func)
     async def wrapper(update: Update, context: CallbackContext, *args, **kwargs):
         if update and update.effective_user and context.user_data:
             
-            idioma = context.user_data.get("idioma", "es")
+            idioma = context.user_data.get("idioma", "es") 
             
             
             if idioma == "es":
@@ -129,3 +153,4 @@ def idioma(func):
         
         return await func(update, context, *args, **kwargs)
     return wrapper
+

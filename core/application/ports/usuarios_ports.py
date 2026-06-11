@@ -34,3 +34,7 @@ class UsuarioRepository(ABC):
     @abstractmethod
     def buscar_usuario_ia(self, nombre_usuario:str):
         pass
+
+    @abstractmethod
+    def buscar_idioma_usuario(self, id_usuario:str):
+        pass

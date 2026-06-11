@@ -9,7 +9,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ConversationHandler
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMedia
-from telegram.ext import CallbackContext, InlineQueryHandler, TypeHandler
+from telegram.ext import CallbackContext, InlineQueryHandler, TypeHandler, PicklePersistence
 #-----------------------------------------------------------------------------------------------------------------------------
 #Importaciones propias del bot
 from .handlers_basicos import NOMBRE, PASSWORD, EMAIL, PEDIR_NOMBRE, PEDIR_PASSWORD
@@ -35,12 +35,12 @@ load_dotenv()
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-
+persistencia = PicklePersistence(filepath="rpg_data_telegram.pickle")
 
 if __name__ == "__main__":
     
     token = os.getenv("TELEGRAM_TOKEN")
-    app = ApplicationBuilder().token(token).post_init(menu).build()
+    app = ApplicationBuilder().token(token).post_init(menu).persistence(persistencia).build()
 
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
@@ -135,6 +135,23 @@ if __name__ == "__main__":
         allow_reentry=True 
     )
 
+    vin_conv_handler_en = ConversationHandler(
+        entry_points=[CommandHandler("link", vincular)],
+        states={
+            PEDIR_NOMBRE: [MessageHandler(filters.TEXT & ~filters.COMMAND, obtener_username)],
+            PEDIR_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, obtener_password)]
+            
+        },
+        fallbacks=[CommandHandler("cancelar", cancelar)],
+        per_message=False,
+        per_chat=True,
+        allow_reentry=True 
+    )
+
+
+
+
+
     tarea_conv_handler = ConversationHandler(
         entry_points=[CommandHandler("nuevatarea", preguntar_nombre_tarea)],
         states={
@@ -155,6 +172,7 @@ if __name__ == "__main__":
     app.add_handler(personaje_conv_handler)
     app.add_handler(entrenar_personaje_conv_handler)
     app.add_handler(vin_conv_handler)
+    app.add_handler(vin_conv_handler_en)
     app.add_handler(tarea_conv_handler)
 
 

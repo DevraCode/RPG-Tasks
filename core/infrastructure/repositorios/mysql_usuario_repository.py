@@ -133,6 +133,29 @@ class MySQLUsuarioRepository(UsuarioRepository):
         return None
     
 
+    def buscar_idioma_usuario(self, id_usuario):
+        conn = self._get_connection() 
+        cursor = conn.cursor(dictionary=True)
+
+        query ="""
+            SELECT id_usuario, idioma_usuario
+            FROM usuarios
+            WHERE id_usuario = %s
+        """
+
+        cursor.execute(query, (id_usuario,))
+        row = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+
+        if row:
+            return row["idioma_usuario"]
+        return None
+
+
+    
+
     def comprobar_usuario_contraseña(self, nombre_usuario: str, password_usuario: str):
         conn = self._get_connection() 
         cursor = conn.cursor(dictionary=True)
