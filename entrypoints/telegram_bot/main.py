@@ -25,7 +25,7 @@ from .handlers_inline import inline_handler, manejador_stats
 
 from .menu import menu
 
-from core.infrastructure.traduccion.traduccion import IDIOMAS_USUARIOS, traducir
+from core.infrastructure.traduccion.traduccion import traducir
 import builtins
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -35,22 +35,6 @@ load_dotenv()
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-#FUNCIÓN DE TRADUCCIÓN
-async def filtro_idioma_middleware(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.effective_user:
-        return
-    
-    user_id = update.effective_user.id
-    
-    idioma_elegido = IDIOMAS_USUARIOS.get(user_id, "es")
-       
-    if idioma_elegido == "es":
-        builtins._ = lambda texto: texto
-    else:
-        builtins._ = lambda texto: traducir(texto=texto, lang=idioma_elegido)
-
-#-----------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
@@ -62,8 +46,6 @@ if __name__ == "__main__":
     #-----------------------------------------------------------------------------------------------------------------------------
 
     #HANDLERS
-    app.add_handler(TypeHandler(Update, filtro_idioma_middleware), group=-1)
-    
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("tareas", lista_tareas))
@@ -94,6 +76,24 @@ if __name__ == "__main__":
         map_to_parent={}, 
         allow_reentry=True 
     )
+
+    reg_conv_handler_en = ConversationHandler(
+        entry_points=[CommandHandler("signup", pide_nombre_usuario)],
+        states={
+            NOMBRE: [MessageHandler(filters.TEXT & ~filters.COMMAND, nombre_usuario)],
+            PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, contraseña)],
+            EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, email)]
+        },
+        fallbacks=[CommandHandler("cancelar", cancelar)],
+        per_message=False,
+        per_chat=True,
+        map_to_parent={}, 
+        allow_reentry=True 
+    )
+
+
+
+
 
     personaje_conv_handler = ConversationHandler(
     entry_points=[CommandHandler('personaje', mostrar_personaje)],
@@ -151,6 +151,7 @@ if __name__ == "__main__":
 
 
     app.add_handler(reg_conv_handler)
+    app.add_handler(reg_conv_handler_en)
     app.add_handler(personaje_conv_handler)
     app.add_handler(entrenar_personaje_conv_handler)
     app.add_handler(vin_conv_handler)

@@ -18,7 +18,7 @@ from core.application.use_cases.basico.basic_use_cases import MensajeInicioUseCa
 from core.application.use_cases.basico.usuarios_use_cases import UsuarioUsecase
 from core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
 from core.infrastructure.dbconfig import db_config
-from .decoradores import usuario_existe
+from .decoradores import usuario_existe, idioma
 
 from core.infrastructure.traduccion.traduccion import IDIOMAS_USUARIOS
 from core.infrastructure.traduccion.traduccion import traducir
@@ -150,13 +150,16 @@ async def interaccion_ia(update, context):
 #-----------------------------------------------------------------------------------------------------------------------------
 NOMBRE, PASSWORD, EMAIL = range(3)
 
+@idioma
 @usuario_existe
 async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
     pide_usuario = crear_cuenta.nombre_usuario()
 
-    await context.bot.send_message(chat_id=chat_id, text=pide_usuario + f". Puedes cancelar en cualquier momento con /cancelar")
+    await context.bot.send_message(chat_id=chat_id, text= _(f"{pide_usuario} Puedes cancelar en cualquier momento con /cancelar"))
+
+
     return NOMBRE
 
 #----------------------------------------------------------------------------------------
@@ -166,12 +169,12 @@ async def nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     usuario_en_bd = usuario.buscar_usuario_por_nombre(context.user_data['nombre_usuario'])
     if usuario_en_bd:
-            await update.message.reply_text(f"Ya estás registrado")
+            await update.message.reply_text(_("Ya estás registrado"))
             return ConversationHandler.END
     else:
         pide_contraseña = crear_cuenta.contraseña()
 
-        await update.message.reply_text(f"Perfecto, {update.message.text}." + f"{pide_contraseña}")
+        await update.message.reply_text(_(f"Perfecto, {update.message.text}." + f"{pide_contraseña}"))
         return PASSWORD
 
 #----------------------------------------------------------------------------------------
@@ -180,7 +183,7 @@ async def contraseña (update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     pide_email = crear_cuenta.email()
 
-    await update.message.reply_text(f"De acuerdo, {update.message.text}." + f"{pide_email}")
+    await update.message.reply_text(_(f"De acuerdo, {update.message.text}." + f"{pide_email}"))
     return EMAIL
     
 #----------------------------------------------------------------------------------------
@@ -210,7 +213,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
 
         )
     
-    await update.message.reply_text(f"Cuenta creada")
+    await update.message.reply_text(_(f"Cuenta creada"))
 
 
 

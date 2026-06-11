@@ -5,6 +5,10 @@
 from functools import wraps
 import hashlib
 
+import builtins
+from telegram import Update
+from telegram.ext import CallbackContext
+
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #Internas
@@ -16,6 +20,8 @@ from core.application.use_cases.basico.personajes_use_cases import PersonajeUseC
 from core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
 
 from core.infrastructure.dbconfig import db_config
+
+from core.infrastructure.traduccion.traduccion import traducir
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -105,3 +111,21 @@ def limite_personajes(func):
         return await func(update, context, *args, **kwargs)
     return id_personaje
 
+
+def idioma(func):
+    @wraps(func)
+    async def wrapper(update: Update, context: CallbackContext, *args, **kwargs):
+        if update and update.effective_user and context.user_data:
+            
+            idioma = context.user_data.get("idioma", "es")
+            
+            
+            if idioma == "es":
+                builtins._ = lambda texto: texto
+            else:
+                
+                builtins._ = lambda texto: traducir(texto=texto, lang=idioma)
+        
+        
+        return await func(update, context, *args, **kwargs)
+    return wrapper
