@@ -50,3 +50,7 @@ class UsuarioUsecase:
         resultado = self.repo.buscar_idioma_usuario(id_usuario)
         return resultado
 
+    #Devuelve todos los idiomas de todos los usuarios de la base de datos
+    def idiomas(self):
+        idiomas = self.repo.idioma()
+        return idiomas

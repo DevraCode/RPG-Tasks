@@ -43,27 +43,6 @@ plataformas = PlataformasUseCase(repo_plataformas)
 #-----------------------------------------------------------------------------------------------------------------------------
 
 """Para traducir, se buscará el idioma del usuario en la bd una vez registrado"""
-def traduccion(func):
-    @wraps(func)
-    async def wrapper(update: Update, context: CallbackContext, *args, **kwargs):
-
-        id_telegram = str(update.effective_user.id)
-        id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
-        id_interno = usuario.buscar_id_externo_usuario(id_externo)
-
-        
-        idioma = usuario.idioma_usuario(id_interno.id_usuario)
-
-        if idioma != "es":
-          builtins.t = lambda texto: traducir(texto=texto, lang=idioma)
-        
-        
-        return await func(update, context, *args, **kwargs)
-    return wrapper
-
-
-
-t = traduccion
 
 
 #Comprueba que exista el usuario y que tenga la sesion activa
@@ -79,7 +58,7 @@ def usuario_existe(func):
 
 
         if id_externo and sesion == True:
-            await update.message.reply_text(t(f"Ya estás registrado como {nombre_usuario.nombre_usuario.capitalize()}. Cierra la sesión o inicia sesión con otro usuario"))
+            await update.message.reply_text((f"Ya estás registrado como {nombre_usuario.nombre_usuario.capitalize()}. Cierra la sesión o inicia sesión con otro usuario"))
             return 
         
         return await func(update, context, *args, **kwargs)

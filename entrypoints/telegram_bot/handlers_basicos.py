@@ -18,7 +18,7 @@ from core.application.use_cases.basico.basic_use_cases import MensajeInicioUseCa
 from core.application.use_cases.basico.usuarios_use_cases import UsuarioUsecase
 from core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
 from core.infrastructure.dbconfig import db_config
-from .decoradores import usuario_existe, idioma_elegido, traduccion
+from .decoradores import usuario_existe, idioma_elegido
 
 from core.infrastructure.traduccion.traduccion import IDIOMAS_USUARIOS
 from core.infrastructure.traduccion.traduccion import traducir
@@ -227,7 +227,6 @@ async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 PEDIR_NOMBRE, PEDIR_PASSWORD = range(2)
 
-@traduccion
 @usuario_existe
 async def vincular(update:Update, context: ContextTypes.DEFAULT_TYPE):
      pide_usuario = crear_cuenta.nombre_usuario()
