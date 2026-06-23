@@ -20,6 +20,10 @@ class TareasUseCase:
         lista = self.repo.lista_tareas_usuario(id_usuario)
         return lista
     
+    def lista_tareas_usuario_completadas(self, id_usuario):
+        lista = self.repo.lista_tareas_usuario(id_usuario)
+        return lista
+    
     def buscar_tarea_por_id(self, id_tarea):
         tarea = self.repo.buscar_tarea_por_id(id_tarea)
         return tarea

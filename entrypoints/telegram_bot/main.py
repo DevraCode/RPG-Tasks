@@ -35,7 +35,7 @@ load_dotenv()
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-persistencia = PicklePersistence(filepath="rpg_data_telegram.pickle")
+persistencia = PicklePersistence(filepath="entrypoints/telegram_bot/rpg_data_telegram.pickle")
 
 if __name__ == "__main__":
     
@@ -176,7 +176,7 @@ if __name__ == "__main__":
     app.add_handler(tarea_conv_handler)
 
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, interaccion_ia))
+    #app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, interaccion_ia))
 
     
     print("Bot Iniciado")

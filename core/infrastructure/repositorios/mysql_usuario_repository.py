@@ -38,8 +38,6 @@ class MySQLUsuarioRepository(UsuarioRepository):
 
     def buscar_por_id_externo(self, id_externo_usuario: str):
         
-
-
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True, buffered=True)
         

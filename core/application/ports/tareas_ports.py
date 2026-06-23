@@ -12,6 +12,10 @@ class TareasRepository(ABC):
         pass
 
     @abstractmethod
+    def lista_tareas_usuario_completadas(self,id_usuario):
+        pass
+
+    @abstractmethod
     def buscar_tarea_usuario(self,id_usuario):
         pass
 

@@ -49,6 +49,7 @@ async def crear_tarea(update:Update, context:ContextTypes.DEFAULT_TYPE):
 
     return ConversationHandler.END
 
+#-----------------------------------------------------------------------------------------------------------------------------
 
 async def lista_tareas(update:Update, context:ContextTypes.DEFAULT_TYPE):
 
@@ -56,19 +57,32 @@ async def lista_tareas(update:Update, context:ContextTypes.DEFAULT_TYPE):
     id_usuario = plataformas.vincular_id_externo_usuario(id_externo)
 
     lista_tareas = tareas.lista_tareas_usuario(id_usuario)
+    lista_tareas_completas = tareas.lista_tareas_usuario_completadas(id_usuario)
 
     lista = []
+
+    lista_completadas = []
 
     for tarea in lista_tareas:
         lista.append(tarea["nombre_tarea"])
 
-    lista_formateada = "\n".join([f"🔹 {t.capitalize()}" for t in lista])
+    for tarea in lista_tareas_completas:
+        lista_completadas.append(tarea["nombre_tarea"])
 
-    mensaje = f"Tienes las siguientes tareas pendientes: \n" + f"{lista_formateada}\n"
+    lista_formateada = "\n".join([f"🔹 {t.capitalize()}" for t in lista])
+    lista_formateada_completas = "\n".join([f"🔹 {t.capitalize()}" for t in lista_completadas])
+
+    mensaje = f"Tienes las siguientes tareas pendientes: \n" + f"{lista_formateada}\n" + f" Y has completado las siguientes: \n" + f"{lista_formateada_completas}"
 
     await update.message.reply_text(mensaje)
 
 
-              
+#-----------------------------------------------------------------------------------------------------------------------------
+
+async def borrar_tareas_completadas(update:Update, context:ContextTypes.DEFAULT_TYPE):
+
+    id_externo = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+    id_usuario = plataformas.vincular_id_externo_usuario(id_externo) 
+
     
 

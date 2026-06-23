@@ -43,6 +43,27 @@ plataformas = PlataformasUseCase(repo_plataformas)
 #-----------------------------------------------------------------------------------------------------------------------------
 
 """Para traducir, se buscará el idioma del usuario en la bd una vez registrado"""
+def traduccion(func):
+    @wraps(func)
+    async def wrapper(update: Update, context: CallbackContext, *args, **kwargs):
+
+        id_telegram = str(update.effective_user.id)
+        id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
+
+        id_usuario = usuario.buscar_id_externo_usuario(id_externo)
+
+        idioma = usuario.idioma_usuario(id_usuario.id_usuario)
+        
+        
+        if idioma == "es":
+            builtins.t = lambda texto: texto
+        else:
+            
+            builtins.t = lambda texto: traducir(texto=texto, lang=idioma)
+        
+        
+        return await func(update, context, *args, **kwargs)
+    return wrapper
 
 
 #Comprueba que exista el usuario y que tenga la sesion activa
@@ -52,13 +73,25 @@ def usuario_existe(func):
     async def usuario_registrado(update, context, *args, **kwargs):
         id_telegram = str(update.effective_user.id)
         id_externo = hashlib.sha256(id_telegram.encode()).hexdigest()[:8]
+        id_usuario = usuario.buscar_id_externo_usuario(id_externo)
+
 
         nombre_usuario = usuario.buscar_id_externo_usuario(id_externo)
         sesion = plataformas.usuario_activo(id_externo)
 
 
         if id_externo and sesion == True:
-            await update.message.reply_text((f"Ya estás registrado como {nombre_usuario.nombre_usuario.capitalize()}. Cierra la sesión o inicia sesión con otro usuario"))
+
+            idioma = usuario.idioma_usuario(id_usuario.id_usuario)
+            
+            if idioma == "es":
+                builtins.t = lambda texto: texto
+            else:
+                
+                builtins.t = lambda texto: traducir(texto=texto, lang=idioma)
+
+
+            await update.message.reply_text(t(f"Ya estás registrado como {nombre_usuario.nombre_usuario.capitalize()}. Cierra la sesión o inicia sesión con otro usuario"))
             return 
         
         return await func(update, context, *args, **kwargs)
@@ -76,10 +109,19 @@ def usuario_no_existe_o_sesion_cerrada(func):
         id_usuario = usuario.buscar_id_externo_usuario(id_externo)
         sesion = plataformas.usuario_activo(id_externo)
 
+        idioma = context.user_data.get("idioma")
+            
+            
+        if idioma == "es":
+            builtins.t = lambda texto: texto
+        else:
+                
+            builtins.t = lambda texto: traducir(texto=texto, lang=idioma)
+
+
         if not id_usuario or not id_externo or sesion == False:
-            await update.message.reply_text(
-                f"Debes registrarte o vincular una cuenta primero"
-            )
+
+            await update.message.reply_text(t(f"Debes registrarte o vincular una cuenta primero"))
             return
         
         return await func(update, context, *args, **kwargs)
