@@ -30,7 +30,7 @@ class MySQLTareasRepository(TareasRepository):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        query = "SELECT * FROM tareas WHERE id_usuario = %s AND tarea_completada = FALSE"
+        query = "SELECT * FROM tareas WHERE id_usuario = %s"
 
         cursor.execute(query,(id_usuario,))
         resultados = cursor.fetchall()
@@ -66,6 +66,8 @@ class MySQLTareasRepository(TareasRepository):
         cursor.execute(query,(id_tarea,))
 
         conn.commit()
+
+        
         
         cursor.close()
         conn.close()

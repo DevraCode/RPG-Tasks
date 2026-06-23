@@ -91,6 +91,7 @@ async def manejador_start(update:Update, context:CallbackContext):
             ("personaje", "Elige un personaje"),
             ("entrenar", "Elige uno de tus personajes y asígnale una tarea para entrenarlo"),
             ("nuevatarea", "Crea una tarea nueva"),
+            ("tareas", "Muestra tu lista de tareas"),
         ],
         scope=BotCommandScopeChat(chat_id=update.effective_chat.id)
     )
