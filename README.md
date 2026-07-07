@@ -3,7 +3,7 @@
 # English
 
 ### Important
-The application code (variables, functions, comments, etc.) is mostly written in Spanish because it is my native language. However, I have added a real-time translation module into English, so you shouldn't have any trouble using it.
+The application code (variables, functions, comments, etc.) is mostly written in Spanish because it is my native language. However, I will add a real-time translation module into English, so you shouldn't have any trouble using it.
 
 The character images are animated Ragnarok Online sprites taken from the Ro sprite simulator and used solely for testing the app. You can add your own animated characters.
 Please note:
@@ -19,21 +19,6 @@ The app will be available on the following platforms:
 * Web App - In development
 * Android - In development
 
-## Telegram Bot
-When you start the bot, it will ask you to select a language
-
-<img width="300" height="150" alt="1" src="https://github.com/user-attachments/assets/3969a03e-d2e6-4cd6-83ed-1a24686e9162" />
-
-Once you've selected your language, it will welcome you and explain how the bot works
-
-<img width="300" height="250" alt="2" src="https://github.com/user-attachments/assets/55ebeedd-7e18-4ee5-9044-064e348fb610" />
-
-To use the app, you'll need to create an account first or link an existing one
-
-<img width="300" height="250" alt="3" src="https://github.com/user-attachments/assets/9074b142-4e43-4e41-8a4d-da8c114773f9" />
-
-
-
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -41,7 +26,7 @@ To use the app, you'll need to create an account first or link an existing one
 # Spanish
 
 ### Importante
-El código de la aplicación (variables, funciones, comentarios, etc) está escrito mayoritariamente en español porque es mi lengua materna. No obstante, he añadido un módulo de traducción en tiempo real al inglés, asi que no debería haber problema en su uso.
+El código de la aplicación (variables, funciones, comentarios, etc) está escrito mayoritariamente en español porque es mi lengua materna. No obstante, añadiré un módulo de traducción en tiempo real al inglés, asi que no debería haber problema en su uso.
 
 Las imágenes de los personajes son sprites de Ragnarok Online animados sacados del simulador de sprites de Ro y utilizados únicamente para probar la aplicación. Puedes añadir tus propios personajes animados.
 Ten en cuenta:
