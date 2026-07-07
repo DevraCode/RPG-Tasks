@@ -41,28 +41,6 @@ La aplicación estará disponible para las siguientes plataformas:
 * Web App - En desarollo
 * Android - En desarollo
 
-## Telegram Bot
-Al iniciar el bot, te pedirá que selecciones el idioma
-
-<img width="300" height="150" alt="1" src="https://github.com/user-attachments/assets/2693e5aa-7cff-41ee-b078-efef06280e57" />
-
-Una vez seleccionado el idioma, el bot te dará la bienvenida y te explicará el funcionamiento del mismo
-
-<img width="300" height="250" alt="2" src="https://github.com/user-attachments/assets/74d6a523-1e64-4be8-8435-f7e4eeff9356" />
-
-Para usar la aplicación, primero deberás crear o vincular una cuenta
-
-<img width="300" height="250" alt="3" src="https://github.com/user-attachments/assets/331e27fb-50c9-4011-9a0a-7f30981188b2" />
-
-Al crear un personaje, puedes elegir entre las clases Guerrero, Mago, Monje y Arquero (de momento solo esas cuatro están disponibles), como se ve en el vídeo a continuación:
-
-https://github.com/user-attachments/assets/0bc9a2f3-3d8b-475b-a0bb-9ae84179554f
-
-Como mencioné antes, los personajes son "stickers" en formato .webm para dar la sensación de dinamismo
-
-
-
-
 
 
 
