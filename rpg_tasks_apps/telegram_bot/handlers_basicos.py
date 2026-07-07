@@ -23,8 +23,6 @@ from rpg_tasks.infrastructure.dbconfig import db_config
 from .decoradores import usuario_existe, idioma_elegido, traduccion
 
 
-import builtins
-
 from .api_url import API_URL
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -42,15 +40,6 @@ usuario = UsuarioUseCase(repo_usuario)
 plataformas = PlataformasUseCase(repo_plataformas)
 
 
-
-from rpg_tasks.infrastructure.servicios_ia.config_ia import SYSTEM_INSTRUCTION
-from rpg_tasks.infrastructure.servicios_ia.cliente_ollama import OllamaClient
-
-ia = OllamaClient(
-    system_instructions=SYSTEM_INSTRUCTION
-)
-
-
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -63,7 +52,6 @@ async def start(update:Update, context: ContextTypes.DEFAULT_TYPE):
          [InlineKeyboardButton(text="English", callback_data="lang_en"), InlineKeyboardButton(text="Español", callback_data="lang_es")]
     ]
    
-
     await context.bot.send_message(chat_id=update.effective_chat.id, text="⚔️ Select your language / Selecciona tu idioma ⚔️", reply_markup=InlineKeyboardMarkup(keyboard))
 
 
@@ -196,7 +184,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
         "password_usuario": password_encriptado,
         "email_usuario": email,
         "rango": Rango.novato,                   
-        "tipo_usuario": 0,                   
+        "tipo_usuario": TiposUsuario.USUARIO,                   
         "idioma_usuario": idioma,
         "id_plataforma": CorrespondenciaPlataformas.TELEGRAM,
         "nombre_plataforma":"TELEGRAM",
@@ -205,8 +193,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         await update.message.reply_text(("Procesando tu registro en el Reino... ⏳"))
-        
-        
+    
         respuesta = requests.post(f"{API_URL}/api/usuarios/registro", json=registro)
         
         if respuesta.status_code == 200 and respuesta.json().get("status") == "ok":
@@ -217,9 +204,6 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
             
     except requests.exceptions.ConnectionError:
         await update.message.reply_text("Error de conexion")
-    
-
-
     
     await update.message.reply_text((f"Cuenta creada"))
 

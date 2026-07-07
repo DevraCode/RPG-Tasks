@@ -1,23 +1,41 @@
+
+#IMPORTACIONES
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
-
-from rpg_tasks.core.domain.auth_utils import decodificar_id_usuario
-
+#-----------------------------------------------------------------------------------------------------------------------------
 from rpg_tasks.infrastructure.dbconfig import db_config
-
 from rpg_tasks.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from rpg_tasks.core.application.use_cases.basico.usuarios_use_cases import UsuarioUseCase
+from rpg_tasks.core.domain.auth_utils import decodificar_id_usuario
 
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
 
+#INICIALIZACIÓN DE REPOSITORIOS Y CASOS DE USO
 repo_usuario = MySQLUsuarioRepository(db_config)
 usuario_use_case = UsuarioUseCase(repo_usuario)
 
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
+#Router de FastAPI para los endpoints relacionados con usuarios
 router = APIRouter(
     prefix="/api/usuarios",
-    tags=["Usuarios"]
-)
+    tags=["Usuarios"])
 
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
+#DTOs
+
+#DTO para el registro de usuarios
 class RegistroUsuarioDTO(BaseModel):
     id_usuario: int = None
     id_externo_usuario: str = "0"
@@ -34,6 +52,12 @@ class RegistroUsuarioDTO(BaseModel):
     id_externo_usuario: str = None   
 
 
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
+#ENDPOINTS
 #Busca a un usuario por su Id. Para la url, esta id estará codificada por seguridad, y se decodificará en el endpoint antes de buscar al usuario en la base de datos.
 @router.get("/buscar/{id_usuario_codificada}")
 def buscar_usuario(id_usuario_codificada):
@@ -69,6 +93,6 @@ def registrar_usuario(datos: RegistroUsuarioDTO):
             "status": "ok",
             "message": "Usuario registrado correctamente"
         }
+    
     except Exception as e:
-        
         raise HTTPException(status_code=400, detail=f"Error al registrar: {str(e)}")
