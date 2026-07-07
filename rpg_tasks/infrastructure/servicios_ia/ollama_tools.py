@@ -1,0 +1,6 @@
+from rpg_tasks.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
+from rpg_tasks.infrastructure.repositorios.mysql_personajes_repository import MySQLPersonajesRepository
+
+from rpg_tasks.infrastructure.dbconfig import db_config
+import inspect
+
