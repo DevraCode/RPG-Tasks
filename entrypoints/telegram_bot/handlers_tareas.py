@@ -1,0 +1,92 @@
+from telegram import Update
+from telegram.ext import ContextTypes, ConversationHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMedia
+from telegram.ext import CallbackContext
+import hashlib
+
+from core.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
+from core.infrastructure.repositorios.mysql_tareas_repository import MySQLTareasRepository
+from core.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
+from core.application.use_cases.basico.usuarios_use_cases import UsuarioUsecase
+from core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
+from core.application.use_cases.basico.tareas_use_cases import TareasUseCase
+
+
+from core.infrastructure.dbconfig import db_config
+
+repo_usuarios = MySQLUsuarioRepository(db_config)
+repo_tareas = MySQLTareasRepository(db_config)
+repo_plataformas = MySQLPlataformasRepository(db_config)
+usuarios = UsuarioUsecase(repo_usuarios)
+tareas = TareasUseCase(repo_tareas)
+plataformas = PlataformasUseCase(repo_plataformas)
+
+
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+
+#INSERTAR TAREAS
+INSERTAR_TAREA = range(1)
+
+async def preguntar_nombre_tarea(update:Update, context:ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Introduce el nombre de la tarea")
+    return INSERTAR_TAREA
+
+
+async def crear_tarea(update:Update, context:ContextTypes.DEFAULT_TYPE):
+    context.user_data["nombre_tarea"] = update.message.text
+
+    id_externo = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+    id_usuario = plataformas.vincular_id_externo_usuario(id_externo)
+    nombre_tarea = context.user_data.get("nombre_tarea")
+
+    nueva_tarea = tareas.insertar_tarea(id_usuario, nombre_tarea)
+
+    await update.message.reply_text(nueva_tarea)
+
+
+    return ConversationHandler.END
+
+#-----------------------------------------------------------------------------------------------------------------------------
+
+async def lista_tareas(update:Update, context:ContextTypes.DEFAULT_TYPE):
+
+    id_externo = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+    id_usuario = plataformas.vincular_id_externo_usuario(id_externo)
+
+    lista_tareas = tareas.lista_tareas_usuario(id_usuario)
+    
+
+    lista = []
+
+    lista_completadas = []
+
+    for tarea in lista_tareas:
+        if tarea["tarea_completada"] == False:
+            lista.append(tarea["nombre_tarea"])
+        else:
+            lista_completadas.append(tarea["nombre_tarea"])
+
+    
+
+    lista_formateada = "\n".join([f"🔹 {tarea.capitalize()}" for tarea in lista])
+    lista_formateada_completas = "\n".join([f"✅ {tarea_completada.capitalize()}" for tarea_completada in lista_completadas])
+
+    mensaje = f"Tienes las siguientes tareas pendientes: \n" + f"{lista_formateada}\n \n" + f" Y has completado las siguientes: \n" + f"{lista_formateada_completas}"
+
+    
+
+    await update.message.reply_text(mensaje)
+
+
+#-----------------------------------------------------------------------------------------------------------------------------
+
+async def borrar_tareas_completadas(update:Update, context:ContextTypes.DEFAULT_TYPE):
+
+    id_externo = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+    id_usuario = plataformas.vincular_id_externo_usuario(id_externo) 
+
+    
+
