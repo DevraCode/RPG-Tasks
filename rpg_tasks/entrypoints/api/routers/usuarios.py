@@ -1,6 +1,6 @@
 
 #IMPORTACIONES
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from datetime import datetime
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -51,6 +51,14 @@ class RegistroUsuarioDTO(BaseModel):
     nombre_plataforma: str = None
     id_externo_usuario: str = None   
 
+#DTO para la vinculación de usuarios
+class VincularUsuarioDTO(BaseModel):
+    id_plataforma: int
+    nombre_plataforma: str
+    id_externo_usuario: str
+    id_usuario: int
+
+
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -72,9 +80,20 @@ def buscar_usuario(id_usuario_codificada):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+#Endpoint para verificar si un nombre de usuario ya está registrado en la base de datos. Devuelve un mensaje indicando si el nombre está disponible o no.
+@router.get("/verificar-nombre/{nombre}")
+def verificar_nombre(nombre: str):
+    existe = usuario_use_case.nombre_usuario_existe(nombre)
+    
+    if existe:
+        raise HTTPException(status_code=400, detail="Ese nombre de usuario ya está registrado.")
+    
+    return {"status": "disponible", "message": "El nombre está libre"}
  
+
 #Endpoint para registrar un nuevo usuario    
-@router.post("/registro")
+@router.post("/registro", status_code=status.HTTP_201_CREATED)
 def registrar_usuario(datos: RegistroUsuarioDTO):
     try:
         
@@ -90,19 +109,35 @@ def registrar_usuario(datos: RegistroUsuarioDTO):
             id_externo_usuario=datos.id_externo_usuario)
         
         return {
-            "status": "ok",
             "message": "Usuario registrado correctamente"
         }
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al registrar: {str(e)}")
     
-#Endpoint para verificar si un nombre de usuario ya está registrado en la base de datos. Devuelve un mensaje indicando si el nombre está disponible o no.
-@router.get("/verificar-nombre/{nombre}")
-def verificar_nombre(nombre: str):
-    existe = usuario_use_case.nombre_usuario_existe(nombre)
-    
-    if existe:
-        raise HTTPException(status_code=400, detail="Ese nombre de usuario ya está registrado.")
-    
-    return {"status": "disponible", "message": "El nombre está libre"}
+@router.post("/vincular", status_code=status.HTTP_200_OK)
+def vincular_usuario(datos: VincularUsuarioDTO):
+    try:
+        vincular = usuario_use_case.vincular_usuario(
+            id_plataforma=datos.id_plataforma,
+            nombre_plataforma=datos.nombre_plataforma,
+            id_externo_usuario=datos.id_externo_usuario,
+            id_usuario=datos.id_usuario)
+        
+        if not vincular:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="No se pudo vincular: El usuario especificado no existe en la base de datos.")
+        
+        return {
+            "message": "Usuario vinculado correctamente"
+        }
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        print(f"Error en la vinculación: {str(e)}") 
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail="Error interno del servidor al procesar la vinculación."
+        )

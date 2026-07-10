@@ -132,7 +132,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
         "password_usuario": password_encriptado,
         "email_usuario": email,
         "rango": "NOVATO",                   
-        "tipo_usuario": "USUARIO",                   
+        "tipo_usuario": 0,                   
         "idioma_usuario": idioma,
         "id_plataforma": 3,
         "nombre_plataforma":"TELEGRAM",
@@ -144,7 +144,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
     
         respuesta = requests.post(f"{API_URL}/api/usuarios/registro", json=registro)
         
-        if respuesta.status_code == 200 and respuesta.json().get("status") == "ok":
+        if respuesta.status_code == 201:
             await update.message.reply_text(("Cuenta creada con éxito ¡Bienvenido!"))
         else:
             error_api = respuesta.json().get("detail", "Error interno de la API")
@@ -153,8 +153,6 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
     except requests.exceptions.ConnectionError:
         await update.message.reply_text("Error de conexion")
     
-    await update.message.reply_text((f"Cuenta creada"))
-
     return ConversationHandler.END
 
 #----------------------------------------------------------------------------------------
@@ -170,18 +168,26 @@ async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @traduccion
 @usuario_existe
 async def vincular(update:Update, context: ContextTypes.DEFAULT_TYPE):
-     pide_usuario = crear_cuenta.nombre_usuario()
-     await update.message.reply_text((f"{pide_usuario}"))
+     await update.message.reply_text((f"Introduce tu nombre de usuario"))
      return PEDIR_NOMBRE
 
 async def obtener_username (update:Update, context: ContextTypes.DEFAULT_TYPE):
      context.user_data["nombre_usuario"] = update.message.text.strip().lower()
+
+     #Comprobar que el nombre de usuario existe en la base de datos
+     #Si existe, pedimos la contraseña. Si no existe, informamos al usuario y terminamos la conversación
+
+
+
      pide_password = crear_cuenta.contraseña()
      await update.message.reply_text(pide_password)
      return PEDIR_PASSWORD
 
 async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
      context.user_data["password_usuario"] = update.message.text
+
+
+     #Comprobar que la contraseña es correcta para el nombre de usuario proporcionado. Si es correcta, vinculamos la cuenta. Si no es correcta, informamos al usuario y terminamos la conversación
 
      nombre_usuario = context.user_data.get("nombre_usuario")
      password_usuario = context.user_data.get("password_usuario")
