@@ -15,13 +15,13 @@ from telegram.ext import CallbackContext
 from rpg_tasks.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from rpg_tasks.infrastructure.repositorios.mysql_personajes_repository import MySQLPersonajesRepository
 from rpg_tasks.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
-from rpg_tasks.core.application.use_cases.basico.usuarios_use_cases import UsuarioUseCase
-from rpg_tasks.core.application.use_cases.basico.personajes_use_cases import PersonajeUseCase
-from rpg_tasks.core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
+from rpg_tasks.core.application.use_cases.usuarios_use_cases import UsuarioUseCase
+from rpg_tasks.core.application.use_cases.personajes_use_cases import PersonajeUseCase
+from rpg_tasks.core.application.use_cases.plataformas_use_cases import PlataformasUseCase
 
 from rpg_tasks.infrastructure.dbconfig import db_config
 
-from rpg_tasks.infrastructure.traduccion.traduccion import traducir
+
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ plataformas = PlataformasUseCase(repo_plataformas)
 #-----------------------------------------------------------------------------------------------------------------------------
 
 """Para traducir, se buscará el idioma del usuario en la bd una vez registrado"""
-def traduccion(func):
+""" def traduccion(func):
     @wraps(func)
     async def wrapper(update: Update, context: CallbackContext, *args, **kwargs):
 
@@ -64,11 +64,11 @@ def traduccion(func):
         
         return await func(update, context, *args, **kwargs)
     return wrapper
-
+ """
 
 #Comprueba que exista el usuario y que tenga la sesion activa
 #Si existe y tiene la sesión activa no podrá volver a registrarse o volver la vincular una cuenta hasta que cierre sesión
-def usuario_existe(func):
+""" def usuario_existe(func):
     @wraps(func)
     async def usuario_registrado(update, context, *args, **kwargs):
         id_telegram = str(update.effective_user.id)
@@ -96,11 +96,11 @@ def usuario_existe(func):
         
         return await func(update, context, *args, **kwargs)
     return usuario_registrado
-
+ """
 
 #Comprueba si el usuario existe o tiene cerrada la sesión
 #Si no existe, no tiene vinculada una cuenta o no tiene abierta la sesión, no podrá usar los comandos de personajes ni tareas
-def usuario_no_existe_o_sesion_cerrada(func):
+""" def usuario_no_existe_o_sesion_cerrada(func):
     @wraps(func)
     async def comprobacion(update,context, *args, **kwargs):
         id_telegram = str(update.effective_user.id)
@@ -127,13 +127,13 @@ def usuario_no_existe_o_sesion_cerrada(func):
         return await func(update, context, *args, **kwargs)
     return comprobacion
 
-
+ """
 
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-#Límite de personajes del usuario
+""" #Límite de personajes del usuario
 def limite_personajes(func):
     @wraps(func)
     async def id_personaje(update, context, *args, **kwargs):
@@ -156,7 +156,7 @@ def limite_personajes(func):
     return id_personaje
 
 
-"""SOLO PARA EL REGISTRO. Como el usuario todavía no está registrado en la base de datos, se utilizará la variable temporal para traducir el idioma"""
+#SOLO PARA EL REGISTRO. Como el usuario todavía no está registrado en la base de datos, se utilizará la variable temporal para traducir el idioma
 def idioma_elegido(func):
     @wraps(func)
     async def wrapper(update: Update, context: CallbackContext, *args, **kwargs):
@@ -175,3 +175,4 @@ def idioma_elegido(func):
         return await func(update, context, *args, **kwargs)
     return wrapper
 
+ """

@@ -7,9 +7,9 @@ import hashlib
 from rpg_tasks.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from rpg_tasks.infrastructure.repositorios.mysql_tareas_repository import MySQLTareasRepository
 from rpg_tasks.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
-from rpg_tasks.core.application.use_cases.basico.usuarios_use_cases import UsuarioUseCase
-from rpg_tasks.core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
-from rpg_tasks.core.application.use_cases.basico.tareas_use_cases import TareasUseCase
+from rpg_tasks.core.application.use_cases.usuarios_use_cases import UsuarioUseCase
+from rpg_tasks.core.application.use_cases.plataformas_use_cases import PlataformasUseCase
+from rpg_tasks.core.application.use_cases.tareas_use_cases import TareasUseCase
 
 
 from rpg_tasks.infrastructure.dbconfig import db_config

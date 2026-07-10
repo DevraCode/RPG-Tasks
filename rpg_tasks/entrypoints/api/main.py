@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from rpg_tasks.core.application.use_cases.basico.basic_use_cases import MensajeInicioUseCase
+from rpg_tasks.core.application.use_cases.basic_use_cases import MensajeInicioUseCase
 from rpg_tasks.entrypoints.api.routers import usuarios
 
 app = FastAPI(title="RPG Tasks API", version="1.0.0")

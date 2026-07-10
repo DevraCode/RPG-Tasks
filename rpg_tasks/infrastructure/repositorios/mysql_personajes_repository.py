@@ -1,5 +1,5 @@
 import mysql.connector
-from rpg_tasks.core.application.ports.personajes_ports import PersonajesRepository
+from rpg_tasks.core.application.output_ports.personajes_ports import PersonajesRepository
 from rpg_tasks.core.domain.entidades import Personaje
 
 class MySQLPersonajesRepository(PersonajesRepository):

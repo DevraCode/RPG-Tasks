@@ -1,5 +1,5 @@
 import mysql.connector
-from rpg_tasks.core.application.ports.plataformas_ports import PlataformasRepository
+from rpg_tasks.core.application.output_ports.plataformas_ports import PlataformasRepository
 from rpg_tasks.core.domain.entidades import Plataformas
 
 class MySQLPlataformasRepository(PlataformasRepository):

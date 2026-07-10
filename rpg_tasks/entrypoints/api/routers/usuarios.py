@@ -6,7 +6,7 @@ from datetime import datetime
 #-----------------------------------------------------------------------------------------------------------------------------
 from rpg_tasks.infrastructure.dbconfig import db_config
 from rpg_tasks.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
-from rpg_tasks.core.application.use_cases.basico.usuarios_use_cases import UsuarioUseCase
+from rpg_tasks.core.application.use_cases.usuarios_use_cases import UsuarioUseCase
 from rpg_tasks.core.domain.auth_utils import decodificar_id_usuario
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -96,3 +96,13 @@ def registrar_usuario(datos: RegistroUsuarioDTO):
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al registrar: {str(e)}")
+    
+#Endpoint para verificar si un nombre de usuario ya está registrado en la base de datos. Devuelve un mensaje indicando si el nombre está disponible o no.
+@router.get("/verificar-nombre/{nombre}")
+def verificar_nombre(nombre: str):
+    existe = usuario_use_case.nombre_usuario_existe(nombre)
+    
+    if existe:
+        raise HTTPException(status_code=400, detail="Ese nombre de usuario ya está registrado.")
+    
+    return {"status": "disponible", "message": "El nombre está libre"}

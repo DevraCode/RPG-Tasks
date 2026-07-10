@@ -1,5 +1,5 @@
 import mysql.connector
-from rpg_tasks.core.application.ports.tareas_ports import TareasRepository
+from rpg_tasks.core.application.output_ports.tareas_ports import TareasRepository
 from rpg_tasks.core.domain.entidades import Tareas
 
 class MySQLTareasRepository(TareasRepository):

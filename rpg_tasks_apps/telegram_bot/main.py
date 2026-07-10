@@ -8,8 +8,8 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ConversationHandler
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #Importaciones propias del bot
-from .handlers_basicos import NOMBRE, PASSWORD, EMAIL, PEDIR_NOMBRE, PEDIR_PASSWORD
-from .handlers_basicos import start, manejador_start, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar, vincular, obtener_username, obtener_password
+from .handlers_basicos import NOMBRE, PASSWORD, EMAIL
+from .handlers_basicos import start, manejador_start, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar
 
 from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR, COMPLETAR, TEMPORIZADOR
 from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes, asignar_tarea, entrenar, completar_tarea, teclado_minutos, manejador_minutos
@@ -97,7 +97,8 @@ if __name__ == "__main__":
     allow_reentry=True 
     )
 
-    #-----------------------------------------------------------------------------------------------------------------------------
+    #----------------------------------------------------------------------------------------------------------------------------
+    """
     vin_conv_handler = ConversationHandler(
         entry_points=[CommandHandler("vincular", vincular)],
         states={
@@ -110,6 +111,8 @@ if __name__ == "__main__":
         per_chat=True,
         allow_reentry=True 
     )
+    """
+    
 
     #-----------------------------------------------------------------------------------------------------------------------------
     tarea_conv_handler = ConversationHandler(
@@ -130,7 +133,7 @@ if __name__ == "__main__":
     app.add_handler(reg_conv_handler)
     app.add_handler(personaje_conv_handler)
     app.add_handler(entrenar_personaje_conv_handler)
-    app.add_handler(vin_conv_handler)
+    #app.add_handler(vin_conv_handler)
     app.add_handler(tarea_conv_handler)
 
 

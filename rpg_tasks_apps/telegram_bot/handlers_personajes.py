@@ -12,18 +12,18 @@ from rpg_tasks.infrastructure.repositorios.mysql_personajes_repository import My
 from rpg_tasks.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
 from rpg_tasks.infrastructure.repositorios.mysql_tareas_repository import MySQLTareasRepository
 
-from rpg_tasks.core.application.use_cases.basico.usuarios_use_cases import UsuarioUseCase
-from rpg_tasks.core.application.use_cases.basico.personajes_use_cases import PersonajeUseCase
-from rpg_tasks.core.application.use_cases.basico.plataformas_use_cases import PlataformasUseCase
-from rpg_tasks.core.application.use_cases.basico.tareas_use_cases import TareasUseCase
-from rpg_tasks.core.application.use_cases.basico.enemigos_use_cases import EnemigosUseCase
+from rpg_tasks.core.application.use_cases.usuarios_use_cases import UsuarioUseCase
+from rpg_tasks.core.application.use_cases.personajes_use_cases import PersonajeUseCase
+from rpg_tasks.core.application.use_cases.plataformas_use_cases import PlataformasUseCase
+from rpg_tasks.core.application.use_cases.tareas_use_cases import TareasUseCase
+from rpg_tasks.core.application.use_cases.enemigos_use_cases import EnemigosUseCase
 
 
 
 from rpg_tasks.infrastructure.servicios_ia.cliente_ollama import OllamaClient
 
 
-from .decoradores import usuario_no_existe_o_sesion_cerrada, limite_personajes
+#from .decoradores import usuario_no_existe_o_sesion_cerrada, limite_personajes
 
 from rpg_tasks.infrastructure.dbconfig import db_config
 
@@ -84,8 +84,6 @@ SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE = range(2)
 
 #Primero se enseña la galería de personajes
 
-@usuario_no_existe_o_sesion_cerrada #Comprobar que el usuario haya elegido o no personaje
-@limite_personajes
 async def mostrar_personaje(update:Update, context):
     chat_id = update.effective_chat.id
 
@@ -265,7 +263,7 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR, COMPLETAR, TEMPORIZADOR = range(5)
 
 #Se muestran los personajes que tiene el usuario en una galeria, igual que para elegir personaje
-@usuario_no_existe_o_sesion_cerrada
+
 async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 

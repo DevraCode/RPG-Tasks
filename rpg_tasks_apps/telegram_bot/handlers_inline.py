@@ -6,8 +6,8 @@ import hashlib
 from rpg_tasks.infrastructure.dbconfig import db_config
 from rpg_tasks.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from rpg_tasks.infrastructure.repositorios.mysql_personajes_repository import MySQLPersonajesRepository
-from rpg_tasks.core.application.use_cases.basico.usuarios_use_cases import UsuarioUseCase
-from rpg_tasks.core.application.use_cases.basico.personajes_use_cases import PersonajeUseCase
+from rpg_tasks.core.application.use_cases.usuarios_use_cases import UsuarioUseCase
+from rpg_tasks.core.application.use_cases.personajes_use_cases import PersonajeUseCase
 
 repo_usuarios = MySQLUsuarioRepository(db_config)
 repo_personajes = MySQLPersonajesRepository(db_config)

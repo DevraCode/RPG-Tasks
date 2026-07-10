@@ -1,6 +1,7 @@
 import mysql.connector
-from rpg_tasks.core.application.ports.usuarios_ports import UsuarioRepository
+from rpg_tasks.core.application.output_ports.usuarios_ports import UsuarioRepository
 from rpg_tasks.core.domain.entidades import Usuario
+
 
 class MySQLUsuarioRepository(UsuarioRepository):
 
@@ -60,6 +61,21 @@ class MySQLUsuarioRepository(UsuarioRepository):
                            nombre_usuario=res['nombre_usuario'])
         return None
     
+    #-----------------------------------------------------------------------------------------------------------------------------
+
+    def nombre_usuario_existe(self, nombre_usuario: str):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = "SELECT 1 FROM usuarios WHERE nombre_usuario = %s LIMIT 1"
+        
+        cursor.execute(query, (nombre_usuario,))
+        row = cursor.fetchone() 
+        
+        cursor.close()
+        conn.close()
+
+        return True if row else False
     #-----------------------------------------------------------------------------------------------------------------------------
     
     def buscar_usuario_por_nombre(self, nombre_usuario: str):

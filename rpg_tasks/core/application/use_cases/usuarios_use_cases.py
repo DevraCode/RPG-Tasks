@@ -28,11 +28,9 @@ class UsuarioUseCase:
         return usuario
     
     def nombre_usuario_existe(self, nombre_usuario: str):
-        usuario = self.repo.buscar_usuario_en_bd(nombre_usuario)
-        if usuario:
-            mensaje = "Ese usuario ya existe"
-            return mensaje
-        
+        usuario = self.repo.nombre_usuario_existe(nombre_usuario)
+        return usuario
+
     def id_externo(self, id_externo_usuario: str):
         usuario = self.repo.buscar_usuario_en_bd(id_externo_usuario)
         return usuario
