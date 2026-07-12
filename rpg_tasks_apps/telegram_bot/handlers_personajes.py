@@ -34,7 +34,7 @@ repo_tareas = MySQLTareasRepository(db_config)
 
 usuarios = UsuarioUseCase(repo_usuarios)
 personajes = PersonajeUseCase(repo_personajes, repo_usuarios)
-plataformas = PlataformasUseCase(repo_plataformas)
+plataformas = PlataformasUseCase(repo_plataformas, repo_usuarios)
 tareas = TareasUseCase(repo_tareas)
 enemigos = EnemigosUseCase()
 

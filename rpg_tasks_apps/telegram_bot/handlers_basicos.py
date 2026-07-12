@@ -1,6 +1,8 @@
 #IMPORTACIONES
 
 #Externas
+from turtle import update
+
 import requests
 import hashlib
 from dotenv import load_dotenv
@@ -163,52 +165,49 @@ async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 #----------------------------------------------------------------------------------------
 
-""" PEDIR_NOMBRE, PEDIR_PASSWORD = range(2)
+PEDIR_NOMBRE, PEDIR_PASSWORD = range(2)
 
-@traduccion
-@usuario_existe
+
 async def vincular(update:Update, context: ContextTypes.DEFAULT_TYPE):
      await update.message.reply_text((f"Introduce tu nombre de usuario"))
      return PEDIR_NOMBRE
 
+     
 async def obtener_username (update:Update, context: ContextTypes.DEFAULT_TYPE):
-     context.user_data["nombre_usuario"] = update.message.text.strip().lower()
+    context.user_data["nombre_usuario"] = update.message.text.strip().lower()
+    await update.message.reply_text(f"Introduce tu contraseña")
+    return PEDIR_PASSWORD
 
-     #Comprobar que el nombre de usuario existe en la base de datos
-     #Si existe, pedimos la contraseña. Si no existe, informamos al usuario y terminamos la conversación
-
-
-
-     pide_password = crear_cuenta.contraseña()
-     await update.message.reply_text(pide_password)
-     return PEDIR_PASSWORD
-
+            
 async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
-     context.user_data["password_usuario"] = update.message.text
+    context.user_data["password_usuario"] = update.message.text
 
+    vincular = {
+         "nombre_usuario": context.user_data.get("nombre_usuario"),
+         "password_usuario": context.user_data.get("password_usuario"),
+         "id_plataforma": 3,
+         "nombre_plataforma": "TELEGRAM",
+         "id_externo_usuario": hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8],
+         "id_usuario": 0
+     }
 
-     #Comprobar que la contraseña es correcta para el nombre de usuario proporcionado. Si es correcta, vinculamos la cuenta. Si no es correcta, informamos al usuario y terminamos la conversación
-
-     nombre_usuario = context.user_data.get("nombre_usuario")
-     password_usuario = context.user_data.get("password_usuario")
-
-     id_plataforma = CorrespondenciaPlataformas.TELEGRAM
-     nombre_plataforma = "TELEGRAM"
-     id_externo_usuario = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+    try:
+        await update.message.reply_text(("Vinculando la cuenta..."))
+    
+        respuesta = requests.post(f"{API_URL}/api/plataformas/vincular", json=vincular)
+        
+        if respuesta.status_code == 200:
+            await update.message.reply_text(("Cuenta vinculada con éxito ¡Bienvenido!"))
+        else:
+            error_api = respuesta.json().get("detail", "Error interno de la API")
+            await update.message.reply_text(f"No se pudo completar la vinculación: {error_api}")
+            
+    except requests.exceptions.ConnectionError:
+         await update.message.reply_text("Error de conexion")
+    
+    return ConversationHandler.END
      
-
-     usuario_existe = usuario.comprobar_usuario(nombre_usuario, password_usuario)
-     id_usuario = usuario_existe.id_usuario
-
-     if usuario_existe:
-          
-          plataformas.vincular_plataforma(id_plataforma,nombre_plataforma, id_externo_usuario, id_usuario)
-
-          await update.message.reply_text(f"Cuenta vinculada correctamente")
-          
-          return ConversationHandler.END
      
-     else:
-          await update.message.reply_text(f"No se encuentra al usuario")
-          
-          return ConversationHandler.END """
+     
+        
+     

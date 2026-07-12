@@ -147,67 +147,26 @@ class MySQLUsuarioRepository(UsuarioRepository):
         return None
     
 
-    def buscar_idioma_usuario(self, id_usuario):
+
+
+    def autenticar_usuario(self, nombre_usuario: str):
         conn = self._get_connection() 
         cursor = conn.cursor(dictionary=True)
 
         query ="""
-            SELECT id_usuario, idioma_usuario
-            FROM usuarios
-            WHERE id_usuario = %s
-        """
-
-        cursor.execute(query, (id_usuario,))
-        row = cursor.fetchone()
-        
-        cursor.close()
-        conn.close()
-
-        if row:
-            return row["idioma_usuario"]
-        return None
-    
-
-    def idioma(self):
-        conn = self._get_connection() 
-        cursor = conn.cursor(dictionary=True)
-
-        query ="""
-            SELECT idioma_usuario
-            FROM usuarios
-        """
-
-        cursor.execute(query)
-        resultados = cursor.fetchall()
-        
-        cursor.close()
-        conn.close()
-
-        return resultados
-        
-
-
-    def comprobar_usuario_contraseña(self, nombre_usuario: str, password_usuario: str):
-        conn = self._get_connection() 
-        cursor = conn.cursor(dictionary=True)
-
-        query ="""
-            SELECT id_usuario, nombre_usuario, password_usuario
+            SELECT *
             FROM usuarios 
-            WHERE nombre_usuario = %s AND password_usuario = %s
+            WHERE nombre_usuario = %s
         """
-        cursor.execute(query, (nombre_usuario,password_usuario))
+        cursor.execute(query, (nombre_usuario,))
         row = cursor.fetchone()
 
         cursor.close()
         conn.close()
 
         if row:
-            return Usuario(
-                id_usuario=row['id_usuario'],
-                nombre_usuario=row['nombre_usuario'],
-                password_usuario=row['password_usuario']
-            )
+            return row
+
         return None
     
 

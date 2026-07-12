@@ -15,28 +15,27 @@ class MySQLPlataformasRepository(PlataformasRepository):
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
 
-    #Para Telegram / Discord - Busca a que usuario pertenece su id externo
-    def vincular_id_externo_con_interno(self, id_externo_usuario):
+    
+    def id_externo_existe(self, id_usuario):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True, buffered=True) 
         try:
-            query = "SELECT id_usuario FROM plataformas WHERE id_externo_usuario = %s"
-            cursor.execute(query, (id_externo_usuario,))
+            query = "SELECT id_externo_usuario FROM plataformas WHERE id_usuario = %s"
+            cursor.execute(query, (id_usuario,))
             row = cursor.fetchone()
             
             if row:
-                
-                return row['id_usuario']
+                return True
             
-            
-            return None
+            return False
+        
         finally:
             cursor.close()
             conn.close()
 
 
     #Vincula la plataforma al iniciar sesión en otro lugar
-    def vincular_plataforma(self, plataformas: Plataformas, id_usuario, id_externo_usuario):
+    def vincular_plataforma(self, plataformas: Plataformas, id_usuario: int, id_externo_usuario: str):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True, buffered=True)
 
@@ -62,66 +61,5 @@ class MySQLPlataformasRepository(PlataformasRepository):
             cursor.close()
             conn.close()
 
-    def obtener_estado_sesion(self, id_externo_usuario):
-
-        conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True, buffered=True) 
-
-        query = """
-        SELECT sesion_activa
-        FROM plataformas
-        WHERE id_externo_usuario = %s AND sesion_activa = 1
-        """
-        
-        try:
-            cursor.execute(query, (id_externo_usuario,))
-            resultado = cursor.fetchone()
-
-            
-            if resultado:
-                return bool(resultado['sesion_activa'])
-            
-            return False 
-
-        finally:
-            
-            cursor.close()
-            conn.close()
-
-    def iniciar_sesion(self, id_usuario):
-        conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True, buffered=True)
-
-        query = """ UPDATE plataformas
-                    SET sesion_activa = 1
-                    WHERE p.id_usuario =  %s """
-
-        try:
-            cursor.execute(query, (id_usuario,))
-            conn.commit() 
-        finally:
-            cursor.close()
-            conn.close()
-
-
-    def cerrar_sesion(self, id_usuario):
-        conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True, buffered=True)
-
-        query = """ UPDATE plataformas
-                    SET sesion_activa = 0
-                    WHERE p.id_usuario =  %s """
-
-        try:
-            cursor.execute(query, (id_usuario,))
-            conn.commit() 
-        finally:
-            cursor.close()
-            conn.close()
-
-
-
-    def sesion_cerrada(self, id_externo_usuario):
-        pass
-
+    
 

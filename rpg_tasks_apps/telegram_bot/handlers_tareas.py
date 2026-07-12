@@ -19,7 +19,7 @@ repo_tareas = MySQLTareasRepository(db_config)
 repo_plataformas = MySQLPlataformasRepository(db_config)
 usuarios = UsuarioUseCase(repo_usuarios)
 tareas = TareasUseCase(repo_tareas)
-plataformas = PlataformasUseCase(repo_plataformas)
+plataformas = PlataformasUseCase(repo_plataformas, repo_usuarios)
 
 
 #-----------------------------------------------------------------------------------------------------------------------------

@@ -1,13 +1,13 @@
-
 #IMPORTACIONES
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from datetime import datetime
 #-----------------------------------------------------------------------------------------------------------------------------
 from rpg_tasks.infrastructure.dbconfig import db_config
+from rpg_tasks.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
 from rpg_tasks.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
-from rpg_tasks.core.application.use_cases.usuarios_use_cases import UsuarioUseCase
-from rpg_tasks.core.domain.auth_utils import decodificar_id_usuario
+from rpg_tasks.core.application.use_cases.plataformas_use_cases import PlataformasUseCase
+
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -15,8 +15,9 @@ from rpg_tasks.core.domain.auth_utils import decodificar_id_usuario
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #INICIALIZACIÓN DE REPOSITORIOS Y CASOS DE USO
-repo_usuario = MySQLUsuarioRepository(db_config)
-usuario_use_case = UsuarioUseCase(repo_usuario)
+repo_plataformas = MySQLPlataformasRepository(db_config)
+repo_usuarios = MySQLUsuarioRepository(db_config)
+plataformas_use_case = PlataformasUseCase(repo_plataformas, repo_usuarios)
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -25,8 +26,8 @@ usuario_use_case = UsuarioUseCase(repo_usuario)
 
 #Router de FastAPI para los endpoints relacionados con usuarios
 router = APIRouter(
-    prefix="/api/usuarios",
-    tags=["Usuarios"])
+    prefix="/api/plataformas",
+    tags=["Plataformas"])
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -35,21 +36,16 @@ router = APIRouter(
 
 #DTOs
 
-#DTO para el registro de usuarios
-class RegistroUsuarioDTO(BaseModel):
-    id_usuario: int = None
-    id_externo_usuario: str = "0"
-    nombre_usuario: str = None
-    password_usuario: str = None
-    email_usuario : str = None
-    fecha_registro: datetime = None
-    activo: bool = True
-    rango: str = None
-    tipo_usuario: int = 0
-    idioma_usuario: str = None
-    id_plataforma: int = None
-    nombre_plataforma: str = None
-    id_externo_usuario: str = None   
+#DTO para la vinculación de usuarios
+class VincularUsuarioDTO(BaseModel):
+    nombre_usuario: str
+    password_usuario: str
+    id_plataforma: int
+    nombre_plataforma: str
+    id_externo_usuario: str
+    id_usuario: int
+
+
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -57,52 +53,33 @@ class RegistroUsuarioDTO(BaseModel):
 #-----------------------------------------------------------------------------------------------------------------------------
 
 #ENDPOINTS
-#Busca a un usuario por su Id. Para la url, esta id estará codificada por seguridad, y se decodificará en el endpoint antes de buscar al usuario en la base de datos.
-@router.get("/buscar/{id_usuario_codificada}")
-def buscar_usuario(id_usuario_codificada):
 
+#Endpoint para vincular un usuario a una plataforma    
+@router.post("/vincular", status_code=status.HTTP_200_OK)
+def vincular_usuario(datos: VincularUsuarioDTO):
     try:
-        id_usuario_real = decodificar_id_usuario(id_usuario_codificada)
-        usuario = usuario_use_case.buscar_usuario_por_id(id_usuario_real)
-        return {
-            "status": "ok",
-            "data": usuario
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-#Endpoint para verificar si un nombre de usuario ya está registrado en la base de datos. Devuelve un mensaje indicando si el nombre está disponible o no.
-@router.get("/verificar-nombre/{nombre}")
-def verificar_nombre(nombre: str):
-    existe = usuario_use_case.nombre_usuario_existe(nombre)
-    
-    if existe:
-        raise HTTPException(status_code=400, detail="Ese nombre de usuario ya está registrado.")
-    
-    return {"status": "disponible", "message": "El nombre está libre"}
- 
-
-#Endpoint para registrar un nuevo usuario    
-@router.post("/registro", status_code=status.HTTP_201_CREATED)
-def registrar_usuario(datos: RegistroUsuarioDTO):
-    try:
-        
-        usuario_creado = usuario_use_case.registrar_usuario(
+        vincular = plataformas_use_case.vincular_plataforma(
             nombre_usuario=datos.nombre_usuario,
             password_usuario=datos.password_usuario,
-            email_usuario=datos.email_usuario,
-            rango=datos.rango,
-            tipo_usuario=datos.tipo_usuario,
-            idioma_usuario=datos.idioma_usuario,
             id_plataforma=datos.id_plataforma,
             nombre_plataforma=datos.nombre_plataforma,
-            id_externo_usuario=datos.id_externo_usuario)
+            id_externo_usuario=datos.id_externo_usuario,
+            id_usuario=datos.id_usuario)
         
-        return {
-            "message": "Usuario registrado correctamente"
-        }
+        return {"message": "Usuario vinculado correctamente"}
     
+        
+    except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, 
+                detail=str(e))
+        
+    except HTTPException:
+        raise
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error al registrar: {str(e)}")
-    
+        print(f"Error en la vinculación: {str(e)}") 
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail="Error interno del servidor al procesar la vinculación."
+        )
