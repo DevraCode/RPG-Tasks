@@ -21,7 +21,9 @@ CREATE TABLE IF NOT EXISTS plataformas (
     id_plataforma INT,
     nombre_plataforma VARCHAR(100),
     id_usuario INT,
-    token_usuario VARCHAR(100), -- Id del usuario de Telegram, Discord, etc
+    id_externo_usuario VARCHAR(100) UNIQUE, -- Id del usuario en la plataforma externa (Telegram, Discord, etc)
+    token_usuario VARCHAR(100), -- Token de sesion del usuario
+    fecha_expiracion DATETIME DEFAULT (DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 7 DAY)), -- Fecha de expiracion del token de sesion
     sesion_activa BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB;

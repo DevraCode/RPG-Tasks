@@ -8,27 +8,11 @@ class UsuarioRepository(ABC):
         pass
 
     @abstractmethod
-    def buscar_por_id_externo(self, id_ext: str) -> Optional[Usuario]: 
-        pass
-
-    @abstractmethod
     def nombre_usuario_existe(self, nombre_usuario: str): 
         pass
 
     @abstractmethod
-    def buscar_usuario_por_nombre(self,nombre_usuario:str): 
-        pass
-
-    @abstractmethod
-    def buscar_usuario_por_plataforma(self, plataforma:str): 
-        pass
-
-    @abstractmethod
-    def buscar_usuario_en_bd (self, nombre_usuario: str): 
-        pass
-
-    @abstractmethod
-    def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, token_usuario: str):
+    def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str, token_usuario: str):
         pass
 
     @abstractmethod

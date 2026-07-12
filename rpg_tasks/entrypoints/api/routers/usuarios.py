@@ -7,6 +7,7 @@ from datetime import datetime
 from rpg_tasks.infrastructure.dbconfig import db_config
 from rpg_tasks.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from rpg_tasks.core.application.use_cases.usuarios_use_cases import UsuarioUseCase
+from rpg_tasks.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
 from rpg_tasks.core.domain.auth_utils import decodificar_id_usuario
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -16,7 +17,8 @@ from rpg_tasks.core.domain.auth_utils import decodificar_id_usuario
 
 #INICIALIZACIÓN DE REPOSITORIOS Y CASOS DE USO
 repo_usuario = MySQLUsuarioRepository(db_config)
-usuario_use_case = UsuarioUseCase(repo_usuario)
+repo_plataformas = MySQLPlataformasRepository(db_config)
+usuario_use_case = UsuarioUseCase(repo_usuario, repo_plataformas)
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -38,7 +40,7 @@ router = APIRouter(
 #DTO para el registro de usuarios
 class RegistroUsuarioDTO(BaseModel):
     id_usuario: int = None
-    token_usuario: str = "0"
+    id_externo_usuario: str = None
     nombre_usuario: str = None
     password_usuario: str = None
     email_usuario : str = None
@@ -96,7 +98,7 @@ def registrar_usuario(datos: RegistroUsuarioDTO):
             idioma_usuario=datos.idioma_usuario,
             id_plataforma=datos.id_plataforma,
             nombre_plataforma=datos.nombre_plataforma,
-            token_usuario=datos.token_usuario)
+            id_externo_usuario=datos.id_externo_usuario)
         
         return {
             "message": "Usuario registrado correctamente"

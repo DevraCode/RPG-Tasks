@@ -3,6 +3,7 @@
 #Externas
 import requests
 import hashlib
+import secrets
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommandScopeChat
 from telegram.ext import ContextTypes, ConversationHandler, CallbackContext
@@ -119,24 +120,24 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     nombre = context.user_data.get('nombre_usuario')
     password = context.user_data.get('password_usuario')
-    password_bytes = f"{password}".encode()
-    password_encriptado = hashlib.sha256(password_bytes).hexdigest()[:8]
+    
     email = context.user_data.get('email_usuario')
     idioma = context.user_data.get("idioma")
 
-    id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+    id_externo = str(update.effective_user.id)
+    
 
 
     registro = {
         "nombre_usuario": nombre,
-        "password_usuario": password_encriptado,
+        "password_usuario": password,
         "email_usuario": email,
         "rango": "NOVATO",                   
         "tipo_usuario": 0,                   
         "idioma_usuario": idioma,
         "id_plataforma": 3,
         "nombre_plataforma":"TELEGRAM",
-        "token_usuario": id_generado
+        "id_externo_usuario": id_externo
     }
 
     try:
@@ -184,8 +185,6 @@ async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
     password = context.user_data.get('password_usuario')
     password_bytes = f"{password}".encode()
     password_encriptado = hashlib.sha256(password_bytes).hexdigest()[:8]
-
-
 
     vincular = {
          "nombre_usuario": nombre_usuario,
