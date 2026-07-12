@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 class PlataformasRepository(ABC):
     @abstractmethod
-    def id_externo_existe(self, id_usuario: str):
+    def token_existe(self, token_usuario: str):
         pass
     
     @abstractmethod

@@ -8,7 +8,7 @@ class UsuarioUseCase:
         usuario = self.repo.buscar_usuario_por_id(id_usuario)
         return usuario
 
-    def registrar_usuario(self, nombre_usuario: str, password_usuario: str, email_usuario: str, rango: str, tipo_usuario:int, idioma_usuario: str, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str):
+    def registrar_usuario(self, nombre_usuario: str, password_usuario: str, email_usuario: str, rango: str, tipo_usuario:int, idioma_usuario: str, id_plataforma: int, nombre_plataforma: str, token_usuario: str):
         nuevo_usuario = Usuario(
             id_usuario = None,
             nombre_usuario = nombre_usuario,
@@ -19,7 +19,7 @@ class UsuarioUseCase:
             idioma_usuario= idioma_usuario
 
         )
-        registro = self.repo.registrar_usuario(nuevo_usuario, id_plataforma, nombre_plataforma, id_externo_usuario)
+        registro = self.repo.registrar_usuario(nuevo_usuario, id_plataforma, nombre_plataforma, token_usuario)
         return registro
     
     def id_usuario_existe(self, id_usuario: int):

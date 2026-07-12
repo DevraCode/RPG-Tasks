@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS plataformas (
     id_plataforma INT,
     nombre_plataforma VARCHAR(100),
     id_usuario INT,
-    id_externo_usuario VARCHAR(100), -- Id del usuario de Telegram, Discord, etc
+    token_usuario VARCHAR(100), -- Id del usuario de Telegram, Discord, etc
     sesion_activa BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB;

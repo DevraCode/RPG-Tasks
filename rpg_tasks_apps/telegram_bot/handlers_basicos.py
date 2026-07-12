@@ -138,7 +138,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
         "idioma_usuario": idioma,
         "id_plataforma": 3,
         "nombre_plataforma":"TELEGRAM",
-        "id_externo_usuario": id_generado
+        "token_usuario": id_generado
     }
 
     try:
@@ -187,7 +187,7 @@ async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
          "password_usuario": context.user_data.get("password_usuario"),
          "id_plataforma": 3,
          "nombre_plataforma": "TELEGRAM",
-         "id_externo_usuario": hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8],
+         "token_usuario": hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8],
          "id_usuario": 0
      }
 
@@ -200,7 +200,7 @@ async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(("Cuenta vinculada con éxito ¡Bienvenido!"))
         else:
             error_api = respuesta.json().get("detail", "Error interno de la API")
-            await update.message.reply_text(f"No se pudo completar la vinculación: {error_api}")
+            await update.message.reply_text(f"No se pudo completar la vinculación {error_api}")
             
     except requests.exceptions.ConnectionError:
          await update.message.reply_text("Error de conexion")

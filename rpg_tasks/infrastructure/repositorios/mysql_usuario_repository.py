@@ -170,7 +170,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
         return None
     
 
-    def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str):
+    def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, token_usuario: str):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
 
@@ -181,7 +181,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
         """
         query2 = """ 
         INSERT INTO plataformas
-        (id_plataforma, nombre_plataforma, id_usuario, id_externo_usuario)
+        (id_plataforma, nombre_plataforma, id_usuario, token_usuario)
         VALUES (%s, %s, %s, %s)
         """
 
@@ -197,7 +197,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
         try:
             cursor.execute(query, valores)
             id_usuario = cursor.lastrowid #Guarda el id del usuario
-            cursor.execute(query2, (id_plataforma, nombre_plataforma, id_usuario, id_externo_usuario))
+            cursor.execute(query2, (id_plataforma, nombre_plataforma, id_usuario, token_usuario))
             conn.commit()
             return id_usuario
 
@@ -206,19 +206,4 @@ class MySQLUsuarioRepository(UsuarioRepository):
             conn.close()
 
    
-    def buscar_usuario_ia(self, nombre_usuario):
-        conn = self._get_connection()
-        cursor = conn.cursor(dictionary=True)
-        query = "SELECT id_usuario FROM usuarios WHERE nombre_usuario = %s"
-        cursor.execute(query, (nombre_usuario,))
-        row = cursor.fetchone()
-
-        cursor.close()
-        conn.close()
-
-        if row:
-            return Usuario(
-                id_usuario=row['id_usuario']
-            )
-        return None
     

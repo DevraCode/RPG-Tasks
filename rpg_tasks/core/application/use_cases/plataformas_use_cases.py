@@ -8,7 +8,7 @@ class PlataformasUseCase:
         self.repo_usuarios = repo_usuarios
 
     
-    def vincular_plataforma(self,nombre_usuario, password_usuario, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str, id_usuario: int):
+    def vincular_plataforma(self,nombre_usuario, password_usuario, id_plataforma: int, nombre_plataforma: str, token_usuario: str, id_usuario: int):
         
         nueva_plataforma = Plataformas(
             id_plataforma = id_plataforma,
@@ -24,16 +24,16 @@ class PlataformasUseCase:
         if usuario["password_usuario"] != password_usuario:
             raise ValueError("La contraseña es incorrecta.")
         
-        #Si coinciden, comprobamos si el id_externo_usuario ya está vinculado a un usuario
+        #Si coinciden, comprobamos si el token_usuario ya está vinculado a un usuario
         else:
 
             id_usuario = usuario["id_usuario"]
-            id_externo_existe = self.repo_plataformas.id_externo_existe(id_usuario)
+            token_existe = self.repo_plataformas.token_existe(token_usuario)
 
-            if id_externo_existe:
+            if token_existe == token_usuario:
                 raise ValueError("Este usuario ya está vinculado")
             
             #Si no está vinculado, procedemos a vincularlo
             else: 
-                vinculacion = self.repo_plataformas.vincular_plataforma(nueva_plataforma, id_usuario, id_externo_usuario)
+                vinculacion = self.repo_plataformas.vincular_plataforma(nueva_plataforma, id_usuario, token_usuario)
                 return True

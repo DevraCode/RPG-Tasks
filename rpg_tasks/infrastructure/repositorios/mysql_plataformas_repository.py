@@ -16,18 +16,18 @@ class MySQLPlataformasRepository(PlataformasRepository):
     #-----------------------------------------------------------------------------------------------------------------------------
 
     
-    def id_externo_existe(self, id_usuario):
+    def token_existe(self, token_usuario):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True, buffered=True) 
         try:
-            query = "SELECT id_externo_usuario FROM plataformas WHERE id_usuario = %s"
-            cursor.execute(query, (id_usuario,))
+            query = "SELECT token_usuario FROM plataformas WHERE id_usuario = %s"
+            cursor.execute(query, (token_usuario,))
             row = cursor.fetchone()
             
             if row:
-                return True
+                return row["token_usuario"]
             
-            return False
+            return None
         
         finally:
             cursor.close()
@@ -35,13 +35,13 @@ class MySQLPlataformasRepository(PlataformasRepository):
 
 
     #Vincula la plataforma al iniciar sesión en otro lugar
-    def vincular_plataforma(self, plataformas: Plataformas, id_usuario: int, id_externo_usuario: str):
+    def vincular_plataforma(self, plataformas: Plataformas, id_usuario: int, token_usuario: str):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True, buffered=True)
 
         query = """ 
         INSERT INTO plataformas 
-        (id_plataforma, nombre_plataforma, id_usuario, id_externo_usuario)
+        (id_plataforma, nombre_plataforma, id_usuario, token_usuario)
         VALUES (%s, %s, %s, %s)
         """
 
@@ -49,7 +49,7 @@ class MySQLPlataformasRepository(PlataformasRepository):
             plataformas.id_plataforma,
             plataformas.nombre_plataforma,
             id_usuario,
-            id_externo_usuario
+            token_usuario
         )
 
         try:

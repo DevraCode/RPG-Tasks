@@ -38,7 +38,7 @@ router = APIRouter(
 #DTO para el registro de usuarios
 class RegistroUsuarioDTO(BaseModel):
     id_usuario: int = None
-    id_externo_usuario: str = "0"
+    token_usuario: str = "0"
     nombre_usuario: str = None
     password_usuario: str = None
     email_usuario : str = None
@@ -48,8 +48,7 @@ class RegistroUsuarioDTO(BaseModel):
     tipo_usuario: int = 0
     idioma_usuario: str = None
     id_plataforma: int = None
-    nombre_plataforma: str = None
-    id_externo_usuario: str = None   
+    nombre_plataforma: str = None   
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -97,7 +96,7 @@ def registrar_usuario(datos: RegistroUsuarioDTO):
             idioma_usuario=datos.idioma_usuario,
             id_plataforma=datos.id_plataforma,
             nombre_plataforma=datos.nombre_plataforma,
-            id_externo_usuario=datos.id_externo_usuario)
+            token_usuario=datos.token_usuario)
         
         return {
             "message": "Usuario registrado correctamente"
