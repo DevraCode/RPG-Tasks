@@ -183,15 +183,14 @@ async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     nombre_usuario = context.user_data.get("nombre_usuario")
     password = context.user_data.get('password_usuario')
-    password_bytes = f"{password}".encode()
-    password_encriptado = hashlib.sha256(password_bytes).hexdigest()[:8]
+    id_externo = str(update.effective_user.id)
 
     vincular = {
          "nombre_usuario": nombre_usuario,
-         "password_usuario": password_encriptado,
+         "password_usuario": password,
          "id_plataforma": 3,
          "nombre_plataforma": "TELEGRAM",
-         "token_usuario": hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
+         "id_externo_usuario": id_externo
      }
 
     try:

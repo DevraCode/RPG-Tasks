@@ -13,5 +13,5 @@ class PlataformasRepository(ABC):
         pass
     
     @abstractmethod
-    def vincular_plataforma(self, id_usuario: int):
+    def vincular_plataforma(self, id_usuario: int, id_externo_usuario:str, token_usuario:str):
         pass 
