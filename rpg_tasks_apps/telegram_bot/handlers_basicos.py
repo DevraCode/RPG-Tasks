@@ -1,8 +1,6 @@
 #IMPORTACIONES
 
 #Externas
-from turtle import update
-
 import requests
 import hashlib
 from dotenv import load_dotenv
@@ -182,13 +180,19 @@ async def obtener_username (update:Update, context: ContextTypes.DEFAULT_TYPE):
 async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["password_usuario"] = update.message.text
 
+    nombre_usuario = context.user_data.get("nombre_usuario")
+    password = context.user_data.get('password_usuario')
+    password_bytes = f"{password}".encode()
+    password_encriptado = hashlib.sha256(password_bytes).hexdigest()[:8]
+
+
+
     vincular = {
-         "nombre_usuario": context.user_data.get("nombre_usuario"),
-         "password_usuario": context.user_data.get("password_usuario"),
+         "nombre_usuario": nombre_usuario,
+         "password_usuario": password_encriptado,
          "id_plataforma": 3,
          "nombre_plataforma": "TELEGRAM",
-         "token_usuario": hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8],
-         "id_usuario": 0
+         "token_usuario": hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
      }
 
     try:
@@ -200,7 +204,7 @@ async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(("Cuenta vinculada con éxito ¡Bienvenido!"))
         else:
             error_api = respuesta.json().get("detail", "Error interno de la API")
-            await update.message.reply_text(f"No se pudo completar la vinculación {error_api}")
+            await update.message.reply_text(f"No se pudo completar la vinculación de la cuenta: {error_api}")
             
     except requests.exceptions.ConnectionError:
          await update.message.reply_text("Error de conexion")

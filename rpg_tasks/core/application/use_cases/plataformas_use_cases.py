@@ -8,7 +8,7 @@ class PlataformasUseCase:
         self.repo_usuarios = repo_usuarios
 
     
-    def vincular_plataforma(self,nombre_usuario, password_usuario, id_plataforma: int, nombre_plataforma: str, token_usuario: str, id_usuario: int):
+    def vincular_plataforma(self,nombre_usuario, password_usuario, id_plataforma: int, nombre_plataforma: str, token_usuario: str):
         
         nueva_plataforma = Plataformas(
             id_plataforma = id_plataforma,
@@ -28,8 +28,9 @@ class PlataformasUseCase:
         else:
 
             id_usuario = usuario["id_usuario"]
-            token_existe = self.repo_plataformas.token_existe(token_usuario)
+            token_existe = self.repo_plataformas.token_existe(token_usuario) 
 
+            #Si el token ya está vinculado a un usuario, lanzamos un error
             if token_existe == token_usuario:
                 raise ValueError("Este usuario ya está vinculado")
             
