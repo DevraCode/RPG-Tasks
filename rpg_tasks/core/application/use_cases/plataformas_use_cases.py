@@ -1,6 +1,7 @@
 import hashlib
 import secrets
 from rpg_tasks.core.domain.entidades import Plataformas
+from rpg_tasks.core.domain.auth_utils import generar_id_usuario_en_plataforma, generar_token_sesion
 
 
 
@@ -10,7 +11,7 @@ class PlataformasUseCase:
         self.repo_usuarios = repo_usuarios
 
     
-    def vincular_plataforma(self,nombre_usuario, password_usuario, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str):
+    def vincular_plataforma(self,nombre_usuario, password_usuario, id_plataforma: int, nombre_plataforma: str, id_usuario_en_plataforma: str):
         
         nueva_plataforma = Plataformas(
             id_plataforma = id_plataforma,
@@ -34,19 +35,20 @@ class PlataformasUseCase:
         else:
 
             id_usuario = usuario["id_usuario"]
+            id_externo_usuario = usuario["id_externo_usuario"]
+        
+            token_usuario = generar_token_sesion()
 
-            id_externo_generado = hashlib.sha256(str(id_externo_usuario).encode()).hexdigest()[:8]
-            id_externo_usuario_existe = self.repo_plataformas.id_externo_usuario_existe(id_externo_generado)
+            id_usuario_en_plataforma_hash = generar_id_usuario_en_plataforma(id_usuario_en_plataforma)
 
-            token_generado = secrets.token_hex(16)
-            token_usuario = hashlib.sha256(str(token_generado).encode()).hexdigest()[:8]
-
-
-            #Si id ya esta vinculado
-            if id_externo_usuario_existe:
+            #Hay que comprobar si existe este id en la tabla plataformas. Diferenciar entre el id del usuario normal y el id del usuario dentro de la plataforma
+            id_usuario_en_plataforma_existe = self.repo_plataformas.id_usuario_en_plataforma_existe(id_usuario_en_plataforma_hash)
+            
+            #Si existe quiere decir que ya está vinculado
+            if id_usuario_en_plataforma_existe:
                 raise ValueError("Ya existe una cuenta vinculada a esta aplicación. Cierra la sesión antes de vincular una cuenta primero")
             
             #Si no está vinculado, procedemos a vincularlo
             else: 
-                vinculacion = self.repo_plataformas.vincular_plataforma(nueva_plataforma, id_usuario, id_externo_generado, token_usuario)
+                vinculacion = self.repo_plataformas.vincular_plataforma(nueva_plataforma, id_usuario, id_externo_usuario, token_usuario, id_usuario_en_plataforma_hash)
                 return True

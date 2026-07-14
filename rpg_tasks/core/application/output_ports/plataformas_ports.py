@@ -9,7 +9,7 @@ class PlataformasRepository(ABC):
         pass
 
     @abstractmethod
-    def id_externo_usuario_en_plataforma_existe(self, id_externo_usuario_en_plataforma):
+    def id_usuario_en_plataforma_existe(self, id_externo_usuario_en_plataforma):
         pass
 
     @abstractmethod
@@ -17,5 +17,5 @@ class PlataformasRepository(ABC):
         pass
     
     @abstractmethod
-    def vincular_plataforma(self, id_usuario: int, id_externo_usuario:str, token_usuario:str):
+    def vincular_plataforma(self, id_usuario: int, id_externo_usuario:str, token_usuario:str, id_externo_usuario_en_plataforma:str,):
         pass 

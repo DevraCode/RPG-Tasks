@@ -40,7 +40,7 @@ class UsuarioUseCase:
 
 
         nombre_usuario_existe = self.repo.nombre_usuario_existe(nombre_usuario)
-        id_externo_usuario_existe = self.repo_plataformas.id_externo_usuario_en_plataforma_existe(id_usuario_en_plataforma_hasheado)
+        id_externo_usuario_existe = self.repo_plataformas.id_usuario_en_plataforma_existe(id_usuario_en_plataforma_hasheado)
 
         
         token_usuario = generar_token_sesion()

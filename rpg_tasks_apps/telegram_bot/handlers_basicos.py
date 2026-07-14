@@ -126,8 +126,6 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     id_externo = str(update.effective_user.id)
     
-
-
     registro = {
         "nombre_usuario": nombre,
         "password_usuario": password,
@@ -190,7 +188,7 @@ async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
          "password_usuario": password,
          "id_plataforma": 3,
          "nombre_plataforma": "TELEGRAM",
-         "id_externo_usuario": id_externo
+         "id_usuario_en_plataforma": id_externo
      }
 
     try:

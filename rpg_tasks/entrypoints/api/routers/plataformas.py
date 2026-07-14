@@ -42,7 +42,7 @@ class VincularUsuarioDTO(BaseModel):
     password_usuario: str
     id_plataforma: int
     nombre_plataforma: str
-    id_externo_usuario: str
+    id_usuario_en_plataforma: str
 
 
 
@@ -62,7 +62,7 @@ def vincular_usuario(datos: VincularUsuarioDTO):
             password_usuario=datos.password_usuario,
             id_plataforma=datos.id_plataforma,
             nombre_plataforma=datos.nombre_plataforma,
-            id_externo_usuario=datos.id_externo_usuario)
+            id_usuario_en_plataforma=datos.id_usuario_en_plataforma)
         
         return {"message": "Usuario vinculado correctamente"}
     
