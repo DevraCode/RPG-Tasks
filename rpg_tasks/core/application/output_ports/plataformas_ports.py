@@ -9,6 +9,10 @@ class PlataformasRepository(ABC):
         pass
 
     @abstractmethod
+    def id_externo_usuario_en_plataforma_existe(self, id_externo_usuario_en_plataforma):
+        pass
+
+    @abstractmethod
     def token_existe(self, token_usuario: str):
         pass
     

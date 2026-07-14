@@ -53,22 +53,23 @@ class MySQLUsuarioRepository(UsuarioRepository):
       
     #-----------------------------------------------------------------------------------------------------------------------------
 
-    def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, id_externo_generado: str, token_usuario: str):
+    def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, id_externo_usuario:str, token_usuario: str, id_usuario_en_plataforma: str):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)
 
         query = """ 
         INSERT INTO usuarios 
-        (nombre_usuario, password_usuario, email_usuario, rango, tipo_usuario, idioma_usuario)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        (id_externo_usuario, nombre_usuario, password_usuario, email_usuario, rango, tipo_usuario, idioma_usuario)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         query2 = """ 
         INSERT INTO plataformas
-        (id_plataforma, nombre_plataforma, id_usuario, id_externo_usuario, token_usuario)
-        VALUES (%s, %s, %s, %s, %s)
+        (id_plataforma, nombre_plataforma, id_usuario, id_externo_usuario, token_usuario, id_usuario_en_plataforma)
+        VALUES (%s, %s, %s, %s, %s, %s)
         """
 
         valores = (
+            usuario.id_externo_usuario,
             usuario.nombre_usuario, 
             usuario.password_usuario, 
             usuario.email_usuario,
@@ -80,7 +81,8 @@ class MySQLUsuarioRepository(UsuarioRepository):
         try:
             cursor.execute(query, valores)
             id_usuario = cursor.lastrowid #Guarda el id del usuario
-            cursor.execute(query2, (id_plataforma, nombre_plataforma, id_usuario, id_externo_generado, token_usuario))
+            id_externo_usuario = usuario.id_externo_usuario #Guarda el id_externo_usuario
+            cursor.execute(query2, (id_plataforma, nombre_plataforma, id_usuario, id_externo_usuario, token_usuario, id_usuario_en_plataforma))
             conn.commit()
             return id_usuario
 

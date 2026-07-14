@@ -50,7 +50,9 @@ class RegistroUsuarioDTO(BaseModel):
     tipo_usuario: int = 0
     idioma_usuario: str = None
     id_plataforma: int = None
-    nombre_plataforma: str = None   
+    nombre_plataforma: str = None
+    id_usuario_en_plataforma: str = None
+
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -98,7 +100,7 @@ def registrar_usuario(datos: RegistroUsuarioDTO):
             idioma_usuario=datos.idioma_usuario,
             id_plataforma=datos.id_plataforma,
             nombre_plataforma=datos.nombre_plataforma,
-            id_externo_usuario=datos.id_externo_usuario)
+            id_usuario_en_plataforma=datos.id_usuario_en_plataforma)
         
         return {
             "message": "Usuario registrado correctamente"

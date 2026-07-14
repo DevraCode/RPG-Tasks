@@ -137,7 +137,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
         "idioma_usuario": idioma,
         "id_plataforma": 3,
         "nombre_plataforma":"TELEGRAM",
-        "id_externo_usuario": id_externo
+        "id_externo_usuario_en_plataforma": id_externo
     }
 
     try:

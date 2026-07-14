@@ -12,7 +12,7 @@ class UsuarioRepository(ABC):
         pass
 
     @abstractmethod
-    def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str, token_usuario: str):
+    def registrar_usuario(self, usuario: Usuario, id_plataforma: int, nombre_plataforma: str, id_externo_usuario: str, token_usuario: str, id_externo_usuario_en_plataforma: str):
         pass
 
     @abstractmethod

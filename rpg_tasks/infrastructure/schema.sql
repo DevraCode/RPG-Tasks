@@ -5,6 +5,7 @@ USE rpg_tasks_db;
 -- TABLA USUARIOS
 CREATE TABLE IF NOT EXISTS usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    id_externo_usuario VARCHAR(100) UNIQUE NOT NULL, -- Id del usuario para usar en la plataforma externa
     nombre_usuario VARCHAR(100) NOT NULL,
     password_usuario VARCHAR(20) NOT NULL,
     email_usuario VARCHAR(100),
@@ -21,11 +22,12 @@ CREATE TABLE IF NOT EXISTS plataformas (
     id_plataforma INT,
     nombre_plataforma VARCHAR(100),
     id_usuario INT,
-    id_externo_usuario VARCHAR(100) UNIQUE, -- Id del usuario en la plataforma externa (Telegram, Discord, etc)
+    id_externo_usuario VARCHAR(100), 
     token_usuario VARCHAR(100), -- Token de sesion del usuario
     fecha_expiracion DATETIME DEFAULT (DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 7 DAY)), -- Fecha de expiracion del token de sesion
-    sesion_activa BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
+    id_usuario_en_plataforma VARCHAR(100) UNIQUE, -- ID para evitar la duplicación de cuentas en una sola plataforma
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_externo_usuario) REFERENCES usuarios(id_externo_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 

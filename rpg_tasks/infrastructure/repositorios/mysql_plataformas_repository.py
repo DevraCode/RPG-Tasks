@@ -28,6 +28,21 @@ class MySQLPlataformasRepository(PlataformasRepository):
         conn.close()
 
         return True if row else False
+    
+
+    def id_externo_usuario_en_plataforma_existe(self, id_usuario_en_plataforma):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = "SELECT 1 FROM plataformas WHERE id_usuario_en_plataforma = %s LIMIT 1"
+        
+        cursor.execute(query, (id_usuario_en_plataforma,))
+        row = cursor.fetchone() 
+        
+        cursor.close()
+        conn.close()
+
+        return True if row else False
 
     
     def token_existe(self, token_usuario):
