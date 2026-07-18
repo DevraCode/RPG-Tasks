@@ -20,14 +20,16 @@ class PlataformasUseCase:
 
         #Primero comprobamos que el usuario y la contraseña coinciden
         usuario = self.repo_usuarios.autenticar_usuario(nombre_usuario)
-        password = usuario["password_usuario"] #Sacado de la BD
 
-        password_hasheado = hashlib.sha256(str(password_usuario).encode()).hexdigest()[:8] #Debe coincidir con el password encriptado de la BD
-
-
+        #Comprobamos que el usuario existe
         if not usuario:
             raise ValueError("El nombre de usuario no existe.")
-        
+
+        #Si existe, sacamos la contraseña
+        password = usuario["password_usuario"] #Sacado de la BD
+        password_hasheado = hashlib.sha256(str(password_usuario).encode()).hexdigest()[:8] #Debe coincidir con el password encriptado de la BD
+
+        #Ahora comprobamos que la contraseña coincida
         if password != password_hasheado:
             raise ValueError("La contraseña es incorrecta.")
         
@@ -42,6 +44,7 @@ class PlataformasUseCase:
             id_usuario_en_plataforma_hash = generar_id_usuario_en_plataforma(id_usuario_en_plataforma)
 
             #Hay que comprobar si existe este id en la tabla plataformas. Diferenciar entre el id del usuario normal y el id del usuario dentro de la plataforma
+            #El id del usuario en la plataforma es un id único del usuario en esa plataforma. Sirve para evitar cuentas duplicadas.
             id_usuario_en_plataforma_existe = self.repo_plataformas.id_usuario_en_plataforma_existe(id_usuario_en_plataforma_hash)
             
             #Si existe quiere decir que ya está vinculado
