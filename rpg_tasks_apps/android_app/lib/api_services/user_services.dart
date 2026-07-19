@@ -2,10 +2,11 @@ import 'package:dio/dio.dart';
 import '../models/user_model.dart';
 import 'api_client.dart';
 
+//Repositorio que contiene las funciones de registro e inicio de sesión del usuario
 class AuthService {
   final Dio _dio = ApiClient.dio;
 
-  Future<UsuarioModel?> registrarUsuario(String idExternoUsuario, String nombreUsuario, String passwordUsuario, String emailUsuario, String rango, int tipoUsuario, String idiomaUsuario, String idUsuarioEnPlataforma,
+  Future<UsuarioModel?> registrarUsuario(String idExternoUsuario, String nombreUsuario, String passwordUsuario, String emailUsuario, String idiomaUsuario, int idPlataforma, String nombrePlataforma, String idUsuarioEnPlataforma,
   ) async {
     try {
       final response = await _dio.post(
@@ -16,11 +17,9 @@ class AuthService {
           "nombre_usuario": nombreUsuario,
           "password_usuario": passwordUsuario,
           "email_usuario": emailUsuario,
-          "rango": "NOVATO",
-          "tipo_usuario": 0,
           "idioma_usuario": idiomaUsuario,
-          "id_plataforma": 2,
-          "nombre_plataforma": "ANDROID",
+          "id_plataforma": idPlataforma,
+          "nombre_plataforma": nombrePlataforma,
           "id_usuario_en_plataforma": idUsuarioEnPlataforma,
         },
       );

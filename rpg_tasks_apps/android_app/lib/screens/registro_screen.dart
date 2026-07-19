@@ -17,7 +17,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
   final _passwordController = TextEditingController();
 
 
-  bool _isLoading = false;
+  bool _isLoading = false; //Tiempo de carga de los datos
 
   @override
   void dispose() {
@@ -65,22 +65,21 @@ class _RegistroScreenState extends State<RegistroScreen> {
 
                   try {
                     
-                    final authService = AuthService();
+                    final authService = AuthService(); //Instancia del repositorio de registro y autenticacion del usuario
 
-                    // Datos simulados de momento
-                    final String idExternoSimulado = "EXT_${DateTime.now().millisecondsSinceEpoch}";
-                    final String idPlataformaSimulada = "PLAT_${DateTime.now().microsecondsSinceEpoch}";
-
+                    final String idExternoUsuario = " "; //Lo dejo vacío porque ya se encarga el caso de uso
+                    final String idPlataforma = _usuarioController.text.trim().toString(); //EL idPlataforma se basará en el nombre del usuario
                     
+                    //Llamada a la función de registro del usuario
                     final usuarioCreado = await authService.registrarUsuario(
-                      idExternoSimulado,                  
+                      idExternoUsuario,                  
                       _usuarioController.text.trim(),     
                       _passwordController.text,           
-                      _emailController.text.trim(),       
-                      "NOVATO",
-                      0,
-                      "es",                           
-                      idPlataformaSimulada,               
+                      _emailController.text.trim(),     
+                      "es",
+                      2,
+                      "ANDROID",                           
+                      idPlataforma,               
                     );
 
                     
@@ -107,7 +106,6 @@ class _RegistroScreenState extends State<RegistroScreen> {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          
                           content: Text(e.toString().replaceAll('Exception: ', '')), 
                           backgroundColor: Colors.red
                         ),

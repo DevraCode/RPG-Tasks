@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     email_usuario VARCHAR(100),
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     activo BOOLEAN DEFAULT TRUE,
-    rango VARCHAR(50),
+    rango VARCHAR(50) DEFAULT "NOVATO",
     tipo_usuario INT DEFAULT 0,
     idioma_usuario VARCHAR(2)
 ) ENGINE=InnoDB;
