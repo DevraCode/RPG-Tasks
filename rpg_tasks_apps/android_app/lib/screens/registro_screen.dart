@@ -77,8 +77,7 @@ class _RegistroScreenState extends State<RegistroScreen> {
                       _passwordController.text,           
                       _emailController.text.trim(),     
                       "es",
-                      2,
-                      "ANDROID",                           
+                      2,                          
                       idPlataforma,               
                     );
 

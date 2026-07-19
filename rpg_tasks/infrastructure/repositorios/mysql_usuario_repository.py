@@ -59,8 +59,8 @@ class MySQLUsuarioRepository(UsuarioRepository):
 
         query = """ 
         INSERT INTO usuarios 
-        (id_externo_usuario, nombre_usuario, password_usuario, email_usuario, rango, tipo_usuario, idioma_usuario)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        (id_externo_usuario, nombre_usuario, password_usuario, email_usuario, idioma_usuario)
+        VALUES (%s, %s, %s, %s, %s)
         """
         query2 = """ 
         INSERT INTO plataformas
@@ -73,8 +73,6 @@ class MySQLUsuarioRepository(UsuarioRepository):
             usuario.nombre_usuario, 
             usuario.password_usuario, 
             usuario.email_usuario,
-            usuario.rango,
-            usuario.tipo_usuario,
             usuario.idioma_usuario
         )
 

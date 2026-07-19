@@ -9,7 +9,6 @@ class UsuarioModel {
   final String? emailUsuario;
   final String? idiomaUsuario;
   final int? idPlataforma;
-  final String? nombrePlataforma;
   final String? idUsuarioEnPlataforma;
 
   UsuarioModel({
@@ -19,7 +18,6 @@ class UsuarioModel {
     this.emailUsuario,
     this.idiomaUsuario,
     this.idPlataforma,
-    this.nombrePlataforma,
     this.idUsuarioEnPlataforma,
   });
 
@@ -31,7 +29,6 @@ class UsuarioModel {
       emailUsuario: json['email_usuario'] as String? ?? " ",
       idiomaUsuario: json['idioma_usuario'] as String? ?? " ",
       idPlataforma: json['id_plataforma'] as int? ?? 0,
-      nombrePlataforma: json['nombre_plataforma'] as String? ?? " ",
       idUsuarioEnPlataforma: json['id_usuario_en_plataforma'] as String? ?? " ",
     );
   }

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import IntEnum
 
+#CORRESPONDENCIAS
 class CorrespondenciaPlataformas(IntEnum):
     WEB = 1
     ANDROID = 2
@@ -20,9 +21,12 @@ class Rango:
     experto:str = "EXPERTO"
     maestro: str = "MAESTRO"
 
+
+#ENTIDADES
+#Valores por defecto definidos por comodidad
 @dataclass
 class Usuario:
-    id_usuario: str
+    id_usuario: int = 0
     id_externo_usuario: str = "0"
     nombre_usuario: str = None
     password_usuario: str = None
@@ -35,8 +39,8 @@ class Usuario:
 
 @dataclass
 class Personaje:
-    id_usuario: str
-    id_personaje: int = 00
+    id_usuario: int = 0
+    id_personaje: int = 0
     nombre_personaje: str = "Personaje"
     genero: str = "Masculino"
     clase: str = "Aprendiz"
@@ -50,11 +54,20 @@ class Personaje:
 
 @dataclass
 class Plataformas:
-    id_plataforma: int
-    nombre_plataforma: str
-    sesion_activa: bool = True
+    id_plataforma: int = 0
+    nombre_plataforma: str = "Plataforma"
+    id_usuario: int = 0
+    id_externo_usuario: str = "Id Externo"
+    token_usuario: str = "Token"
+    fecha_expiracion: str = "Fecha Expiración"
+    id_usuario_en_plataforma = "Id Usuario En Plataforma"
 
 @dataclass
 class Tareas:
-    id_tarea: int
+    id_tarea: int = 0
+    id_usuario: int = 0
+    id_personaje: int = 0
+    nombre_tarea: str = "Tarea"
+    fecha: str = "Fecha"
+    tarea_completada: bool = False
 

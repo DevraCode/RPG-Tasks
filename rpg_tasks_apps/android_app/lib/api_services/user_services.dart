@@ -6,8 +6,8 @@ import 'api_client.dart';
 class AuthService {
   final Dio _dio = ApiClient.dio;
 
-  Future<UsuarioModel?> registrarUsuario(String idExternoUsuario, String nombreUsuario, String passwordUsuario, String emailUsuario, String idiomaUsuario, int idPlataforma, String nombrePlataforma, String idUsuarioEnPlataforma,
-  ) async {
+  Future<UsuarioModel?> registrarUsuario(String idExternoUsuario, String nombreUsuario, String passwordUsuario, String emailUsuario, String idiomaUsuario, int idPlataforma, String idUsuarioEnPlataforma) 
+  async {
     try {
       final response = await _dio.post(
         '/usuarios/registro',
@@ -19,7 +19,6 @@ class AuthService {
           "email_usuario": emailUsuario,
           "idioma_usuario": idiomaUsuario,
           "id_plataforma": idPlataforma,
-          "nombre_plataforma": nombrePlataforma,
           "id_usuario_en_plataforma": idUsuarioEnPlataforma,
         },
       );

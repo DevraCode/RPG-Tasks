@@ -129,12 +129,9 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
     registro = {
         "nombre_usuario": nombre,
         "password_usuario": password,
-        "email_usuario": email,
-        "rango": "NOVATO",                   
-        "tipo_usuario": 0,                   
+        "email_usuario": email,                                   
         "idioma_usuario": idioma,
         "id_plataforma": 3,
-        "nombre_plataforma":"TELEGRAM",
         "id_externo_usuario_en_plataforma": id_externo
     }
 

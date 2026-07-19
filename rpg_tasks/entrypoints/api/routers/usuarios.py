@@ -39,18 +39,14 @@ router = APIRouter(
 
 #DTO para el registro de usuarios
 class RegistroUsuarioDTO(BaseModel):
-    id_usuario: int = None
     id_externo_usuario: str = None
     nombre_usuario: str = None
     password_usuario: str = None
     email_usuario : str = None
     fecha_registro: datetime = None
     activo: bool = True
-    rango: str = None
-    tipo_usuario: int = 0
     idioma_usuario: str = None
     id_plataforma: int = None
-    nombre_plataforma: str = None
     id_usuario_en_plataforma: str = None
 
 
@@ -95,11 +91,8 @@ def registrar_usuario(datos: RegistroUsuarioDTO):
             nombre_usuario=datos.nombre_usuario,
             password_usuario=datos.password_usuario,
             email_usuario=datos.email_usuario,
-            rango=datos.rango,
-            tipo_usuario=datos.tipo_usuario,
             idioma_usuario=datos.idioma_usuario,
             id_plataforma=datos.id_plataforma,
-            nombre_plataforma=datos.nombre_plataforma,
             id_usuario_en_plataforma=datos.id_usuario_en_plataforma)
         
         return {

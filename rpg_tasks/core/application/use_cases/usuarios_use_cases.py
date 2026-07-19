@@ -1,7 +1,7 @@
 import hashlib
 import secrets
 
-from rpg_tasks.core.domain.entidades import Usuario
+from rpg_tasks.core.domain.entidades import Usuario, CorrespondenciaPlataformas
 from rpg_tasks.core.domain.auth_utils import generar_id_externo, generar_id_usuario_en_plataforma, generar_token_sesion
 
 class UsuarioUseCase:
@@ -19,7 +19,7 @@ class UsuarioUseCase:
     
 
 
-    def registrar_usuario(self, nombre_usuario: str, password_usuario: str, email_usuario: str, rango: str, tipo_usuario:int, idioma_usuario: str, id_plataforma: int, nombre_plataforma: str, id_usuario_en_plataforma: str):
+    def registrar_usuario(self, nombre_usuario: str, password_usuario: str, email_usuario: str, idioma_usuario: str, id_plataforma: int, id_usuario_en_plataforma: str):
         
         password_bytes = f"{password_usuario}".encode()
         password_encriptado = hashlib.sha256(password_bytes).hexdigest()[:8]
@@ -34,8 +34,6 @@ class UsuarioUseCase:
             nombre_usuario = nombre_usuario,
             password_usuario = password_encriptado,
             email_usuario = email_usuario,
-            rango = rango,
-            tipo_usuario = tipo_usuario,
             idioma_usuario= idioma_usuario)
 
 
@@ -44,6 +42,7 @@ class UsuarioUseCase:
 
         
         token_usuario = generar_token_sesion()
+        nombre_plataforma = CorrespondenciaPlataformas(id_plataforma).name
 
 
         #Comprobar si el nombre de usuario ya existe antes de registrar al usuario
