@@ -3,62 +3,16 @@ from telegram.ext import ContextTypes, ConversationHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from datetime import datetime
-import time
 import hashlib
-
-
-from rpg_tasks.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
-from rpg_tasks.infrastructure.repositorios.mysql_personajes_repository import MySQLPersonajesRepository
-from rpg_tasks.infrastructure.repositorios.mysql_plataformas_repository import MySQLPlataformasRepository
-from rpg_tasks.infrastructure.repositorios.mysql_tareas_repository import MySQLTareasRepository
-
-from rpg_tasks.core.application.use_cases.usuarios_use_cases import UsuarioUseCase
-from rpg_tasks.core.application.use_cases.personajes_use_cases import PersonajeUseCase
-from rpg_tasks.core.application.use_cases.plataformas_use_cases import PlataformasUseCase
-from rpg_tasks.core.application.use_cases.tareas_use_cases import TareasUseCase
-from rpg_tasks.core.application.use_cases.enemigos_use_cases import EnemigosUseCase
-
-
-
-from rpg_tasks.infrastructure.servicios_ia.cliente_ollama import OllamaClient
-
-
-#from .decoradores import usuario_no_existe_o_sesion_cerrada, limite_personajes
-
-from rpg_tasks.infrastructure.dbconfig import db_config
-
-repo_usuarios = MySQLUsuarioRepository(db_config)
-repo_personajes = MySQLPersonajesRepository(db_config)
-repo_plataformas = MySQLPlataformasRepository(db_config)
-repo_tareas = MySQLTareasRepository(db_config)
-
-usuarios = UsuarioUseCase(repo_usuarios)
-personajes = PersonajeUseCase(repo_personajes, repo_usuarios)
-plataformas = PlataformasUseCase(repo_plataformas, repo_usuarios)
-tareas = TareasUseCase(repo_tareas)
-enemigos = EnemigosUseCase()
-
-catalogo = personajes.personajes_dic()
-lista_personajes = personajes.personajes_list()
-
-
-
-
-from rpg_tasks.infrastructure.servicios_ia.config_ia import SYSTEM_INSTRUCTION
-
-
-
-
-ia = OllamaClient(
-    system_instructions=SYSTEM_INSTRUCTION,
-)
+import httpx
+from .api_url import API_URL
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-
+""" 
 #Funcion auxiliar que cambia las rutas gif a webm para Telegram exclusivamente
 def ruta_webm(clase_personaje):
 
@@ -70,7 +24,7 @@ def ruta_webm(clase_personaje):
 
     return imagen, icono_personaje, animacion
 
-
+ """
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -81,18 +35,24 @@ def ruta_webm(clase_personaje):
 
 SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE = range(2)
 
-
 #Primero se enseña la galería de personajes
-
 async def mostrar_personaje(update:Update, context):
     chat_id = update.effective_chat.id
 
-    index = 0 #El índice para manejar los botones
+    #LLama al endpoint que muestra el catálogo de personajes
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{API_URL}/api/personajes")
+        catalogo_dict = response.json()  #Devuelve un diccionario de diccionarios, tal y como está estructurado en clases_personajes.py en la capa de dominio
+
+    lista_personajes = list(catalogo_dict.values()) #Lo convertimos a una lista para poder indexar. En este caso "values()" devuelve clave-valor, pero en forma de lista
+    context.user_data['catalogo_lista'] = lista_personajes #Guardamos la lista
     
-    personaje = lista_personajes[index] #lista_personajes[0]
-    datos_personaje = catalogo[personaje] #Obtiene los datos del primer personaje de la lista
-         
-    #Primer teclado para mostrar solamente al primer personaje
+    #Indexamos
+    index = 0
+    datos_personaje = lista_personajes[index]
+    
+    #Como hemos convertido el diccionario de diccionarios en lista, podemos acceder a sus claves-valores gracias a la estructura definida en clases_personajes.py
+    #Mostramos al primer personaje
     keyboard = [
         [InlineKeyboardButton(datos_personaje["clase"], callback_data="ignore")],
         [
@@ -102,15 +62,13 @@ async def mostrar_personaje(update:Update, context):
         [InlineKeyboardButton("Seleccionar", callback_data=f"SELECT_{index}")]
     ]
     
-    #Se envía el mensaje a telegram con la imagen del primer personaje y sus botones
     await context.bot.send_sticker(
         chat_id=chat_id,
         sticker=datos_personaje["imagen_personaje"],
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-
-
+        reply_markup=InlineKeyboardMarkup(keyboard))
+ 
     return SELECCIONANDO_CLASE #Mantenemos el estado mientras se selecciona al personaje
+
 
 async def manejador_botones (update:Update, context: CallbackContext):
     query = update.callback_query
@@ -120,26 +78,21 @@ async def manejador_botones (update:Update, context: CallbackContext):
 
     await query.answer()
 
+    data = query.data.split("_")
+    accion = data[0]
+    indice_actual = int(data[1])
 
-    
+    #Recuperamos la lista
+    lista_personajes = context.user_data.get('catalogo_lista', [])
 
-    data = query.data.split("_") #Split para que separe el data y obtenga NEXT O PREV con el índice separado ([NEXT, 0] [PREV, 0])
-    accion = data[0] #Primera posición de los data obtenidos, o sea, NEXT o PREV
-    indice_actual = int(data[1]) #Se convierte a int la segunda posición del data obtenido, que fue 0, que se guardó en la variable index de la función anterior
-
-    #Calculamos los índices
     if accion == "NEXT":
-        nuevo_indice = (indice_actual + 1) % len(lista_personajes) #Pasará a NEXT_1, NEXT_2...etc. Y pasa al siguiente personaje
+        nuevo_indice = (indice_actual + 1) % len(lista_personajes)
     elif accion == "PREV":
-        nuevo_indice = (indice_actual - 1) % len(lista_personajes)#Pasará a PREV_1, PREV_2... Y pasa al anterior personaje
-    else:
-        nuevo_indice = indice_actual
-
-        personaje_elegido = lista_personajes[nuevo_indice]
-        datos_personaje = catalogo[personaje_elegido]
-
+        nuevo_indice = (indice_actual - 1) % len(lista_personajes)
+    else:  
+        datos_personaje = lista_personajes[indice_actual]
         
-        
+        #Guardamos los datos de la clase seleccionada
         context.user_data['imagen_personaje'] = datos_personaje["imagen_personaje_gif"]
         context.user_data['clase_personaje'] = datos_personaje["clase"]
         context.user_data['genero_personaje'] = datos_personaje["genero"]
@@ -147,20 +100,15 @@ async def manejador_botones (update:Update, context: CallbackContext):
         context.user_data['animacion_personaje'] = datos_personaje["animacion_personaje_gif"]
         context.user_data['nivel_personaje'] = datos_personaje["nivel"]
         
-        await query.message.reply_text(f"Has seleccionado la clase {datos_personaje["clase"]}. Ahora, escribe el nombre de tu personaje:")
-        
-        
-        return PREGUNTAR_NOMBRE #Pasa al siguiente estado
+        await query.message.reply_text(
+            f"Has seleccionado la clase {datos_personaje['clase']}. Ahora, escribe el nombre de tu personaje:"
+        )
+        return PREGUNTAR_NOMBRE #Si se selecciona el personaje pasamos al siguiente estado
 
-    #Borra el Sticker actual y muestra el siguiente, dando la sensación de dinamismo 
     await query.message.delete()
 
-
-    #Hay que rehacer el teclado para cada personaje
-    personaje = lista_personajes[nuevo_indice]
-    datos_personaje = catalogo[personaje]
+    datos_personaje = lista_personajes[nuevo_indice]
         
-    #Creamos el nuevo teclado con el nuevo índice que mostrará al siguiente o al anterior personaje
     nuevo_keyboard = [
         [InlineKeyboardButton(datos_personaje["clase"], callback_data="ignore")],
         [
@@ -170,16 +118,15 @@ async def manejador_botones (update:Update, context: CallbackContext):
         [InlineKeyboardButton("Seleccionar", callback_data=f"SELECT_{nuevo_indice}")]
     ]
 
-    #Se envía el nuevo personaje
     await context.bot.send_sticker(
         chat_id=query.message.chat_id,
         sticker=datos_personaje["imagen_personaje"],
         reply_markup=InlineKeyboardMarkup(nuevo_keyboard)
-        )
+    )
     
-    return SELECCIONANDO_CLASE  #Mientras se selecciona la clase no se cambia de estado
+    return SELECCIONANDO_CLASE
     
-
+"""
 #Función que registra al personaje en la base de datos
 async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['nombre_personaje'] = update.message.text
@@ -193,13 +140,7 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     nivel = context.user_data.get("nivel_personaje")
 
 
-    prompt_para_ia =(
-            f"Escribe una descripción de bardo para este héroe:\n"
-            f"Nombre: {nombre}\n"
-            f"Clase: {clase}\n"
-            f"Género: {genero}\n"
-            f"Nivel:{nivel}"
-        )
+    
     
     #Mejor poner esto antes de la llamada a la IA, porque tardará en responder
     sticker_carga = "./assets/animaciones/carga/animacion_puntos_suspensivos.webm"
@@ -211,14 +152,7 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     
     
     
-    #Llamada a la IA 
-    descripcion_epica = ia.descripcion(prompt_para_ia)
-
-
-    """ Como el id de Telegram no cambia y está asociado al usuario, 
-    en este caso da igual buscarlo en la base de datos y hacer una comparación con effective_user.id que poner la variable
-    id_generado
-    """
+   
     id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
     
 
@@ -250,12 +184,12 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     await update.message.reply_text(f"{descripcion_epica}")
 
     return ConversationHandler.END
-
+ """
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
-
+""" 
 #ENTRENAR PERSONAJES
 
 #El usuario elige a un personaje que va a ser entrenado conforme cumple tareas
@@ -295,8 +229,8 @@ async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT
         )
     
     return SELECCIONANDO
-
-
+ """
+""" 
 
 async def manejador_lista_personajes(update:Update, context: CallbackContext):
     query = update.callback_query
@@ -353,7 +287,8 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
     
     return SELECCIONANDO  
 
-
+ """
+""" 
 async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.message.delete()
@@ -383,8 +318,8 @@ async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE):
 
     
     return ASIGNAR_TAREA
-
-  
+ """
+"""   
 async def asignar_tarea(update:Update, context: CallbackContext):
     query = update.callback_query
     id_tarea = query.data
@@ -463,7 +398,8 @@ async def teclado_minutos(update:Update, context:CallbackContext):
         text="Selecciona los minutos:",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
-
+ """
+"""  
 async def manejador_minutos(update:Update, context: CallbackContext):
     query = update.callback_query
     await query.answer()
@@ -520,8 +456,8 @@ async def manejador_minutos(update:Update, context: CallbackContext):
 
         return COMPLETAR
         
-
-
+ """
+""" 
 async def entrenar(update:Update, context: CallbackContext):
     query = update.callback_query
     data = query.data
@@ -548,8 +484,8 @@ async def entrenar(update:Update, context: CallbackContext):
         await query.delete_message() 
         await teclado_minutos(update, context)   
         return TEMPORIZADOR
-
-
+ """
+""" 
 async def completar_tarea(update:Update, context:CallbackContext):
     query = update.callback_query
     data = query.data
@@ -601,8 +537,8 @@ async def completar_tarea(update:Update, context:CallbackContext):
     else:
         await context.bot.send_message(chat_id = update.effective_chat.id, text = "Aun no has terminado la Quest")
         return COMPLETAR
-    
-
+     """
+""" 
 async def aviso_finalizacion(context: CallbackContext):
     job = context.job
     id_personaje = job.data
@@ -610,4 +546,5 @@ async def aviso_finalizacion(context: CallbackContext):
     await context.bot.send_message(
         chat_id=job.chat_id, 
         text=f"¡El entrenamiento ha terminado! Tu personaje ha ganado experiencia."
-    )
+    ) """
+    

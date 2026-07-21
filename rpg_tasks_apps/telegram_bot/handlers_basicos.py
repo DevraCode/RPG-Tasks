@@ -2,8 +2,6 @@
 
 #Externas
 import requests
-import hashlib
-import secrets
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommandScopeChat
 from telegram.ext import ContextTypes, ConversationHandler, CallbackContext

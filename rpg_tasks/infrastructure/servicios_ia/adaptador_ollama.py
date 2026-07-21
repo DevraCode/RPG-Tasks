@@ -1,14 +1,12 @@
 import ollama
+from rpg_tasks.core.application.output_ports.ollama_output_port import OllamaOutputPort
 
-
-class OllamaClient:
+class OllamaAdapter(OllamaOutputPort):
     def __init__(self, system_instructions):
         self.model_name = "hermes3" 
         self.system_instructions = system_instructions
 
-
-
-    def descripcion(self, message: str):
+    def generar_descripcion(self, message: str):
         response = ollama.chat(
                     model=self.model_name,           
                     messages=[

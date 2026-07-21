@@ -11,6 +11,9 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ConversationHandler
 from .handlers_basicos import NOMBRE, PASSWORD, EMAIL, PEDIR_NOMBRE, PEDIR_PASSWORD
 from .handlers_basicos import start, manejador_start, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar, obtener_username, obtener_password, vincular
 
+from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE
+from .handlers_personajes import mostrar_personaje, manejador_botones
+
 #from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR, COMPLETAR, TEMPORIZADOR
 #from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes, asignar_tarea, entrenar, completar_tarea, teclado_minutos, manejador_minutos
 
@@ -85,7 +88,19 @@ if __name__ == "__main__":
     
  
     #-----------------------------------------------------------------------------------------------------------------------------
-    """ personaje_conv_handler = ConversationHandler(
+    personaje_conv_handler = ConversationHandler(
+    entry_points=[CommandHandler('personaje', mostrar_personaje)],
+    states={
+        SELECCIONANDO_CLASE: [CallbackQueryHandler(manejador_botones)]
+    },
+    fallbacks=[CommandHandler('cancel', cancelar)],
+    per_message=False,
+    per_chat=True,
+    allow_reentry=True 
+    )
+    
+    """ 
+    personaje_conv_handler = ConversationHandler(
     entry_points=[CommandHandler('personaje', mostrar_personaje)],
     states={
         SELECCIONANDO_CLASE: [CallbackQueryHandler(manejador_botones)],
@@ -95,8 +110,8 @@ if __name__ == "__main__":
     per_message=False,
     per_chat=True,
     allow_reentry=True 
-    ) """
-
+    )
+ """
     #-----------------------------------------------------------------------------------------------------------------------------
     """ entrenar_personaje_conv_handler = ConversationHandler(
     entry_points=[CommandHandler('entrenar', lista_personajes_usuarios)],
@@ -136,7 +151,7 @@ if __name__ == "__main__":
  
 
     app.add_handler(reg_conv_handler)
-    #app.add_handler(personaje_conv_handler)
+    app.add_handler(personaje_conv_handler)
     #app.add_handler(entrenar_personaje_conv_handler)
     app.add_handler(vin_conv_handler)
     #app.add_handler(tarea_conv_handler)

@@ -1,6 +1,6 @@
 from rpg_tasks.core.domain.clases_personajes import CLASES_DISPONIBLES
 from rpg_tasks.core.domain.logica_personajes import LogicaPersonajes
-
+from rpg_tasks.core.application.output_ports.ollama_output_port import OllamaOutputPort
 
 
 logica_personajes = LogicaPersonajes()
@@ -8,16 +8,27 @@ logica_personajes = LogicaPersonajes()
 
 
 class PersonajeUseCase:
-    def __init__(self, repo_personajes, repo_usuarios):
+
+    def __init__(self, repo_personajes, repo_usuarios, ollama: OllamaOutputPort):
         self.repo_personajes = repo_personajes  # Para guardar el personaje
         self.repo_usuarios = repo_usuarios
+        self.ollama = ollama
 
     def registrar_personaje(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje, descripcion_personaje):
         usuario = self.repo_usuarios.buscar_por_id_usuario(id_usuario)
-        if usuario is None:
-            
-            
+
+        if usuario is None: 
             return "Error: El usuario no existe en la base de datos."
+        
+
+        prompt_para_ia =(
+            f"Escribe una descripción de bardo para este héroe:\n"
+            f"Nombre: {nombre_personaje}\n"
+            f"Clase: {clase}\n"
+            f"Género: {genero}\n"
+        )
+
+        descripcion_personaje = self.ollama.generar_descripcion(prompt_para_ia)
         
         self.repo_personajes.registrar_personaje_elegido(
             id_usuario, 
@@ -30,6 +41,9 @@ class PersonajeUseCase:
             descripcion_personaje
         )
         return "¡Personaje elegido!"
+    
+
+    
     
 
     def buscar_personaje_por_id(self, id_personaje):
