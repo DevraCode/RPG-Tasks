@@ -93,7 +93,7 @@ def registrar_usuario(datos: RegistroUsuarioDTO):
             email_usuario=datos.email_usuario,
             idioma_usuario=datos.idioma_usuario,
             id_plataforma=datos.id_plataforma,
-            id_usuario_en_plataforma=datos.id_usuario_en_plataforma)
+            identificacion_plataforma=datos.id_usuario_en_plataforma)
         
         return {
             "message": "Usuario registrado correctamente"

@@ -1,3 +1,4 @@
+import hashlib
 from rpg_tasks.core.domain.clases_personajes import CLASES_DISPONIBLES
 from rpg_tasks.core.domain.logica_personajes import LogicaPersonajes
 from rpg_tasks.core.application.output_ports.ollama_output_port import OllamaOutputPort
@@ -14,12 +15,16 @@ class PersonajeUseCase:
         self.repo_usuarios = repo_usuarios
         self.ollama = ollama
 
-    def registrar_personaje(self, id_usuario, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje, descripcion_personaje):
-        usuario = self.repo_usuarios.buscar_por_id_usuario(id_usuario)
-
+    def registrar_personaje(self, nombre_personaje, genero, clase, imagen_personaje, icono_personaje, animacion_personaje, descripcion_personaje, id_usuario_en_plataforma):
+        
+        #Buscamos primero al usuario
+        id_usuario_en_plataforma_hasheado = hashlib.sha256(id_usuario_en_plataforma.encode('utf-8')).hexdigest()[:8]
+        usuario = self.repo_usuarios.buscar_usuario_por_id_plataforma(id_usuario_en_plataforma_hasheado)
+        
         if usuario is None: 
             return "Error: El usuario no existe en la base de datos."
         
+        id_usuario = usuario.id_usuario
 
         prompt_para_ia =(
             f"Escribe una descripción de bardo para este héroe:\n"
@@ -40,7 +45,7 @@ class PersonajeUseCase:
             animacion_personaje,
             descripcion_personaje
         )
-        return "¡Personaje elegido!"
+        return descripcion_personaje #Devolvemos la descripcion del personaje para el endpoint
     
 
     

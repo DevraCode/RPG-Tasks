@@ -18,14 +18,17 @@ class UsuarioUseCase:
         return usuario
     
 
-
-    def registrar_usuario(self, nombre_usuario: str, password_usuario: str, email_usuario: str, idioma_usuario: str, id_plataforma: int, id_usuario_en_plataforma: str):
+    def registrar_usuario(self, nombre_usuario: str, password_usuario: str, email_usuario: str, idioma_usuario: str, id_plataforma: int, identificacion_plataforma: str):
         
         password_bytes = f"{password_usuario}".encode()
         password_encriptado = hashlib.sha256(password_bytes).hexdigest()[:8]
 
         id_externo_generado = generar_id_externo()
-        id_usuario_en_plataforma_hasheado = generar_id_usuario_en_plataforma(id_usuario_en_plataforma)
+
+        """El parámetro identificacion plataforma se le pasará al endpoint de registro desde cada una de las plataformas.
+        En el caso de Telegram es el chat_id, en Android es el android_id...etc. 
+        Así se evita que un usuario tenga múltiples cuentas en un mismo dispositivo"""
+        id_usuario_en_plataforma_hasheado = generar_id_usuario_en_plataforma(identificacion_plataforma)
 
         
         nuevo_usuario = Usuario(
@@ -38,7 +41,7 @@ class UsuarioUseCase:
 
 
         nombre_usuario_existe = self.repo.nombre_usuario_existe(nombre_usuario)
-        id_externo_usuario_existe = self.repo_plataformas.id_usuario_en_plataforma_existe(id_usuario_en_plataforma_hasheado)
+        id_usuario_en_plataforma_existe = self.repo_plataformas.id_usuario_en_plataforma_existe(id_usuario_en_plataforma_hasheado)
 
         
         token_usuario = generar_token_sesion()
@@ -50,7 +53,7 @@ class UsuarioUseCase:
             raise ValueError("El nombre de usuario ya existe.")
         
         #Comprobar si el id_externo_usuario ya está en la base de datos
-        if id_externo_usuario_existe:
+        if id_usuario_en_plataforma_existe:
             raise ValueError("El usuario ya está registrado en esta plataforma. Cierra la sesión para poder registrarte de nuevo.")
 
 

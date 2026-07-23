@@ -24,9 +24,9 @@ def generar_id_externo():
     id_externo = str(uuid.uuid4())
     return id_externo
 
-#Para bots. Utiliza el chat_id del bot para evitar cuentas duplicadas en la BD
-def generar_id_usuario_en_plataforma(chat_id):
-    id_usuario_en_plataforma = hashlib.sha256(str(chat_id).encode()).hexdigest()[:8]
+#Genera un id para el usuario en una plataforma segun el parametro que le pasemos. En este caso, el id del dispositvo o del chat, que es un id único
+def generar_id_usuario_en_plataforma(parametro):
+    id_usuario_en_plataforma = hashlib.sha256(str(parametro).encode()).hexdigest()[:8]
     return id_usuario_en_plataforma
     
 def generar_token_sesion():

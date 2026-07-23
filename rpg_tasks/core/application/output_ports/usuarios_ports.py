@@ -4,7 +4,11 @@ from typing import Optional
 
 class UsuarioRepository(ABC):
     @abstractmethod
-    def buscar_usuario_por_id(self, id_usuario: int) -> Optional[Usuario]: 
+    def buscar_usuario_por_id(self, id_usuario: int) -> Optional[Usuario]:
+        pass
+    
+    @abstractmethod
+    def buscar_usuario_por_id_plataforma(id_usuario_en_plataforma: str):
         pass
 
     @abstractmethod

@@ -122,7 +122,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
     email = context.user_data.get('email_usuario')
     idioma = context.user_data.get("idioma")
 
-    id_externo = str(update.effective_user.id)
+    id_usuario_en_telegram = str(update.effective_user.id)
     
     registro = {
         "nombre_usuario": nombre,
@@ -130,7 +130,7 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
         "email_usuario": email,                                   
         "idioma_usuario": idioma,
         "id_plataforma": 3,
-        "id_externo_usuario_en_plataforma": id_externo
+        "id_usuario_en_plataforma": id_usuario_en_telegram
     }
 
     try:

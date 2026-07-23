@@ -37,6 +37,27 @@ class MySQLUsuarioRepository(UsuarioRepository):
     
     #-----------------------------------------------------------------------------------------------------------------------------
 
+    def buscar_usuario_por_id_plataforma(self,id_usuario_en_plataforma):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """ SELECT *
+                    FROM plataformas p
+                    WHERE p.id_usuario_en_plataforma = %s"""
+        
+        cursor.execute(query, (id_usuario_en_plataforma,))
+        res = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if res:
+            return Usuario(id_usuario=res['id_usuario'], 
+                           id_externo_usuario=res['id_externo_usuario'])
+        return None
+    
+    #-----------------------------------------------------------------------------------------------------------------------------
+
     def nombre_usuario_existe(self, nombre_usuario: str):
         conn = self._get_connection()
         cursor = conn.cursor(dictionary=True)

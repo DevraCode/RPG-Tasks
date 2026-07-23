@@ -1,3 +1,5 @@
+import asyncio
+
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -12,24 +14,14 @@ from .api_url import API_URL
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-""" 
-#Funcion auxiliar que cambia las rutas gif a webm para Telegram exclusivamente
-def ruta_webm(clase_personaje):
-
-    datos_personaje = catalogo[clase_personaje]
-
-    imagen = datos_personaje["imagen_personaje"]
-    icono_personaje = datos_personaje["icono_personaje"]
-    animacion = datos_personaje["animacion_personaje"]
-
-    return imagen, icono_personaje, animacion
-
- """
-#-----------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------
-#-----------------------------------------------------------------------------------------------------------------------------
-
+# Función auxiliar para mantener la animación "escribiendo..." activa
+async def mantener_estado_escribiendo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        while True:
+            await update.message.reply_chat_action(action="typing")
+            await asyncio.sleep(7)  
+    except asyncio.CancelledError:
+        pass
 
 #ELEGIR PERSONAJE
 
@@ -98,8 +90,12 @@ async def manejador_botones (update:Update, context: CallbackContext):
         context.user_data['genero_personaje'] = datos_personaje["genero"]
         context.user_data['icono_personaje'] = datos_personaje["icono_personaje_gif"]
         context.user_data['animacion_personaje'] = datos_personaje["animacion_personaje_gif"]
-        context.user_data['nivel_personaje'] = datos_personaje["nivel"]
-        
+
+        #GUARDAMOS PARA TELEGRAM EL FORMATO .WEBM
+        context.user_data['imagen_personaje_webm'] = datos_personaje["imagen_personaje"]
+        context.user_data['icono_personaje_webm'] = datos_personaje["icono_personaje"]
+        context.user_data['animacion_personaje_webm'] = datos_personaje["animacion_personaje"]
+
         await query.message.reply_text(
             f"Has seleccionado la clase {datos_personaje['clase']}. Ahora, escribe el nombre de tu personaje:"
         )
@@ -126,7 +122,7 @@ async def manejador_botones (update:Update, context: CallbackContext):
     
     return SELECCIONANDO_CLASE
     
-"""
+
 #Función que registra al personaje en la base de datos
 async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['nombre_personaje'] = update.message.text
@@ -137,54 +133,59 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     genero = context.user_data.get('genero_personaje')
     icono = context.user_data.get('icono_personaje')
     animacion = context.user_data.get('animacion_personaje')
-    nivel = context.user_data.get("nivel_personaje")
 
+    #FORMATO .WEBM SOLO PARA QUE LOS STICKERS DE TELEGRAM SE VEAN ANIMADOS
+    imagen_webm = context.user_data.get('imagen_personaje_webm')
+    icono_webm = context.user_data.get('icono_personaje_webm')
+    animacion_webm = context.user_data.get('animacion_personaje_webm')
+    
 
+    sticker_carga = "./rpg_tasks/assets/animaciones/carga/animacion_puntos_suspensivos.webm"
     
+
+    await update.message.reply_text(f"Registrando a {nombre} en el gremio. Solo hay dos funcionar... Ejem, cronistas currando en todo el Gremio, así que va a tardar lo suyo.")
+    await asyncio.sleep(5)
+    await update.message.reply_chat_action(action="typing")
+    await update.message.reply_text(f"El cronista está escribiendo la biografía de {nombre}. Tardará un poco ...")
     
-    #Mejor poner esto antes de la llamada a la IA, porque tardará en responder
-    sticker_carga = "./assets/animaciones/carga/animacion_puntos_suspensivos.webm"
-    
-    await update.message.reply_text(f"🖋️ Registrando a {nombre} en el gremio, tardará un momento...") 
     await context.bot.send_sticker(
         chat_id=update.effective_chat.id,
         sticker=sticker_carga)
     
-    
-    
-   
-    id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
-    
+    typing = asyncio.create_task(mantener_estado_escribiendo(update, context))
 
-    id_usuario = plataformas.vincular_id_externo_usuario(id_generado) #Se busca el id de usuario interno a través del id_enterno
 
+    id_usuario_en_telegram = str(update.effective_user.id)
     
-    resultado = personajes.registrar_personaje(
-            id_usuario=id_usuario,
-            nombre_personaje=nombre,
-            genero=genero,
-            clase=clase,
-            imagen_personaje = imagen,
-            icono_personaje= icono,
-            animacion_personaje = animacion,
-            descripcion_personaje = descripcion_epica
+    resultado = {
+        "nombre_personaje": nombre,
+        "genero": genero,
+        "clase": clase,
+        "imagen_personaje": imagen,
+        "icono_personaje": icono,
+        "animacion_personaje": animacion,
+        "descripcion_personaje": " ",
+        "id_usuario_en_plataforma": id_usuario_en_telegram
+    }
+            
+    #120 segundos para que a Ollama le de tiempo a hacer la descripcion del personaje
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        response = await client.post(f"{API_URL}/api/personajes/seleccionar", json=resultado)
 
-        )
-    
-
-    img, icon, anim = ruta_webm(clase.lower()) # Desempaquetar
-    
-
-    await update.message.reply_text(f"{resultado}")
-
-    await context.bot.send_sticker(
-        chat_id=update.effective_chat.id,
-        sticker=img)
-    
-    await update.message.reply_text(f"{descripcion_epica}")
+        if response.status_code in (200, 201):
+            personaje_json = response.json()
+            await context.bot.send_sticker(chat_id=update.effective_chat.id,
+                                           sticker=imagen_webm)
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=f"{personaje_json.get('nombre_personaje', 'Héroe')}")
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=f"{personaje_json.get('descripcion_personaje', "Descripción por defecto")}")
+            typing.cancel()
+            
+        else:
+            print(f"Error {response.status_code}: {response.json().get('detail')}")
+            return None
 
     return ConversationHandler.END
- """
+ 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
