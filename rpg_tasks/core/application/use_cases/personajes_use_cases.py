@@ -70,11 +70,17 @@ class PersonajeUseCase:
         
         return limite
     
+
+
     def lista_personajes_usuario(self,id_usuario):
+
         lista_personajes = self.repo_personajes.lista_personajes_usuario(id_usuario)
 
         return lista_personajes
     
+
+
+
     def vincular_id_personaje_con_usuario(self, id_externo):
         resultado = self.repo_personajes.vincular_id_personaje_con_usuario(id_externo)
 

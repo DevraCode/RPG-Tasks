@@ -93,8 +93,7 @@ async def manejador_botones (update:Update, context: CallbackContext):
 
         #GUARDAMOS PARA TELEGRAM EL FORMATO .WEBM
         context.user_data['imagen_personaje_webm'] = datos_personaje["imagen_personaje"]
-        context.user_data['icono_personaje_webm'] = datos_personaje["icono_personaje"]
-        context.user_data['animacion_personaje_webm'] = datos_personaje["animacion_personaje"]
+        
 
         await query.message.reply_text(
             f"Has seleccionado la clase {datos_personaje['clase']}. Ahora, escribe el nombre de tu personaje:"
@@ -136,8 +135,7 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 
     #FORMATO .WEBM SOLO PARA QUE LOS STICKERS DE TELEGRAM SE VEAN ANIMADOS
     imagen_webm = context.user_data.get('imagen_personaje_webm')
-    icono_webm = context.user_data.get('icono_personaje_webm')
-    animacion_webm = context.user_data.get('animacion_personaje_webm')
+    
     
 
     sticker_carga = "./rpg_tasks/assets/animaciones/carga/animacion_puntos_suspensivos.webm"
@@ -190,7 +188,8 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
-""" 
+
+
 #ENTRENAR PERSONAJES
 
 #El usuario elige a un personaje que va a ser entrenado conforme cumple tareas
@@ -201,19 +200,53 @@ SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR, COMPLETAR, TEMPORIZADOR = range(5)
 
 async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
+    id_usuario_en_telegram = str(update.effective_user.id)
+    id_usuario_en_plataforma_hasheado = hashlib.sha256(id_usuario_en_telegram.encode('utf-8')).hexdigest()[:8]
 
-    id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
-    id_usuario = plataformas.vincular_id_externo_usuario(id_generado)
+    #Buscamos primero al usuario
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        res = await client.get(f"{API_URL}/api/usuarios/user/{id_usuario_en_plataforma_hasheado}")
+        if res.status_code != 200 or not res.json():
+            await update.message.reply_text("Ese usuario no existe")
+            return ConversationHandler.END
+        
+        usuario = res.json()
+        print(usuario)
 
-    personajes_user = personajes.lista_personajes_usuario(id_usuario) #Devuelve los personajes que tiene el usuario
+        usuario_data = usuario.get("id_usuario")
+        if not usuario_data or "id_usuario" not in usuario_data:
+            print(usuario_data)
+            await update.message.reply_text("Error al obtener los datos del usuario.")
+            return ConversationHandler.END
+
+        id_usuario = usuario_data["id_usuario"]
+
+        print(id_usuario)
+
+    #Cuando tengamos al usuario buscamos sus personajes
+    
+        res_personajes = await client.get(f"{API_URL}/api/personajes/lista-personajes/{id_usuario}")
+        if res_personajes.status_code != 200 or not res.json():
+            await update.message.reply_text("No hay personajes")
+            return ConversationHandler.END
+        
+        respuesta_personajes = res_personajes.json()
+        lista_personajes = respuesta_personajes.get("data", [])
+
+        if not lista_personajes:
+            await update.message.reply_text("No tienes personajes creados todavía.")
+            return ConversationHandler.END
+
+        context.user_data["lista_personajes"] = respuesta_personajes
+
 
     index = 0 
 
-    personaje_usuario = personajes_user[index]
+    personaje_usuario = lista_personajes[index]
 
-    img, icon, anim = ruta_webm(personaje_usuario["clase"].lower())
+    #print(context.user_data["lista_personajes"])
 
-
+   
     keyboard = [
         [InlineKeyboardButton(personaje_usuario["nombre_personaje"], callback_data="ignore")],
         [
@@ -225,13 +258,12 @@ async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT
 
     await context.bot.send_sticker(
         chat_id=chat_id,
-        sticker=icon,
+        sticker=personaje_usuario["icono_personaje"],
         reply_markup=InlineKeyboardMarkup(keyboard)
         )
     
-    return SELECCIONANDO
- """
-""" 
+    return SELECCIONANDO 
+
 
 async def manejador_lista_personajes(update:Update, context: CallbackContext):
     query = update.callback_query
@@ -245,30 +277,32 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
     accion = data[0] 
     indice_actual = int(data[1])
 
-    id_generado = hashlib.sha256(str(update.effective_user.id).encode()).hexdigest()[:8]
-    id_usuario = plataformas.vincular_id_externo_usuario(id_generado)
+    personajes_user_lista = context.user_data.get("lista_personajes", {}).get("data", [])
+    
+    if not personajes_user_lista:
+        await query.message.reply_text("Ocurrió un error al cargar tus personajes.")
+        return ConversationHandler.END
 
-    personajes_user = personajes.lista_personajes_usuario(id_usuario) #Devuelve los personajes que tiene el usuario
-
+    total_personajes = len(personajes_user_lista)
     
     if accion == "NEXT":
-        nuevo_indice = (indice_actual + 1) % len(personajes_user) 
+        nuevo_indice = (indice_actual + 1) % total_personajes 
     elif accion == "PREV":
-        nuevo_indice = (indice_actual - 1) % len(personajes_user)
+        nuevo_indice = (indice_actual - 1) % total_personajes
     else:
         nuevo_indice = indice_actual
 
-        personaje_a_entrenar = personajes_user[nuevo_indice]
+        #personaje_a_entrenar = personajes_user[nuevo_indice]
         
-        context.user_data["id_personaje"] = personaje_a_entrenar["id_personaje"] #Guardamos el id del personaje
+        #context.user_data["id_personaje"] = personaje_a_entrenar["id_personaje"] #Guardamos el id del personaje
 
-        return await menu_tareas(update, context) #Muestra el listado de tareas
+        #return await menu_tareas(update, context) #Muestra el listado de tareas
 
     
     await query.message.delete()
     
-    nuevo_personaje = personajes_user[nuevo_indice]
-    img, icon, anim = ruta_webm(nuevo_personaje["clase"].lower())
+    nuevo_personaje = personajes_user_lista[nuevo_indice]
+    #img, icon, anim = ruta_webm(nuevo_personaje["clase"].lower())
     
     nuevo_keyboard = [
         [InlineKeyboardButton(nuevo_personaje["nombre_personaje"], callback_data="ignore")],
@@ -282,13 +316,12 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
     
     await context.bot.send_sticker(
         chat_id=query.message.chat_id,
-        sticker=icon,
+        sticker=nuevo_personaje["icono_personaje"],
         reply_markup=InlineKeyboardMarkup(nuevo_keyboard)
         )
     
     return SELECCIONANDO  
 
- """
 """ 
 async def menu_tareas(update:Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query

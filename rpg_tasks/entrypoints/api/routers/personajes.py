@@ -8,6 +8,7 @@ from rpg_tasks.infrastructure.dbconfig import db_config
 from rpg_tasks.infrastructure.repositorios.mysql_usuario_repository import MySQLUsuarioRepository
 from rpg_tasks.infrastructure.repositorios.mysql_personajes_repository import MySQLPersonajesRepository
 from rpg_tasks.core.application.use_cases.personajes_use_cases import PersonajeUseCase
+from rpg_tasks.core.domain.auth_utils import decodificar_id_usuario
 
 from rpg_tasks.infrastructure.servicios_ia.adaptador_ollama import OllamaAdapter
 from rpg_tasks.infrastructure.servicios_ia.config_ia import SYSTEM_INSTRUCTION
@@ -53,6 +54,19 @@ class RegistrarPersonajeDTO(BaseModel):
     descripcion_personaje: str
     id_usuario_en_plataforma: str
 
+class ListaPersonajesDTO(BaseModel):
+    id_personaje: int = None
+    nombre_personaje: str = None
+    genero: str = None
+    clase: str = None
+    imagen_personaje: str = None
+    icono_personaje:str = None
+    animacion_personaje: str =  None
+    descripcion_personaje: str = None
+    class Config:
+        from_attributes = True
+
+
 #ENDPOINTS
 #Catálogo de personajes
 @router.get("")
@@ -86,3 +100,19 @@ def seleccionar_personaje(datos:RegistrarPersonajeDTO):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al registrar: {str(e)}")
 
+@router.get("/lista-personajes/{id_usuario}")
+def lista_personajes_usuario(id_usuario: str):
+    try:
+        #id_usuario_real = decodificar_id_usuario(id_usuario)
+        lista_personajes = personajes_use_case.lista_personajes_usuario(id_usuario)
+
+        personajes_dto = [ListaPersonajesDTO.model_validate(p) for p in lista_personajes]
+
+        return {
+            "status": "ok",
+            "data": personajes_dto
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

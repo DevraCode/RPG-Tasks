@@ -37,6 +37,12 @@ router = APIRouter(
 
 #DTOs
 
+#DTO para buscar usuarios
+class BuscarUsuarioDTO(BaseModel):
+    id_usuario: int = None
+    id_externo_usuario: str = None
+    id_usuario_en_plataforma: str = None
+
 #DTO para el registro de usuarios
 class RegistroUsuarioDTO(BaseModel):
     id_externo_usuario: str = None
@@ -69,6 +75,20 @@ def buscar_usuario(id_usuario_codificada):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+#Busca a un usuario por su id en la plataforma
+@router.get("/user/{id_usuario_en_plataforma}")
+def buscar_usuario_plataforma(id_usuario_en_plataforma):
+
+    try:
+        usuario = usuario_use_case.buscar_usuario_por_id_plataforma(id_usuario_en_plataforma)
+        return {
+            "status": "ok",
+            "id_usuario": usuario.id_usuario
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 #Endpoint para verificar si un nombre de usuario ya está registrado en la base de datos. Devuelve un mensaje indicando si el nombre está disponible o no.

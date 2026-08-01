@@ -13,6 +13,10 @@ class UsuarioUseCase:
         usuario = self.repo.buscar_usuario_por_id(id_usuario)
         return usuario
     
+    def buscar_usuario_por_id_plataforma(self, id_usuario_en_plataforma):
+        usuario = self.repo.buscar_usuario_por_id_plataforma(id_usuario_en_plataforma)
+        return usuario
+
     def nombre_usuario_existe(self, nombre_usuario: str):
         usuario = self.repo.nombre_usuario_existe(nombre_usuario)
         return usuario

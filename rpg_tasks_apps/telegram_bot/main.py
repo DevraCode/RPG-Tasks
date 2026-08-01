@@ -11,11 +11,13 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ConversationHandler
 from .handlers_basicos import NOMBRE, PASSWORD, EMAIL, PEDIR_NOMBRE, PEDIR_PASSWORD
 from .handlers_basicos import start, manejador_start, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar, obtener_username, obtener_password, vincular
 
-from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE
-from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje
+from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO
+from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes
 
 #from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR, COMPLETAR, TEMPORIZADOR
 #from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes, asignar_tarea, entrenar, completar_tarea, teclado_minutos, manejador_minutos
+
+from .handlers_personajes import lista_personajes_usuarios
 
 #from .handlers_tareas import INSERTAR_TAREA
 #from .handlers_tareas import preguntar_nombre_tarea, crear_tarea, lista_tareas
@@ -47,6 +49,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("start", start))
     #app.add_handler(CommandHandler("tareas", lista_tareas))
     #app.add_handler(InlineQueryHandler(inline_handler))
+    #app.add_handler(CommandHandler("listap", lista_personajes_usuarios))
 
     #He puesto expresiones regulares para que no se intercepten los data query de los botones entre los comandos
     app.add_handler(CallbackQueryHandler(manejador_start, pattern=r"^lang_"))
@@ -102,6 +105,17 @@ if __name__ == "__main__":
     )
 
     #-----------------------------------------------------------------------------------------------------------------------------
+    entrenar_personaje_conv_handler = ConversationHandler(
+    entry_points=[CommandHandler('entrenar', lista_personajes_usuarios)],
+    states={
+        SELECCIONANDO: [CallbackQueryHandler(manejador_lista_personajes)],
+    },
+    fallbacks=[CommandHandler('cancel', cancelar)],
+    per_message=False,
+    per_chat=True,
+    allow_reentry=True 
+    )
+
     """ entrenar_personaje_conv_handler = ConversationHandler(
     entry_points=[CommandHandler('entrenar', lista_personajes_usuarios)],
     states={
@@ -141,7 +155,7 @@ if __name__ == "__main__":
 
     app.add_handler(reg_conv_handler)
     app.add_handler(personaje_conv_handler)
-    #app.add_handler(entrenar_personaje_conv_handler)
+    app.add_handler(entrenar_personaje_conv_handler)
     app.add_handler(vin_conv_handler)
     #app.add_handler(tarea_conv_handler)
 
