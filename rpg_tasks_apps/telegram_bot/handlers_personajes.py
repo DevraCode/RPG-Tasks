@@ -1,12 +1,12 @@
 import asyncio
+import httpx
+import hashlib
 
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from datetime import datetime
-import hashlib
-import httpx
 from .api_url import API_URL
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -14,7 +14,7 @@ from .api_url import API_URL
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
 
-# Función auxiliar para mantener la animación "escribiendo..." activa
+#Función auxiliar para mantener la animación "escribiendo..." activa
 async def mantener_estado_escribiendo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         while True:
@@ -22,6 +22,36 @@ async def mantener_estado_escribiendo(update: Update, context: ContextTypes.DEFA
             await asyncio.sleep(7)  
     except asyncio.CancelledError:
         pass
+
+
+#Función auxiliar solo para Telegram para obtener la ruta de los archivos .webm según la clase del personaje y que los stickers se vean animados.
+async def ruta_webm(clase_personaje): 
+
+    #Obtenemos el catalogo de personajes desde la API
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{API_URL}/api/personajes")
+        catalogo_dict = response.json() 
+
+    """ 
+    El diccionario está estructurado de la siguiente manera (como se puede ver en clases_personajes.py dentro de la capa de dominio):
+        guerrero: {
+            "id_personaje": "",
+            ...}
+        guerrera: {
+            "id_personaje": "",
+            ...}
+        ...
+    """
+    
+    personaje = catalogo_dict.get(clase_personaje) #Obtiene los datos del personaje del usuario, el cual ya está registrado en la base de datos y tiene un id_personaje asignado. Se busca por la clase del personaje, que es lo que se pasa como argumento a la función
+
+    #Devuelve las rutas de los archivos .webm correspondientes al personaje seleccionado
+    return personaje["imagen_personaje"], personaje["icono_personaje"], personaje["animacion_personaje"]
+
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
 
 #ELEGIR PERSONAJE
 
@@ -38,7 +68,7 @@ async def mostrar_personaje(update:Update, context):
 
     lista_personajes = list(catalogo_dict.values()) #Lo convertimos a una lista para poder indexar. En este caso "values()" devuelve clave-valor, pero en forma de lista
     context.user_data['catalogo_lista'] = lista_personajes #Guardamos la lista
-    
+
     #Indexamos
     index = 0
     datos_personaje = lista_personajes[index]
@@ -90,14 +120,11 @@ async def manejador_botones (update:Update, context: CallbackContext):
         context.user_data['genero_personaje'] = datos_personaje["genero"]
         context.user_data['icono_personaje'] = datos_personaje["icono_personaje_gif"]
         context.user_data['animacion_personaje'] = datos_personaje["animacion_personaje_gif"]
-
-        #GUARDAMOS PARA TELEGRAM EL FORMATO .WEBM
-        context.user_data['imagen_personaje_webm'] = datos_personaje["imagen_personaje"]
         
-
         await query.message.reply_text(
             f"Has seleccionado la clase {datos_personaje['clase']}. Ahora, escribe el nombre de tu personaje:"
         )
+
         return PREGUNTAR_NOMBRE #Si se selecciona el personaje pasamos al siguiente estado
 
     await query.message.delete()
@@ -134,13 +161,10 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
     animacion = context.user_data.get('animacion_personaje')
 
     #FORMATO .WEBM SOLO PARA QUE LOS STICKERS DE TELEGRAM SE VEAN ANIMADOS
-    imagen_webm = context.user_data.get('imagen_personaje_webm')
+    imagen_webm, icon, anim = await ruta_webm(clase.lower())
     
-    
-
     sticker_carga = "./rpg_tasks/assets/animaciones/carga/animacion_puntos_suspensivos.webm"
     
-
     await update.message.reply_text(f"Registrando a {nombre} en el gremio. Solo hay dos funcionar... Ejem, cronistas currando en todo el Gremio, así que va a tardar lo suyo.")
     await asyncio.sleep(5)
     await update.message.reply_chat_action(action="typing")
@@ -151,7 +175,6 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
         sticker=sticker_carga)
     
     typing = asyncio.create_task(mantener_estado_escribiendo(update, context))
-
 
     id_usuario_en_telegram = str(update.effective_user.id)
     
@@ -197,7 +220,6 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR, COMPLETAR, TEMPORIZADOR = range(5)
 
 #Se muestran los personajes que tiene el usuario en una galeria, igual que para elegir personaje
-
 async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     id_usuario_en_telegram = str(update.effective_user.id)
@@ -211,20 +233,15 @@ async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT
             return ConversationHandler.END
         
         usuario = res.json()
-        print(usuario)
 
-        usuario_data = usuario.get("id_usuario")
-        if not usuario_data or "id_usuario" not in usuario_data:
-            print(usuario_data)
+        if not usuario or "id_usuario" not in usuario:
             await update.message.reply_text("Error al obtener los datos del usuario.")
             return ConversationHandler.END
 
-        id_usuario = usuario_data["id_usuario"]
+        id_usuario = usuario["id_usuario"]
 
-        print(id_usuario)
 
     #Cuando tengamos al usuario buscamos sus personajes
-    
         res_personajes = await client.get(f"{API_URL}/api/personajes/lista-personajes/{id_usuario}")
         if res_personajes.status_code != 200 or not res.json():
             await update.message.reply_text("No hay personajes")
@@ -244,9 +261,6 @@ async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT
 
     personaje_usuario = lista_personajes[index]
 
-    #print(context.user_data["lista_personajes"])
-
-   
     keyboard = [
         [InlineKeyboardButton(personaje_usuario["nombre_personaje"], callback_data="ignore")],
         [
@@ -256,9 +270,12 @@ async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT
         [InlineKeyboardButton("Entrenar", callback_data=f"SELECT_{index}")]
     ]
 
+    img, icon, anim = await ruta_webm(personaje_usuario["clase"].lower())
+
+
     await context.bot.send_sticker(
         chat_id=chat_id,
-        sticker=personaje_usuario["icono_personaje"],
+        sticker=img,
         reply_markup=InlineKeyboardMarkup(keyboard)
         )
     
@@ -302,7 +319,7 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
     await query.message.delete()
     
     nuevo_personaje = personajes_user_lista[nuevo_indice]
-    #img, icon, anim = ruta_webm(nuevo_personaje["clase"].lower())
+    img, icon, anim = await ruta_webm(nuevo_personaje["clase"].lower())
     
     nuevo_keyboard = [
         [InlineKeyboardButton(nuevo_personaje["nombre_personaje"], callback_data="ignore")],
@@ -316,7 +333,7 @@ async def manejador_lista_personajes(update:Update, context: CallbackContext):
     
     await context.bot.send_sticker(
         chat_id=query.message.chat_id,
-        sticker=nuevo_personaje["icono_personaje"],
+        sticker=img,
         reply_markup=InlineKeyboardMarkup(nuevo_keyboard)
         )
     

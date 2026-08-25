@@ -10,6 +10,7 @@ class UsuarioModel {
   final String? idiomaUsuario;
   final int? idPlataforma;
   final String? idUsuarioEnPlataforma;
+  final String? tokenUsuario;
 
   UsuarioModel({
     this.idExternoUsuario,
@@ -19,6 +20,7 @@ class UsuarioModel {
     this.idiomaUsuario,
     this.idPlataforma,
     this.idUsuarioEnPlataforma,
+    this.tokenUsuario
   });
 
   factory UsuarioModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,7 @@ class UsuarioModel {
       idiomaUsuario: json['idioma_usuario'] as String? ?? " ",
       idPlataforma: json['id_plataforma'] as int? ?? 0,
       idUsuarioEnPlataforma: json['id_usuario_en_plataforma'] as String? ?? " ",
+      tokenUsuario: json['token_usuario'] as String? ?? " ",
     );
   }
 }

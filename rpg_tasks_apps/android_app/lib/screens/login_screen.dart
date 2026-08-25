@@ -29,7 +29,9 @@ class _LoginScreenState extends State<LoginScreen> {
   //De momento voy a dejar esto sin implementar
   @override
   Widget build(BuildContext context) {
-    throw UnimplementedError(); 
+    return Scaffold( 
+        appBar: AppBar(title: const Text('Inicio de sesión')) ,
+    );
   }
 
 }
