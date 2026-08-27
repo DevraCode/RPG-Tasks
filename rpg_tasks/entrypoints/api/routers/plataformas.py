@@ -40,11 +40,13 @@ router = APIRouter(
 class VincularUsuarioDTO(BaseModel):
     nombre_usuario: str
     password_usuario: str
+    
     id_plataforma: int
     nombre_plataforma: str
     id_usuario_en_plataforma: str
 
-
+class CerrarSesionDTO(BaseModel):
+    token_usuario: str
 
 #-----------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -57,14 +59,18 @@ class VincularUsuarioDTO(BaseModel):
 @router.post("/vincular", status_code=status.HTTP_200_OK)
 def vincular_usuario(datos: VincularUsuarioDTO):
     try:
-        vincular = plataformas_use_case.vincular_plataforma(
+        id_externo_usuario, token_usuario = plataformas_use_case.vincular_plataforma(
             nombre_usuario=datos.nombre_usuario,
             password_usuario=datos.password_usuario,
             id_plataforma=datos.id_plataforma,
             nombre_plataforma=datos.nombre_plataforma,
             id_usuario_en_plataforma=datos.id_usuario_en_plataforma)
         
-        return {"message": "Usuario vinculado correctamente"}
+        return {"status":"ok",
+                "message": "Usuario vinculado correctamente",
+                "token_usuario": token_usuario,
+                "id_externo_usuario": id_externo_usuario
+                }
     
         
     except ValueError as e:
@@ -80,4 +86,17 @@ def vincular_usuario(datos: VincularUsuarioDTO):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail="Error interno del servidor al procesar la vinculación."
+        )
+
+    #Endpoint para cerrar la sesión de un usuario en una plataforma
+@router.post("/cerrar_sesion", status_code=status.HTTP_200_OK)
+def cerrar_sesion(datos: CerrarSesionDTO):
+    try:
+        plataformas_use_case.cerrar_sesion(token_usuario=datos.token_usuario)
+        return {"message": "Sesión cerrada correctamente"}
+    except Exception as e:
+        print(f"Error al cerrar la sesión: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error interno del servidor al procesar el cierre de sesión."
         )

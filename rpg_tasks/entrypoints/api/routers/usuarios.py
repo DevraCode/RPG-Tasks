@@ -107,7 +107,7 @@ def verificar_nombre(nombre: str):
 def registrar_usuario(datos: RegistroUsuarioDTO):
     try:
         
-        usuario_creado = usuario_use_case.registrar_usuario(
+        usuario_creado, token_usuario = usuario_use_case.registrar_usuario(
             nombre_usuario=datos.nombre_usuario,
             password_usuario=datos.password_usuario,
             email_usuario=datos.email_usuario,
@@ -116,7 +116,10 @@ def registrar_usuario(datos: RegistroUsuarioDTO):
             identificacion_plataforma=datos.id_usuario_en_plataforma)
         
         return {
-            "message": "Usuario registrado correctamente"
+            "status": "ok",
+            "message": "Usuario registrado correctamente",
+            "token_usuario": token_usuario,
+            "id_externo_usuario": usuario_creado.id_externo_usuario
         }
     
     except Exception as e:

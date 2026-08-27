@@ -1,5 +1,5 @@
 import hashlib
-import secrets
+import bcrypt
 from rpg_tasks.core.domain.entidades import Plataformas
 from rpg_tasks.core.domain.auth_utils import generar_id_usuario_en_plataforma, generar_token_sesion
 
@@ -27,12 +27,15 @@ class PlataformasUseCase:
 
         #Si existe, sacamos la contraseña
         password = usuario["password_usuario"] #Sacado de la BD
-        password_hasheado = hashlib.sha256(str(password_usuario).encode()).hexdigest()[:8] #Debe coincidir con el password encriptado de la BD
+
+        password_bytes = password_usuario.encode('utf-8')
+        password_db_bytes = password.encode('utf-8') #El hash almacenado en la DB
 
         #Ahora comprobamos que la contraseña coincida
-        if password != password_hasheado:
+        if not bcrypt.checkpw(password_bytes, password_db_bytes):
             raise ValueError("La contraseña es incorrecta.")
-        
+
+
         #Si coinciden, comprobamos si el token_usuario ya está vinculado a un usuario
         else:
 
@@ -40,6 +43,7 @@ class PlataformasUseCase:
             id_externo_usuario = usuario["id_externo_usuario"]
         
             token_usuario = generar_token_sesion()
+            token_usuario_hash = hashlib.sha256(token_usuario.encode()).hexdigest()[:8]
 
             id_usuario_en_plataforma_hash = generar_id_usuario_en_plataforma(id_usuario_en_plataforma)
 
@@ -53,5 +57,13 @@ class PlataformasUseCase:
             
             #Si no está vinculado, procedemos a vincularlo
             else: 
-                vinculacion = self.repo_plataformas.vincular_plataforma(nueva_plataforma, id_usuario, id_externo_usuario, token_usuario, id_usuario_en_plataforma_hash)
-                return True
+                vinculacion = self.repo_plataformas.vincular_plataforma(nueva_plataforma, id_usuario, id_externo_usuario, token_usuario_hash, id_usuario_en_plataforma_hash)
+                return id_externo_usuario, token_usuario
+
+
+    def cerrar_sesion(self, token_usuario: str):
+        #Cierra la sesión del usuario en la plataforma
+        token_usuario_hash = hashlib.sha256(token_usuario.encode()).hexdigest()[:8]
+        self.repo_plataformas.cerrar_sesion(token_usuario_hash)
+        return True
+        

@@ -103,7 +103,7 @@ class MySQLUsuarioRepository(UsuarioRepository):
             id_externo_usuario = usuario.id_externo_usuario #Guarda el id_externo_usuario
             cursor.execute(query2, (id_plataforma, nombre_plataforma, id_usuario, id_externo_usuario, token_usuario, id_usuario_en_plataforma))
             conn.commit()
-            return id_usuario
+            return usuario
 
         finally:
             cursor.close()

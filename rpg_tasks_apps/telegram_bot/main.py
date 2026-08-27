@@ -9,7 +9,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ConversationHandler
 
 #Importaciones propias del bot
 from .handlers_basicos import NOMBRE, PASSWORD, EMAIL, PEDIR_NOMBRE, PEDIR_PASSWORD
-from .handlers_basicos import start, manejador_start, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar, obtener_username, obtener_password, vincular
+from .handlers_basicos import start, manejador_start, pide_nombre_usuario, nombre_usuario, contraseña, email, cancelar, obtener_username, obtener_password, vincular, cerrar_sesion
 
 from .handlers_personajes import SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE, SELECCIONANDO
 from .handlers_personajes import mostrar_personaje, manejador_botones, obtener_nombre_personaje, lista_personajes_usuarios, manejador_lista_personajes
@@ -54,6 +54,8 @@ if __name__ == "__main__":
     #He puesto expresiones regulares para que no se intercepten los data query de los botones entre los comandos
     app.add_handler(CallbackQueryHandler(manejador_start, pattern=r"^lang_"))
     #app.add_handler(CallbackQueryHandler(manejador_stats, pattern=r"^stats_"))
+
+    app.add_handler(CommandHandler("logout", cerrar_sesion))
     
     #-----------------------------------------------------------------------------------------------------------------------------
     #-----------------------------------------------------------------------------------------------------------------------------
@@ -158,6 +160,7 @@ if __name__ == "__main__":
     app.add_handler(entrenar_personaje_conv_handler)
     app.add_handler(vin_conv_handler)
     #app.add_handler(tarea_conv_handler)
+    app.add_handler(CommandHandler("logout", cerrar_sesion))
 
 
     #-----------------------------------------------------------------------------------------------------------------------------

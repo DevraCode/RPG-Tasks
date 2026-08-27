@@ -31,12 +31,5 @@ def generar_id_usuario_en_plataforma(parametro):
     
 def generar_token_sesion():
     token_generado = secrets.token_hex(16)
-    token_sesion = hashlib.sha256(str(token_generado).encode()).hexdigest()[:8]
-    return token_sesion
+    return token_generado
 
-
-def verificar_password(password_plana: str, password_hasheada: str) -> bool:
-    
-    hash_intento = hashlib.sha256(password_plana.encode()).hexdigest()
-    
-    return hash_intento == password_hasheada

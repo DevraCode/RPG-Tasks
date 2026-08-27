@@ -7,7 +7,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, BotComm
 from telegram.ext import ContextTypes, ConversationHandler, CallbackContext
 
 #Internas
-
+from .decoradores import verificar_sesion_activa
 from .api_url import API_URL
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ async def manejador_start(update:Update, context:CallbackContext):
 #-----------------------------------------------------------------------------------------------------------------------------
 NOMBRE, PASSWORD, EMAIL = range(3)
 
-
+@verificar_sesion_activa
 async def pide_nombre_usuario (update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     await context.bot.send_message(chat_id=chat_id, text= (f"Introduce tu nombre de usuario. Puedes cancelar en cualquier momento con /cancelar"))
@@ -139,7 +139,16 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
         respuesta = requests.post(f"{API_URL}/api/usuarios/registro", json=registro)
         
         if respuesta.status_code == 201:
+            datos = respuesta.json()
+            token_usuario = datos.get("token_usuario")
+            id_externo_usuario = datos.get("id_externo_usuario")
+
+            context.user_data["token_usuario"] = token_usuario
+            context.user_data["id_externo_usuario"] = id_externo_usuario
+
             await update.message.reply_text(("Cuenta creada con éxito ¡Bienvenido!"))
+            
+
         else:
             error_api = respuesta.json().get("detail", "Error interno de la API")
             await update.message.reply_text(f"No se pudo completar el registro: {error_api}")
@@ -159,7 +168,7 @@ async def cancelar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 PEDIR_NOMBRE, PEDIR_PASSWORD = range(2)
 
-
+@verificar_sesion_activa
 async def vincular(update:Update, context: ContextTypes.DEFAULT_TYPE):
      await update.message.reply_text((f"Introduce tu nombre de usuario"))
      return PEDIR_NOMBRE
@@ -192,7 +201,15 @@ async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
         respuesta = requests.post(f"{API_URL}/api/plataformas/vincular", json=vincular)
         
         if respuesta.status_code == 200:
+            datos = respuesta.json()
+            token_usuario = datos.get("token_usuario")
+            id_externo_usuario = datos.get("id_externo_usuario")
+            
+            context.user_data["token_usuario"] = token_usuario
+            context.user_data["id_externo_usuario"] = id_externo_usuario
+
             await update.message.reply_text(("Cuenta vinculada con éxito ¡Bienvenido!"))
+            
         else:
             error_api = respuesta.json().get("detail", "Error interno de la API")
             await update.message.reply_text(f"No se pudo completar la vinculación de la cuenta: {error_api}")
@@ -202,7 +219,31 @@ async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
     
     return ConversationHandler.END
      
-     
+#----------------------------------------------------------------------------------------
+async def cerrar_sesion(update:Update, context: ContextTypes.DEFAULT_TYPE):
+    token_usuario = context.user_data.get("token_usuario")
+
+    if not token_usuario:
+        await update.message.reply_text("No tienes una sesión activa para cerrar.")
+        return
+
+    cerrar_sesion = {
+        "token_usuario": token_usuario
+    }
+
+    try:
+        respuesta = requests.post(f"{API_URL}/api/plataformas/cerrar_sesion", json=cerrar_sesion)
+        
+        if respuesta.status_code == 200:
+            await update.message.reply_text("Sesión cerrada correctamente.")
+            context.user_data.pop("token_usuario", None)
+            context.user_data.pop("id_externo_usuario", None)
+        else:
+            error_api = respuesta.json().get("detail", "Error interno de la API")
+            await update.message.reply_text(f"No se pudo cerrar la sesión: {error_api}")
+            
+    except requests.exceptions.ConnectionError:
+         await update.message.reply_text("Error de conexion")  
      
         
      

@@ -18,4 +18,8 @@ class PlataformasRepository(ABC):
     
     @abstractmethod
     def vincular_plataforma(self, id_usuario: int, id_externo_usuario:str, token_usuario:str, id_externo_usuario_en_plataforma:str,):
-        pass 
+        pass
+
+    @abstractmethod
+    def cerrar_sesion(self, token_usuario: str):
+        pass

@@ -7,13 +7,15 @@ CREATE TABLE IF NOT EXISTS usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     id_externo_usuario VARCHAR(100) UNIQUE NOT NULL, -- Id del usuario para usar en la plataforma externa
     nombre_usuario VARCHAR(100) NOT NULL,
-    password_usuario VARCHAR(20) NOT NULL,
+    password_usuario VARCHAR(255) NOT NULL,
     email_usuario VARCHAR(100),
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
     activo BOOLEAN DEFAULT TRUE,
     rango VARCHAR(50) DEFAULT "NOVATO",
     tipo_usuario INT DEFAULT 0,
-    idioma_usuario VARCHAR(2)
+    idioma_usuario VARCHAR(2),
+    puntuacion INT,
+    INDEX idx_puntuacion (puntuacion)
 ) ENGINE=InnoDB;
 
 -- TABLA PLATAFORMAS
@@ -45,6 +47,7 @@ CREATE TABLE IF NOT EXISTS personajes (
     imagen_personaje TEXT,
     animacion_personaje TEXT,
     descripcion_personaje TEXT,
+    INDEX idx_exp (exp),
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

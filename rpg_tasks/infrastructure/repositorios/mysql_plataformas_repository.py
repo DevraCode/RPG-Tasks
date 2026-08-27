@@ -92,5 +92,19 @@ class MySQLPlataformasRepository(PlataformasRepository):
             cursor.close()
             conn.close()
 
+
+    def cerrar_sesion(self, token_usuario: str):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True, buffered=True)
+
+        try:
+            query = "DELETE FROM plataformas WHERE token_usuario = %s"
+            cursor.execute(query, (token_usuario,))
+            conn.commit()
+            
+        finally:
+            cursor.close()
+            conn.close()
+
     
 
