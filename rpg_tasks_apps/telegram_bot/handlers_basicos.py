@@ -140,12 +140,10 @@ async def email (update:Update, context: ContextTypes.DEFAULT_TYPE):
         
         if respuesta.status_code == 201:
             datos = respuesta.json()
-            token_usuario = datos.get("token_usuario")
-            id_externo_usuario = datos.get("id_externo_usuario")
+            token_usuario = datos.get("token_usuario") #Obtenemos el token del usuario
 
-            context.user_data["token_usuario"] = token_usuario
-            context.user_data["id_externo_usuario"] = id_externo_usuario
-
+            context.user_data["token_usuario"] = token_usuario #GUARDAMOS EL TOKEN DEL USUARIO
+            
             await update.message.reply_text(("Cuenta creada con éxito ¡Bienvenido!"))
             
 
@@ -202,14 +200,12 @@ async def obtener_password (update:Update, context: ContextTypes.DEFAULT_TYPE):
         
         if respuesta.status_code == 200:
             datos = respuesta.json()
-            token_usuario = datos.get("token_usuario")
-            id_externo_usuario = datos.get("id_externo_usuario")
+            token_usuario = datos.get("token_usuario") #Obtenemos el token del usuario
+        
+            context.user_data["token_usuario"] = token_usuario #GUARDAMOS EL TOKEN DEL USUARIO
             
-            context.user_data["token_usuario"] = token_usuario
-            context.user_data["id_externo_usuario"] = id_externo_usuario
-
             await update.message.reply_text(("Cuenta vinculada con éxito ¡Bienvenido!"))
-            
+
         else:
             error_api = respuesta.json().get("detail", "Error interno de la API")
             await update.message.reply_text(f"No se pudo completar la vinculación de la cuenta: {error_api}")

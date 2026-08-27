@@ -88,7 +88,7 @@ def vincular_usuario(datos: VincularUsuarioDTO):
             detail="Error interno del servidor al procesar la vinculación."
         )
 
-    #Endpoint para cerrar la sesión de un usuario en una plataforma
+#Endpoint para cerrar la sesión de un usuario en una plataforma
 @router.post("/cerrar_sesion", status_code=status.HTTP_200_OK)
 def cerrar_sesion(datos: CerrarSesionDTO):
     try:

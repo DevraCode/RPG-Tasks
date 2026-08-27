@@ -55,6 +55,27 @@ class MySQLUsuarioRepository(UsuarioRepository):
             return Usuario(id_usuario=res['id_usuario'], 
                            id_externo_usuario=res['id_externo_usuario'])
         return None
+
+    #-----------------------------------------------------------------------------------------------------------------------------
+    def buscar_usuario_por_token(self, token_usuario):
+        conn = self._get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        query = """ SELECT *
+                    FROM plataformas p
+                    INNER JOIN usuarios u ON p.id_usuario = u.id_usuario
+                    WHERE p.token_usuario = %s"""
+        
+        cursor.execute(query, (token_usuario,))
+        res = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if res:
+            return Usuario(id_usuario=res['id_usuario'], 
+                           id_externo_usuario=res['id_externo_usuario'])
+        return None
     
     #-----------------------------------------------------------------------------------------------------------------------------
 

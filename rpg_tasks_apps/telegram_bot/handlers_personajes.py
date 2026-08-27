@@ -7,6 +7,8 @@ from telegram.ext import ContextTypes, ConversationHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from datetime import datetime
+
+from .decoradores import verificar_usuario
 from .api_url import API_URL
 
 #-----------------------------------------------------------------------------------------------------------------------------
@@ -57,8 +59,8 @@ async def ruta_webm(clase_personaje):
 
 SELECCIONANDO_CLASE, PREGUNTAR_NOMBRE = range(2)
 
-#Primero se enseña la galería de personajes
-async def mostrar_personaje(update:Update, context):
+@verificar_usuario #Comprobar que el usuario esté registrado
+async def mostrar_personaje(update:Update, context): #Primero se enseña la galería de personajes
     chat_id = update.effective_chat.id
 
     #LLama al endpoint que muestra el catálogo de personajes
@@ -219,31 +221,21 @@ async def obtener_nombre_personaje(update: Update, context: ContextTypes.DEFAULT
 
 SELECCIONANDO, ASIGNAR_TAREA, ENTRENAR, COMPLETAR, TEMPORIZADOR = range(5)
 
-#Se muestran los personajes que tiene el usuario en una galeria, igual que para elegir personaje
-async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT_TYPE):
+@verificar_usuario #Comprobar que el usuario esté registrado
+async def lista_personajes_usuarios(update:Update, context: ContextTypes.DEFAULT_TYPE): #Se muestran los personajes que tiene el usuario en una galeria, igual que para elegir personaje
     chat_id = update.effective_chat.id
-    id_usuario_en_telegram = str(update.effective_user.id)
-    id_usuario_en_plataforma_hasheado = hashlib.sha256(id_usuario_en_telegram.encode('utf-8')).hexdigest()[:8]
 
-    #Buscamos primero al usuario
+    #Obtenemos el token del usuario guardado en user_data al iniciar sesión
+    token_usuario = context.user_data.get("token_usuario")
+
+    #Creamos la cabecera que contiene el token para la autenticación en la API
+    headers = {
+        "Authorization": f"Bearer {token_usuario}"
+    }
+
     async with httpx.AsyncClient(timeout=10.0) as client:
-        res = await client.get(f"{API_URL}/api/usuarios/user/{id_usuario_en_plataforma_hasheado}")
-        if res.status_code != 200 or not res.json():
-            await update.message.reply_text("Ese usuario no existe")
-            return ConversationHandler.END
-        
-        usuario = res.json()
-
-        if not usuario or "id_usuario" not in usuario:
-            await update.message.reply_text("Error al obtener los datos del usuario.")
-            return ConversationHandler.END
-
-        id_usuario = usuario["id_usuario"]
-
-
-    #Cuando tengamos al usuario buscamos sus personajes
-        res_personajes = await client.get(f"{API_URL}/api/personajes/lista-personajes/{id_usuario}")
-        if res_personajes.status_code != 200 or not res.json():
+        res_personajes = await client.get(f"{API_URL}/api/personajes/lista-personajes/me", headers=headers) #Le pasamos el token como parámetro de cabecera
+        if res_personajes.status_code != 200:
             await update.message.reply_text("No hay personajes")
             return ConversationHandler.END
         

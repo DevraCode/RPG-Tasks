@@ -12,6 +12,10 @@ class UsuarioRepository(ABC):
         pass
 
     @abstractmethod
+    def buscar_usuario_por_token(token_usuario: str):
+        pass
+
+    @abstractmethod
     def nombre_usuario_existe(self, nombre_usuario: str): 
         pass
 
